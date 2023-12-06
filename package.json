@@ -1,0 +1,16 @@
+{
+  "name": "metallurgy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "trace": "electron --trace-warnings ...",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "werner@glinka.co",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

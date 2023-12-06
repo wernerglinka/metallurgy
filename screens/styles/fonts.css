@@ -1,0 +1,93 @@
+@import "./colors.css";
+
+/**
+ * Courtesy of https://gwfh.mranftl.com/fonts
+ */
+
+/* open-sans-300 - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 300;
+  src: url("fonts/open-sans-v36-latin-300.woff2") format("woff2");
+}
+/* open-sans-300italic - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 300;
+  src: url("fonts/open-sans-v36-latin-300italic.woff2") format("woff2");
+}
+/* open-sans-regular - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 400;
+  src: url("fonts/open-sans-v36-latin-regular.woff2") format("woff2");
+}
+/* open-sans-italic - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 400;
+  src: url("fonts/open-sans-v36-latin-italic.woff2") format("woff2");
+}
+/* open-sans-600 - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: normal;
+  font-weight: 600;
+  src: url("fonts/open-sans-v36-latin-600.woff2") format("woff2");
+}
+/* open-sans-600italic - latin */
+@font-face {
+  font-display: swap;
+  font-family: "Open Sans";
+  font-style: italic;
+  font-weight: 600;
+  src: url("fonts/open-sans-v36-latin-600italic.woff2") format("woff2");
+}
+
+:root {
+  /**
+    * Typography
+    * Fonts are loaded from Google Fonts
+    * Common Typographic Scale Ratios:
+    *  1.200 — Minor Third
+    *  1.067 — Minor Second
+    *  1.125 — Major Second
+    *  1.200 — Minor Third
+    *  1.250 — Major Third
+    *  1.333 — Perfect Fourth
+    *  1.414 — Augmented Fourth
+    *  1.500 — Perfect Fifth
+    *  1.618 — The Golden Ratio
+    *  
+    *  Rem value: 1rem = 10px
+    *
+    *  Min screen width: 400px;
+    *  Maxscreen width: 1200px;
+    *
+    * Calculated with: https://www.fluid-type-scale.com/
+    *
+    * Sources: 
+    *   - https://www.type-scale.com/
+    *   - https://css-clamp-calculator.netlify.app/
+    *   - https://blog.logrocket.com/fluid-vs-responsive-typography-css-clamp/
+    */
+  --font-family: "Open Sans", sans-serif;
+  --color-body: var(--text-color);
+  --color-header: var(--header-color);
+  --font-size-sm: clamp(1.28rem, 0.18vw + 1.21rem, 1.43rem);
+  --font-size-base: clamp(1.6rem, 0.38vw + 1.45rem, 1.9rem);
+  --font-size-md: clamp(2rem, 0.67vw + 1.73rem, 2.53rem);
+  --font-size-lg: clamp(2.5rem, 1.1vw + 2.06rem, 3.38rem);
+  --font-size-xl: clamp(3.13rem, 1.72vw + 2.44rem, 4.5rem);
+  --font-size-xxl: clamp(3.91rem, 2.62vw + 2.86rem, 6rem);
+  --font-size-xxxl: clamp(4.88rem, 3.89vw + 3.33rem, 8rem);
+}

@@ -1,0 +1,265 @@
+@import "./typography.css";
+
+* {
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: none;
+}
+
+:root {
+  --titlebar-height: 2rem;
+  --body-padding: 3rem 2rem 2rem;
+  --page-background: linear-gradient(
+      112.5deg,
+      rgb(214, 214, 214) 0%,
+      rgb(214, 214, 214) 10%,
+      rgb(195, 195, 195) 10%,
+      rgb(195, 195, 195) 53%,
+      rgb(176, 176, 176) 53%,
+      rgb(176, 176, 176) 55%,
+      rgb(157, 157, 157) 55%,
+      rgb(157, 157, 157) 60%,
+      rgb(137, 137, 137) 60%,
+      rgb(137, 137, 137) 88%,
+      rgb(118, 118, 118) 88%,
+      rgb(118, 118, 118) 91%,
+      rgb(99, 99, 99) 91%,
+      rgb(99, 99, 99) 100%
+    ),
+    linear-gradient(
+      157.5deg,
+      rgb(214, 214, 214) 0%,
+      rgb(214, 214, 214) 10%,
+      rgb(195, 195, 195) 10%,
+      rgb(195, 195, 195) 53%,
+      rgb(176, 176, 176) 53%,
+      rgb(176, 176, 176) 55%,
+      rgb(157, 157, 157) 55%,
+      rgb(157, 157, 157) 60%,
+      rgb(137, 137, 137) 60%,
+      rgb(137, 137, 137) 88%,
+      rgb(118, 118, 118) 88%,
+      rgb(118, 118, 118) 91%,
+      rgb(99, 99, 99) 91%,
+      rgb(99, 99, 99) 100%
+    ),
+    linear-gradient(
+      135deg,
+      rgb(214, 214, 214) 0%,
+      rgb(214, 214, 214) 10%,
+      rgb(195, 195, 195) 10%,
+      rgb(195, 195, 195) 53%,
+      rgb(176, 176, 176) 53%,
+      rgb(176, 176, 176) 55%,
+      rgb(157, 157, 157) 55%,
+      rgb(157, 157, 157) 60%,
+      rgb(137, 137, 137) 60%,
+      rgb(137, 137, 137) 88%,
+      rgb(118, 118, 118) 88%,
+      rgb(118, 118, 118) 91%,
+      rgb(99, 99, 99) 91%,
+      rgb(99, 99, 99) 100%
+    ),
+    linear-gradient(90deg, rgb(195, 195, 195), rgb(228, 228, 228));
+
+  --info-background: #ffffff;
+  --drop-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+
+/**
+ * Since we use a frameless window, we need to
+ * add a titlebar to the top of the window so we maintain
+ * the ability to drag the window around.
+ */
+.titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  height: var(--titlebar-height);
+  width: 100%;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  cursor: move;
+}
+
+.titlebar-button {
+  -webkit-app-region: no-drag;
+}
+
+/**
+ * Common button styles
+ */
+.btn {
+  display: inline-block;
+  padding: 1rem 2rem;
+  margin: 0 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: var(--info-background);
+  box-shadow: var(--drop-shadow);
+  font-size: 1.6rem;
+  text-decoration: none;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &.primary {
+    background-color: var(--attention-color);
+    color: #ffffff;
+  }
+}
+
+/**
+ * Main window styles
+ */
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-width: 900px;
+  padding: var(--body-padding);
+  background-image: var(--page-background);
+  background-blend-mode: overlay, overlay, overlay, normal;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/**
+ * Screen Transitions
+ */
+.fade-enter {
+  opacity: 0;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-enter-active {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+}
+.fade-enter-active,
+.fade-exit-active {
+  transition: opacity 500ms;
+}
+
+/**
+ * Welcome page styles
+ */
+.welcome {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100vh;
+
+  & img {
+    max-width: 15rem;
+    margin-bottom: 5rem;
+  }
+
+  & ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    & li {
+      margin-bottom: 1rem;
+
+      & a,
+      &.listHeader,
+      &.recent {
+        color: var(--attention-color);
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        font-size: 1.6rem;
+      }
+
+      & a {
+        font-weight: bold;
+      }
+
+      &.recent a {
+        padding-left: 2rem;
+      }
+
+      & svg {
+        width: 2rem;
+        height: 2rem;
+        margin-right: 1rem;
+
+        & g {
+          stroke: var(--attention-color);
+        }
+      }
+
+      &.preview a {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+      }
+    }
+  }
+}
+
+/**
+ * New Project page styles
+ */
+.new-project {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100vh;
+
+  & img {
+    max-width: 15rem;
+    margin-bottom: 5rem;
+  }
+
+  & ul {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+
+    & li {
+      padding: 1rem 0;
+
+      & strong {
+        display: inline-block;
+        width: 15rem;
+        font-size: 0.8em;
+      }
+
+      &.decision-buttons {
+        display: flex;
+        margin-top: 3rem;
+
+        & .btn {
+          margin: 0 2rem;
+        }
+
+        & .btn:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+}
