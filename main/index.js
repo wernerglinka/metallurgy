@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require( 'electron' );
+const { app, BrowserWindow, ipcMain, dialog } = require( 'electron' );
 const path = require( 'node:path' );
+const fs = require( 'node:fs' );
 
+let mainWindow;
 
 const createWindow = () => {
-  const win = new BrowserWindow( {
+  mainWindow = new BrowserWindow( {
     width: 800,
     height: 600,
     webPreferences: {
@@ -11,12 +13,11 @@ const createWindow = () => {
     }
   } );
 
-  win.loadFile( 'screens/index.html' );
+  mainWindow.loadFile( 'screens/home/index.html' );
 };
 
 // Load the window when Electron is ready
 app.whenReady().then( () => {
-  ipcMain.handle( 'ping', () => 'pong' );
 
   createWindow();
 
@@ -25,6 +26,31 @@ app.whenReady().then( () => {
     if ( BrowserWindow.getAllWindows().length === 0 ) {
       createWindow();
     };
+  } );
+
+  // handle dialog requests from the renderer process
+  ipcMain.handle( 'dialog', ( e, method, params ) => {
+    return dialog[ method ]( mainWindow, params );
+  } );
+
+  // handle a send like this: electronAPI.send( "createProjectConfig", projectData )
+  ipcMain.handle( 'writeFile', ( e, projectData ) => {
+    try {
+      // Create the path for the project data file
+      const filePath = path.join( projectData.projectPath, "/.metallurgy/projectData.json" );
+      const directoryPath = path.dirname( filePath );
+
+      // Ensure the directory exists
+      if ( !fs.existsSync( directoryPath ) ) {
+        fs.mkdirSync( directoryPath, { recursive: true } );
+      }
+
+      fs.writeFileSync( filePath, JSON.stringify( projectData ) );
+      return { status: 'success' };
+    }
+    catch ( err ) {
+      return { status: 'failure', error: err.message };
+    }
   } );
 
 } );

@@ -100,7 +100,9 @@
   border: none;
   background-color: var(--info-background);
   box-shadow: var(--drop-shadow);
-  font-size: 1.6rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
   text-decoration: none;
   color: #000000;
   cursor: pointer;
@@ -240,7 +242,10 @@ body {
     margin: 2rem 0 0;
 
     & li {
-      padding: 1rem 0;
+      height: 5rem;
+      display: flex;
+      align-items: center;
+      font-size: 1.6rem;
 
       & strong {
         display: inline-block;
@@ -248,16 +253,68 @@ body {
         font-size: 0.8em;
       }
 
+      &.get-path {
+        position: relative;
+        padding: 0;
+
+        & > div {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
+
+        & .path-display {
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+
+          &.show {
+            opacity: 1;
+          }
+        }
+
+        & .button-display {
+          position: absolute;
+          top: 0;
+          left: 0;
+          opacity: 1;
+          transition: opacity 0.3s ease-in-out;
+
+          &.show {
+            opacity: 0;
+          }
+
+          & a {
+            margin-left: 1rem;
+          }
+        }
+
+        &.ready {
+          & .path-display {
+            opacity: 1;
+          }
+
+          & .button-display {
+            opacity: 0;
+          }
+        }
+      }
+
       &.decision-buttons {
         display: flex;
         margin-top: 3rem;
 
         & .btn {
-          margin: 0 2rem;
+          margin: 0 2rem 0 0;
+
+          &.start {
+            display: none;
+          }
         }
 
-        & .btn:first-child {
-          margin-left: 0;
+        &.ready {
+          & .start {
+            display: inline-block;
+          }
         }
       }
     }
