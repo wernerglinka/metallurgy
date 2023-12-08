@@ -9,6 +9,8 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: true,
       preload: path.join( __dirname, 'preload.js' )
     }
   } );
@@ -33,7 +35,7 @@ app.whenReady().then( () => {
     return dialog[ method ]( mainWindow, params );
   } );
 
-  // handle a send like this: electronAPI.send( "createProjectConfig", projectData )
+  // handle a write file request from the renderer process
   ipcMain.handle( 'writeFile', ( e, projectData ) => {
     try {
       // Create the path for the project data file
@@ -53,9 +55,45 @@ app.whenReady().then( () => {
     }
   } );
 
-} );
+  // handle a read file request from the renderer process
+  ipcMain.handle( 'readFile', ( e, filePath ) => {
+    try {
+      const data = fs.readFileSync( filePath, 'utf8' );
+      return { status: 'success', data: JSON.parse( data ) };
+    }
+    catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  } );
 
-// Quit when all windows are closed, except on macOS
-app.on( 'window-all-closed', () => {
-  if ( process.platform !== 'darwin' ) app.quit();
+  // handle delete file request from the renderer process
+  ipcMain.handle( 'deleteFile', ( e, filePath ) => {
+    try {
+      fs.unlinkSync( filePath );
+      return { status: 'success' };
+    }
+    catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  } );
+
+  // handle confirmation dialog requests from the renderer process
+  ipcMain.handle( 'showConfirmationDialog', async ( event, message ) => {
+    const options = {
+      type: 'question',
+      buttons: [ 'Yes', 'No' ],
+      defaultId: 1,
+      title: 'Confirm',
+      message: message,
+    };
+
+    const result = await dialog.showMessageBox( options );
+    return result.response === 0; // Returns true if 'Yes' was clicked
+  } );
+
+  // Quit when all windows are closed, except on macOS
+  app.on( 'window-all-closed', () => {
+    if ( process.platform !== 'darwin' ) app.quit();
+  } );
+
 } );

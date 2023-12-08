@@ -319,4 +319,13 @@ body {
       }
     }
   }
+
+  & .start-with-config {
+    display: none;
+
+    & strong {
+      font-size: 1.2rem;
+      white-space: nowrap;
+    }
+  }
 }

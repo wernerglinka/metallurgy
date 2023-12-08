@@ -1,13 +1,52 @@
-import { getFromLocalStorage, saveToLocalStorage } from "../utility-functions/local-storage.js";
-import getFolderName from "../utility-functions/get-folder-name.js";
-import { isProjectReady } from "../utility-functions/is-project-ready.js";
+import { getFromLocalStorage, saveToLocalStorage } from "../lib/local-storage.js";
+import { isProjectReady } from "../lib/is-project-ready.js";
+import { selectFolder } from "../lib/select-folder.js";
+import { updateFolderUI } from "../lib/update-folder-ui.js";
+import { updateButtonsContainer } from "../lib/update-buttons-container.js";
 const renderer = ( () => {
-  const showProjectFolderName = () => {
+  const showProjectFolderName = async () => {
     const projectFolder = getFromLocalStorage( "projectFolder" );
     const projectFolderName = document.querySelector( '.js-project-folder-name' );
     if ( projectFolderName ) {
       const folderName = `/${ projectFolder.split( "/" ).pop() }/`;
       projectFolderName.innerText = folderName;
+    }
+
+    // Check if a config file already exists in this project folder
+    // <projectFolder>/.metallurgy/projectData.json
+    const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
+
+    const exists = await electronAPI.checkFileExists( configFilePath );
+
+    console.log( `config file exists: ${ exists }` );
+
+    if ( exists ) {
+      // Get the content and data folder from the config file
+      const fileContents = await window.electronAPI.readFile( configFilePath );
+      const contentFolder = fileContents.data.contentPath;
+      const dataFolder = fileContents.data.dataPath;
+
+      // Save the content and data folders to local storage
+      saveToLocalStorage( "contentFolder", contentFolder );
+      saveToLocalStorage( "dataFolder", dataFolder );
+
+      // Update the UI with the content and data folder names and hide the
+      // 'select content folder' and 'select data folder' buttons
+      updateFolderUI( 'content', contentFolder );
+      updateFolderUI( 'data', dataFolder );
+
+      // Check if the project is ready to be created
+      if ( isProjectReady() ) {
+        updateButtonsContainer();
+      }
+
+      // Add note to the UI that the project already exists and ask if the
+      // user wants to continue
+      const startNew = document.querySelector( '.js-start-new' );
+      const startWithConfig = document.querySelector( '.js-start-with-config' );
+
+      startNew.style.display = "none";
+      startWithConfig.style.display = "block";
     }
   };
 
@@ -19,60 +58,23 @@ const renderer = ( () => {
         e.preventDefault();
 
         try {
-          // get the project folder from local storage so we can open a
-          // dialog box to select the content folder in the project folder
-          const projectFolder = getFromLocalStorage( "projectFolder" );
+          // Get the content folder from the user via a dialog box
+          const userSelection = await selectFolder( "Content" );
+          if ( userSelection.canceled || userSelection.filePaths.length === 0 ) return false;
 
-          // Dialog options for selecting the content folder in the project folder
-          const dialogOptions = {
-            message: "Select the Content Folder",
-            defaultPath: projectFolder,
-            properties: [ "openDirectory" ],
-          };
+          // Save the content folder to local storage
+          const contentFolder = userSelection.filePaths[ 0 ];
+          saveToLocalStorage( "contentFolder", contentFolder );
 
-          // Show a dialog to select the project folder
-          const userSelection = await electronAPI.openDialog( "showOpenDialog", dialogOptions );
+          // Update the UI with the content folder name and hide the 'select 
+          // content folder' button
+          updateFolderUI( 'content', contentFolder );
 
-          if ( userSelection.canceled ) {
-            return false;
+          // Check if the project is ready to be created
+          if ( isProjectReady() ) {
+            updateButtonsContainer();
           }
 
-          // Save the content folder to local storage and show the content folder name
-          if ( userSelection.filePaths.length > 0 ) {
-            const contentFolder = userSelection.filePaths[ 0 ];
-            saveToLocalStorage( "contentFolder", contentFolder );
-
-            // Show the content folder name
-
-            // we need the project folder name to generate the content folder name with getFolderName()
-            const projectFolderName = projectFolder.split( "/" ).pop();
-            const contentFolderName = getFolderName( projectFolderName, contentFolder );
-
-            // Update the content folder name in the UI
-            const contentFolderNameElement = document.querySelector( '.js-content-folder-name' );
-            if ( contentFolderNameElement ) {
-              contentFolderNameElement.innerText = contentFolderName;
-            }
-
-            // Add 'ready' class to the wrapper so we can show the content folder name
-            // and hide the 'select content folder' button
-            const contentField = contentFolderNameElement.closest( ".js-get-path" );
-            if ( contentField ) {
-              contentField.classList.add( "ready" );
-            }
-
-            // Check if the project is ready to be created
-            if ( isProjectReady() ) {
-              // Show the 'create project' button
-              const startProjectButton = document.querySelector( '.js-start' );
-              if ( startProjectButton ) {
-                const buttonWrapper = startProjectButton.closest( ".js-decision-buttons" );
-                if ( buttonWrapper ) {
-                  buttonWrapper.classList.add( "ready" );
-                }
-              }
-            }
-          }
         } catch ( error ) {
           console.error( "Error in getContentFolder", error );
           alert( "Error selecting content folder" );
@@ -93,59 +95,21 @@ const renderer = ( () => {
         e.preventDefault();
 
         try {
-          // get the project folder from local storage so we can open a
-          // dialog box to select the content folder in the project folder
-          const projectFolder = getFromLocalStorage( "projectFolder" );
+          // Get the content folder from the user via a dialog box
+          const userSelection = await selectFolder( "Data" );
+          if ( userSelection.canceled || userSelection.filePaths.length === 0 ) return false;
 
-          // Dialog options for selecting the content folder in the project folder
-          const dialogOptions = {
-            message: "Select the Data Folder",
-            defaultPath: projectFolder,
-            properties: [ "openDirectory" ],
-          };
+          // Save the data folder to local storage
+          const dataFolder = userSelection.filePaths[ 0 ];
+          saveToLocalStorage( "dataFolder", dataFolder );
 
-          // Show a dialog to select the project folder
-          const userSelection = await electronAPI.openDialog( "showOpenDialog", dialogOptions );
+          // update the UI with the content folder name and hide the 'select 
+          // content folder' button
+          updateFolderUI( 'data', dataFolder );
 
-          if ( userSelection.canceled ) {
-            return false;
-          }
-
-          // Save the content folder to local storage and show the content folder name
-          if ( userSelection.filePaths.length > 0 ) {
-            const dataFolder = userSelection.filePaths[ 0 ];
-            saveToLocalStorage( "dataFolder", dataFolder );
-
-            // Show the data folder name
-
-            // we need the project folder name to generate the content folder name with getFolderName()
-            const projectFolderName = projectFolder.split( "/" ).pop();
-            const dataFolderName = getFolderName( projectFolderName, dataFolder );
-
-            // Update the content folder name in the UI
-            const dataFolderNameElement = document.querySelector( '.js-data-folder-name' );
-            if ( dataFolderNameElement ) {
-              dataFolderNameElement.innerText = dataFolderName;
-            }
-
-            // Add 'ready' class to the wrapper so we can show the content folder name
-            // and hide the 'select content folder' button
-            const dataField = dataFolderNameElement.closest( ".js-get-path" );
-            if ( dataField ) {
-              dataField.classList.add( "ready" );
-            }
-
-            // Check if the project is ready to be created
-            if ( isProjectReady() ) {
-              // Show the 'create project' button
-              const startProjectButton = document.querySelector( '.js-start' );
-              if ( startProjectButton ) {
-                const buttonWrapper = startProjectButton.closest( ".js-decision-buttons" );
-                if ( buttonWrapper ) {
-                  buttonWrapper.classList.add( "ready" );
-                }
-              }
-            }
+          // Check if the project is ready to be created
+          if ( isProjectReady() ) {
+            updateButtonsContainer();
           }
         } catch ( error ) {
           console.error( "Error in getDataFolder", error );
