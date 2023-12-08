@@ -20,5 +20,6 @@ contextBridge.exposeInMainWorld( 'electronAPI', {
       return false;
     }
   },
-  showConfirmationDialog: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message )
+  showConfirmationDialog: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
+  readDirectory: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
 } );

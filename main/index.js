@@ -2,6 +2,40 @@ const { app, BrowserWindow, ipcMain, dialog } = require( 'electron' );
 const path = require( 'node:path' );
 const fs = require( 'node:fs' );
 
+/**
+ * @function readAllFiles
+ * @param {*} dir 
+ * @param {*} result 
+ * @returns {Object} Contains all files in the directory and subdirectories
+ * @description Creates object (result) with arrays of file paths, organized by
+ *     their parent directory paths. The result object is initialized as an empty
+ *     object and gets populated recursively as the function traverses the 
+ *     directory structure.
+ */
+function readDirectoryStructure( rootDir ) {
+  function readAllFiles( dir ) {
+    const files = fs.readdirSync( dir, { withFileTypes: true } );
+    let result = [];
+
+    for ( const file of files ) {
+      // Skip .DS_Store files
+      if ( file.name === '.DS_Store' ) {
+        continue;
+      }
+      const fullPath = path.join( dir, file.name );
+      if ( file.isDirectory() ) {
+        result.push( { [ file.name ]: readAllFiles( fullPath ) } );
+      } else {
+        result.push( { [ file.name ]: fullPath } );
+      }
+    }
+
+    return result;
+  }
+
+  return { [ rootDir ]: readAllFiles( rootDir ) };
+}
+
 let mainWindow;
 
 const createWindow = () => {
@@ -89,6 +123,17 @@ app.whenReady().then( () => {
 
     const result = await dialog.showMessageBox( options );
     return result.response === 0; // Returns true if 'Yes' was clicked
+  } );
+
+  // handle a read directory request from the renderer process
+  ipcMain.handle( 'readDirectory', ( e, directoryPath ) => {
+    try {
+      const allFiles = readDirectoryStructure( directoryPath );
+      return { status: 'success', data: allFiles };
+    }
+    catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
   } );
 
   // Quit when all windows are closed, except on macOS
