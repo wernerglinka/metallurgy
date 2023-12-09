@@ -1,33 +1,36 @@
-import { getFromLocalStorage, saveToLocalStorage } from "../lib/local-storage.js";
-import { isProjectReady } from "../lib/is-project-ready.js";
-import { selectFolder } from "../lib/select-folder.js";
-import { updateFolderUI } from "../lib/update-folder-ui.js";
-import { updateButtonsContainer } from "../lib/update-buttons-container.js";
-import { createDomTree } from "../lib/create-dom-tree.js";
+import { getDirectoryFiles } from "../lib/get-directory-files.js";
+import { getFromLocalStorage } from "../lib/local-storage.js";
+
 const renderer = ( () => {
-  const getContentFileList = async () => {
-    // Get the content folder path from local storage
-    const contentFolderPath = getFromLocalStorage( "contentFolder" );
+  const updateProjectName = () => {
+    const projectFolder = getFromLocalStorage( 'projectFolder' );
+    const projectName = projectFolder.split( '/' ).pop();
+    document.getElementById( 'project-name' ).prepend( projectName );
+  };
 
-    // Get the content directory
-    const contentDirectory = await electronAPI.readDirectory( contentFolderPath );
+  const getFileLists = async () => {
+    await getDirectoryFiles( 'contentFolder', '.md' );
+    await getDirectoryFiles( 'dataFolder', '.json' );
 
-    // Create the dom tree from the content directory
-    const domTree = createDomTree( contentDirectory.data );
+    // Add event listeners to folder toggles
+    const folderToggles = document.querySelectorAll( 'li.folder > span' );
 
-    domTree.classList.add( 'dom-tree', 'js-dom-tree' );
-
-    // add the dom tree to the folder ui
-    const sidebar = document.querySelector( '.js-dom-tree-wrapper' );
-    sidebar.appendChild( domTree );
-
+    for ( const toggle of folderToggles ) {
+      toggle.addEventListener( 'click', ( e ) => {
+        e.preventDefault();
+        const folder = toggle.closest( 'li' );
+        folder.classList.toggle( 'open' );
+      } );
+    }
   };
 
   return {
-    getContentFileList
+    updateProjectName,
+    getFileLists,
+
   };
 
 } )();
 
-
-renderer.getContentFileList();
+renderer.updateProjectName();
+renderer.getFileLists();

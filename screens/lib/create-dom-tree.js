@@ -1,19 +1,38 @@
-export function createDomTree( data ) {
+export function createDomTree( data, type ) {
   const ul = document.createElement( 'ul' );
 
   for ( const [ key, value ] of Object.entries( data ) ) {
     if ( Array.isArray( value ) ) {
       // Directory
       const dirLi = document.createElement( 'li' );
-      dirLi.textContent = key.split( '/' ).pop();
+      const dirLiSpan = document.createElement( 'span' );
+      dirLiSpan.textContent = key.split( '/' ).pop();
+      dirLi.appendChild( dirLiSpan );
+      dirLi.classList.add( 'folder' );
       const subUl = document.createElement( 'ul' );
 
       for ( const item of value ) {
         for ( const [ subKey, subValue ] of Object.entries( item ) ) {
           if ( typeof subValue === 'string' ) {
             // File
+
+            // Check if the file is of the correct type
+            if ( type && !subKey.endsWith( type ) ) {
+              continue;
+            }
+            // Only add the file if it is of the correct type, e.g. '.md' for 
+            // content files or 'json' for data files
             const fileLi = document.createElement( 'li' );
             fileLi.classList.add( 'file' );
+
+            // add filetype classes to use the proper icon in file list
+            if ( subKey.endsWith( '.md' ) ) {
+              fileLi.classList.add( 'md' );
+            }
+            if ( subKey.endsWith( '.json' ) ) {
+              fileLi.classList.add( 'json' );
+            }
+
             const link = document.createElement( 'a' );
             link.href = subValue;
             link.textContent = subKey;

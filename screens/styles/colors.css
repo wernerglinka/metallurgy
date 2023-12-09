@@ -1,6 +1,8 @@
 :root {
   --header-color: #071013;
   --text-color: #000000;
+  --link-color: #800020;
+  --link-color-hover: #f68d36;
   --attention-color: #800020;
   --secondary-color: #aaaaaa;
 }

@@ -1,3 +1,27 @@
+@import "../styles/colors.css";
+
+h1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+
+  & a {
+    text-decoration: none;
+    font-size: 1rem;
+  }
+}
+.dom-tree-wrapper {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 1rem;
+}
+
 .dom-tree,
 .dom-tree ul {
   list-style: none;
@@ -6,29 +30,65 @@
 
   & ul {
     margin-left: 2rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+
+    & > li,
+    & > li:first-child {
+      font-weight: normal;
+      text-transform: none;
+    }
   }
 
   & li {
     padding: 0.5rem 0;
+    font-size: 1.6rem;
+    color: var(--text-color);
+
+    & a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease-in-out;
+
+      &:hover {
+        color: var(--link-color-hover);
+      }
+    }
+
+    &.open > ul {
+      max-height: 100rem;
+    }
   }
 
-  & .file:before {
-    content: url(../icons/file.svg);
+  & .folder span {
+    display: block;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  & .file a:before,
+  & .folder span:before {
+    content: "";
     display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    margin-right: 2rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-right: 1.6rem;
     position: relative;
     top: 0.6rem;
   }
 
-  & .folder:before {
+  & .file.md a:before {
+    content: url(../icons/file-md.svg);
+  }
+  & .file.json a:before {
+    content: url(../icons/file-json.svg);
+  }
+  & .folder span:before {
     content: url(../icons/folder.svg);
-    display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    margin-right: 2rem;
-    position: relative;
-    top: 0.6rem;
+  }
+  & .folder.open span:before {
+    content: url(../icons/folder-open.svg);
   }
 }
