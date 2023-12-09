@@ -11,8 +11,21 @@ h1 {
     font-size: 1rem;
   }
 }
-.dom-tree-wrapper {
-  display: inline-block;
+
+.edit-pane {
+  display: grid;
+  grid-template-columns: minmax(30rem, 20%) 1fr;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-right: 2rem;
+  font-size: 1.6rem;
+}
+
+.container-background {
   padding: 1rem 2rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
@@ -20,6 +33,7 @@ h1 {
   backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 1rem;
+  margin-bottom: 2rem;
 }
 
 .dom-tree,
@@ -91,4 +105,8 @@ h1 {
   & .folder.open span:before {
     content: url(../icons/folder-open.svg);
   }
+}
+
+.edit-container {
+  min-height: 80vh;
 }

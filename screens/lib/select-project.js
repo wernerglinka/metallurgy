@@ -6,8 +6,6 @@ export const selectProject = async () => {
   // Show a dialog to select the project folder
   const userSelection = await electronAPI.openDialog( "showOpenDialog", dialogOptions );
 
-  console.log( "userSelection", userSelection );
-
   if ( userSelection.canceled || userSelection.filePaths.length === 0 ) {
     return "abort";
   }

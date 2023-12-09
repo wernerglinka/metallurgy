@@ -11,8 +11,16 @@
   <body>
     <h1 id="project-name"><a href="../home/index.html">Start Over</a></h1>
 
-    <div class="js-sidebar sidebar">
-      <div class="js-dom-tree-wrapper dom-tree-wrapper"></div>
+    <div class="edit-pane">
+      <div class="js-sidebar sidebar">
+        <div class="sidebar-container container-background">
+          <h3>Project Files</h3>
+          <p>Select a project below file to start editing...</p>
+        </div>
+        <div class="js-dom-tree-wrapper container-background"></div>
+      </div>
+
+      <main class="js-edit-container edit-container container-background"></main>
     </div>
   </body>
   <script type="module" src="./renderer.js"></script>

@@ -18,13 +18,14 @@ const renderer = ( () => {
 
     const exists = await electronAPI.checkFileExists( configFilePath );
 
-    console.log( `config file exists: ${ exists }` );
-
     if ( exists ) {
+      console.log( "config file exists" );
       // Get the content and data folder from the config file
-      const fileContents = await window.electronAPI.readFile( configFilePath );
-      const contentFolder = fileContents.data.contentPath;
-      const dataFolder = fileContents.data.dataPath;
+      const fileContentsRaw = await window.electronAPI.readFile( configFilePath );
+      const fileContents = JSON.parse( fileContentsRaw.data );
+
+      const contentFolder = fileContents.contentPath;
+      const dataFolder = fileContents.dataPath;
 
       // Save the content and data folders to local storage
       saveToLocalStorage( "contentFolder", contentFolder );

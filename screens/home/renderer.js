@@ -45,7 +45,7 @@ const renderer = ( () => {
 
           console.log( `targetScreen: ${ targetScreen }` );
 
-          location.assign( targetScreen );
+          location.assign( "../new-project/index.html" );
 
         } catch ( error ) {
           console.error( "Error in getProjectFolder", error );

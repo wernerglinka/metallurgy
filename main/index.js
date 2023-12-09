@@ -91,9 +91,12 @@ app.whenReady().then( () => {
 
   // handle a read file request from the renderer process
   ipcMain.handle( 'readFile', ( e, filePath ) => {
+
+    console.log( filePath );
+
     try {
       const data = fs.readFileSync( filePath, 'utf8' );
-      return { status: 'success', data: JSON.parse( data ) };
+      return { status: 'success', data: data };
     }
     catch ( error ) {
       return { status: 'failure', error: error.message };
