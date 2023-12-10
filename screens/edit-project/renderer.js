@@ -1,5 +1,6 @@
 import { getDirectoryFiles } from "../lib/get-directory-files.js";
 import { getFromLocalStorage } from "../lib/local-storage.js";
+import { getMarkdownFile } from "../lib/get-markdown-file.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -23,32 +24,33 @@ const renderer = ( () => {
       } );
     }
 
+    ////// At this point we are ready to select individual files //////
+
     // add event listener to file links
     const allFileLinks = document.querySelectorAll( '.js-dom-tree .file a' );
-
     for ( const fileLink of allFileLinks ) {
       fileLink.addEventListener( 'click', async ( e ) => {
         e.preventDefault();
         e.stopPropagation();
 
+        // Retrieve the file path from the link
         const selectedFile = e.target.closest( 'li' );
         let selectedFilePath = selectedFile.querySelector( 'a' ).href;
 
-        // remove the file protocal from the path
-        selectedFilePath = selectedFilePath.replace( 'file://', '' );
+        // get the file contents
+        const { frontmatter, content } = await getMarkdownFile( selectedFilePath );
 
-        // load file contents 
-        const fileContents = await electronAPI.readFile( selectedFilePath );
 
-        console.log( selectedFilePath );
-        console.log( fileContents );
+
+        console.log( frontmatter );
+        console.log( content );
 
 
       } );
 
     }
 
-    // At this point we are ready to select individual files
+
 
 
   };

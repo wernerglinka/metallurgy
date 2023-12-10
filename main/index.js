@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require( 'electron' );
 const path = require( 'node:path' );
 const fs = require( 'node:fs' );
+const matter = require( 'gray-matter' );
 
 /**
  * @function readAllFiles
@@ -97,6 +98,36 @@ app.whenReady().then( () => {
     try {
       const data = fs.readFileSync( filePath, 'utf8' );
       return { status: 'success', data: data };
+    }
+    catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  } );
+
+  // handle a write markdown file request from the renderer process
+  ipcMain.handle( 'writeMarkdownFile', ( e, filePath, data ) => {
+    try {
+      // Ensure the directory exists
+      if ( !fs.existsSync( filePath ) ) {
+        fs.mkdirSync( filePath, { recursive: true } );
+      }
+
+      fs.writeFileSync( filePath, JSON.stringify( projectData ) );
+      return { status: 'success' };
+    }
+    catch ( err ) {
+      return { status: 'failure', error: err.message };
+    }
+  } );
+
+  // handle a read markdown file request from the renderer process
+  ipcMain.handle( 'readMarkdownFile', ( e, filePath ) => {
+    try {
+      const fileContent = fs.readFileSync( filePath, 'utf8' );
+      const frontMatter = matter( fileContent ).data;
+      const content = matter( fileContent ).content || '';
+
+      return { status: 'success', data: { frontMatter, content } };
     }
     catch ( error ) {
       return { status: 'failure', error: error.message };

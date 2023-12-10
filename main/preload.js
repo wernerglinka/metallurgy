@@ -22,4 +22,6 @@ contextBridge.exposeInMainWorld( 'electronAPI', {
   },
   showConfirmationDialog: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
   readDirectory: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
+  writeMarkdownFile: ( data ) => ipcRenderer.invoke( 'writeMarkdownFile', data ),
+  readMarkdownFile: ( filePath ) => ipcRenderer.invoke( 'readMarkdownFile', filePath ),
 } );
