@@ -66,6 +66,7 @@
 
   --info-background: #ffffff;
   --drop-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  --default-radius: 0.5rem;
 }
 
 /**
@@ -106,7 +107,7 @@
   text-decoration: none;
   color: #000000;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 
   &:hover {
     transform: scale(1.05);

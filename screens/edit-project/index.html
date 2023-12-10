@@ -15,9 +15,98 @@
       <div class="js-sidebar sidebar">
         <div class="sidebar-container container-background">
           <h3>Project Files</h3>
-          <p>Select a project below file to start editing...</p>
+
+          <ul class="sidebar-pane-selection js-sidebar-pane-selection">
+            <li class="select-file">
+              <a class="active btn" data-pane="js-select-file">Select File</a>
+            </li>
+            <li class="add-component">
+              <a class="btn" data-pane="js-add-component">Add Components</a>
+            </li>
+          </ul>
         </div>
-        <div class="js-dom-tree-wrapper container-background"></div>
+
+        <div class="sidebar-panes">
+          <div id="js-add-component" class="sidebar-pane js-sidebar-pane">
+            <div class="sidebar-hint container-background">
+              <p>Drag a component into the editor...</p>
+            </div>
+
+            <div class="container-background">
+              <div
+                id="component1"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="array"
+              >
+                Array
+              </div>
+              <div
+                id="component2"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="checkbox"
+              >
+                Checkbox
+              </div>
+              <div
+                id="component3"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="date"
+              >
+                Date
+              </div>
+              <div
+                id="component4"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="number"
+              >
+                Number
+              </div>
+              <div
+                id="component5"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="object"
+              >
+                Object
+              </div>
+              <div
+                id="component6"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="simple list"
+              >
+                Simple List
+              </div>
+              <div
+                id="component7"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="text"
+              >
+                Text
+              </div>
+              <div
+                id="component8"
+                class="component-selection draggable"
+                draggable="true"
+                data-component="textarea"
+              >
+                Textarea
+              </div>
+            </div>
+          </div>
+
+          <div id="js-select-file" class="sidebar-pane js-sidebar-pane active">
+            <div class="sidebar-hint container-background">
+              <p>Select a project below file to start editing...</p>
+            </div>
+            <div class="js-dom-tree-wrapper container-background"></div>
+          </div>
+        </div>
       </div>
 
       <main class="js-edit-container edit-container container-background"></main>
