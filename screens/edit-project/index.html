@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <title>Metallurgy</title>
+    <link rel="stylesheet" href="css/easymde.css" />
     <link rel="stylesheet" href="../styles/index.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -109,8 +110,15 @@
         </div>
       </div>
 
-      <main class="js-edit-container edit-container container-background"></main>
+      <main class="js-edit-container edit-container container-background">
+        <div id="frontmatter-container">
+          <form id="main-form">
+            <div id="dropzone" class="dropzone js-main-dropzone"></div>
+          </form>
+        </div>
+      </main>
     </div>
   </body>
+  <script src="./easymde.js"></script>
   <script type="module" src="./renderer.js"></script>
 </html>
