@@ -2,7 +2,11 @@ import { convertToSchemaObject } from './convert-js-to-schema.js';
 import { getUpdatedElement } from './create-element.js';
 
 export const renderMarkdownFile = ( frontmatter, content ) => {
+
+  console.log( JSON.stringify( frontmatter, null, 2 ) );
+
   const schema = convertToSchemaObject( frontmatter );
+
   console.log( JSON.stringify( schema, null, 2 ) );
 
   // render the schema to the DOM
