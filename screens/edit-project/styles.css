@@ -169,3 +169,566 @@ h1 {
   /* cursor for drag and drop */
   cursor: move;
 }
+
+/**
+ * Main form styles
+ */
+#main-form {
+  position: relative;
+  width: 100%;
+  padding-bottom: 3rem;
+}
+
+#button-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+/**
+ * Dropzone holds all the form elements that are added 
+ * to the form from the component selection panel (left panel)
+ */
+#dropzone {
+  min-height: 10rem;
+  padding: 1rem; /* a little room when dropzone is full */
+  margin-bottom: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--default-radius);
+
+  &:hover {
+    background-color: var(--dropzone-background-highlight-color);
+  }
+
+  &.dropzone-highlight {
+    background-color: var(--dropzone-background-highlight-color);
+  }
+}
+
+/*
+ * Fieldsets and form elements
+ */
+fieldset {
+  position: relative;
+  margin: 2rem 0;
+  padding: 1.4rem 0.5rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--default-radius);
+}
+
+.form-element {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border: 1px dotted var(--border-color);
+  border-radius: var(--default-radius);
+  padding: 0.5rem 6rem 0.5rem 3rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  transition: all 0.5s ease-in-out;
+
+  .sort-handle {
+    position: absolute;
+    top: 50%;
+    left: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    transform: translateY(-50%);
+    cursor: move;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+
+    & svg {
+      flex: 1;
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+
+  .button-wrapper {
+    position: absolute;
+    top: calc(50% - 0.75rem);
+    right: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 0 0 6rem;
+    height: 1.6rem;
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+  }
+  .delete-button,
+  .add-button {
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    flex: 0 0 1.6rem;
+    height: 1.6rem;
+    width: 1.6rem;
+    border-radius: 50%;
+    color: var(--font-color);
+    cursor: pointer;
+    margin-left: auto;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &:hover {
+    .sort-handle,
+    .button-wrapper {
+      opacity: 1;
+    }
+  }
+
+  &.is-last {
+    border: none;
+    border-top: 1px double var(--highlight-color);
+    padding: 0;
+    overflow: hidden;
+    height: 0;
+  }
+
+  & label {
+    flex: 0 0 50%;
+
+    & span {
+      flex: 0 0 6rem;
+      display: inline-block;
+      margin-right: 1rem;
+
+      /*
+      &.with-switch {
+        flex: 1 1 auto;
+        
+        .md-select-wrapper {
+          margin-left: 7rem;
+
+          &:before {
+            content: 'Plain text';
+            padding-right: 0.5rem;
+            opacity: 0.7;
+          }
+          &:after {
+            content: 'Markdown';
+            padding-left: 0.5rem;
+            opacity: 0.7;
+          }
+          & .md-select {
+            margin: 0;
+          }
+        }
+      }
+      */
+    }
+    & .help {
+      position: relative;
+      display: inline-flex !important;
+      justify-content: center;
+      align-items: center;
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      margin: 0 0 0 0.5rem;
+
+      &:hover {
+        cursor: help;
+
+        & .help-text {
+          opacity: 1;
+        }
+      }
+    }
+
+    & .help-text {
+      position: absolute;
+      top: 1rem;
+      right: -12rem;
+      width: 10rem;
+      padding: 0.5rem;
+      background-color: var(--help-background-color);
+      border-radius: var(--default-radius);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s ease-in-out;
+    }
+
+    & .error-message {
+      position: absolute;
+      top: -2rem;
+      left: 1rem;
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      color: var(--font-color);
+      background-color: var(--error-color);
+      margin: 0.25rem 0 0;
+    }
+
+    & div {
+      position: relative;
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: flex-start;
+      margin-right: 2rem;
+
+      & *:not([type="checkbox"][role="switch"]) {
+        width: 100%;
+      }
+    }
+
+    & [type="text"],
+    & textarea,
+    & [type="number"],
+    & [type="date"],
+    & [type="time"],
+    & select {
+      font-family: "Open Sans", sans-serif;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      background: none;
+      color: var(--font-color);
+      padding: var(--element-padding);
+
+      &.invalid {
+        border-bottom-color: var(--error-color);
+      }
+    }
+
+    & textarea {
+      height: 29px;
+      max-height: 10rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    & [type="date"]::webkit-calendar-picker-indicator {
+      color: #fff;
+    }
+  }
+
+  &.is-list {
+    display: block;
+
+    & label {
+      display: block;
+      margin-bottom: 1rem;
+
+      & span {
+        display: block;
+      }
+    }
+
+    & ul {
+      padding: 0;
+      margin: 0;
+    }
+
+    & li {
+      position: relative;
+      display: flex;
+      font-family: "Open Sans", sans-serif;
+      border: none;
+      background: none;
+      color: var(--font-color);
+      padding: var(--element-padding);
+    }
+
+    & input {
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      background: none;
+      color: var(--font-color);
+      padding: var(--element-padding);
+      flex: 0 0 80%;
+    }
+
+    & .button-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex: 0 0 5rem;
+      height: 1.6rem;
+
+      & .button {
+        position: static;
+      }
+    }
+  }
+
+  &.is-array,
+  &.is-object {
+    display: block;
+
+    & label {
+      position: relative;
+      display: block;
+      margin-bottom: 1rem;
+
+      & span {
+        display: block;
+      }
+
+      & .collapse-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 1rem;
+        right: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0;
+        cursor: pointer;
+        transition: all 0.5s ease-in-out;
+
+        & svg {
+          height: 1.4rem;
+          width: 1.4rem;
+        }
+
+        & .open {
+          display: block;
+        }
+        & .collapsed {
+          display: none;
+        }
+
+        &.is-collapsed {
+          & .open {
+            display: none;
+          }
+          & .collapsed {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+
+  & .object-dropzone,
+  & .array-dropzone {
+    min-height: 5rem;
+    border: 1px dotted var(--border-color);
+    border-radius: var(--default-radius);
+    padding: 0.5rem;
+    opacity: 1;
+
+    &.is-collapsed {
+      max-height: 0 !important;
+      min-height: 0;
+      padding: 0;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+}
+
+.dropzone-highlight {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+::placeholder {
+  color: var(--font-color);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/**
+ * EasyMD Editor styles
+ */
+#editorOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  padding: 5rem 2rem 2rem;
+  background-image: var(--page-background);
+  background-blend-mode: overlay, overlay, overlay, normal;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  color: var(--font-color);
+  font-family: "Open Sans", sans-serif;
+  justify-content: center;
+  display: none;
+
+  &.show {
+    display: flex;
+  }
+
+  #closeEditor {
+    position: absolute;
+    top: 2rem;
+    right: 1rem;
+    z-index: 10001;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    transition: all 0.5s ease-in-out;
+
+    & svg {
+      margin: 0.25rem;
+    }
+  }
+
+  & .EasyMDEContainer {
+    width: 90%;
+    color: inherit;
+
+    & .editor-toolbar {
+      background-image: var(--editor-background);
+
+      & button {
+        color: var(--font-color);
+        transition: all 0.5s ease-in-out;
+
+        &:hover {
+          color: var(--button-hover-color);
+        }
+      }
+
+      & i.separator {
+        border-right: none;
+      }
+    }
+
+    & .CodeMirror {
+      background-image: var(--editor-background);
+      color: var(--font-color) !important;
+
+      & .CodeMirror-cursor {
+        border-left-color: var(--font-color) !important;
+      }
+
+      &.disable-markdown-styles {
+        & .cm-header {
+          font-size: 1rem !important;
+          font-weight: normal !important;
+        }
+      }
+    }
+
+    & .editor-preview {
+      background-image: var(--editor-background);
+    }
+  }
+
+  #disableMarkdownStyles.disabled {
+    text-decoration: line-through !important;
+  }
+}
+
+/**
+ * A nicer looking Select Element
+ */
+.select-wrapper {
+  position: relative;
+  color: #fff;
+
+  &:after {
+    position: absolute;
+    top: var(--element-padding);
+    right: var(--element-padding);
+    content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="m20 9l-8 8l-8-8l1.414-1.414L12 14.172l6.586-6.586z"/></svg> ');
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--font-color);
+  cursor: pointer;
+  width: 100%;
+  padding: var(--element-padding);
+  font-family: "Open Sans", sans-serif;
+}
+
+/**
+ * Checkbox as Toggle Switch
+ */
+
+input:where([type="checkbox"][role="switch"]) {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  position: relative;
+  color: inherit;
+  font-size: inherit;
+  width: 2em;
+  height: 1em;
+  box-sizing: content-box;
+  border: 1px solid;
+  border-radius: 1em;
+  vertical-align: text-bottom;
+  margin-right: auto;
+}
+
+input:where([type="checkbox"][role="switch"])::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(0, -50%);
+  box-sizing: border-box;
+  width: 0.7em;
+  height: 0.7em;
+  margin: 0 0.15em;
+  border: 1px solid;
+  border-radius: 50%;
+  background: currentcolor;
+  opacity: 50%;
+}
+
+input:where([type="checkbox"][role="switch"]):checked::before {
+  opacity: 100%;
+  left: 1em;
+}
+
+input:where([type="checkbox"][role="switch"]):disabled {
+  opacity: 0.4;
+}
+
+/**
+ * About window styles
+ */
+.about-window {
+  min-height: 100vh;
+  padding: 0;
+
+  & .about-wrapper {
+    padding: 2rem;
+  }
+
+  & svg {
+    width: 6.75rem;
+    height: 6.75rem;
+    fill: none;
+    stroke: var(--font-color);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
