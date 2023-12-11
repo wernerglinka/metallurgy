@@ -43,6 +43,10 @@ h1 {
   margin-bottom: 2rem;
 }
 
+/**
+ * DOM Tree
+ * The DOM Tree is the list of all the files in the project and is displayed in the sidebar
+ */
 .dom-tree,
 .dom-tree ul {
   list-style: none;
@@ -71,10 +75,16 @@ h1 {
       display: block;
       text-decoration: none;
       color: inherit;
-      transition: color 0.3s ease-in-out;
+      transition: all 0.3s ease-in-out;
 
       &:hover {
         color: var(--link-color-hover);
+      }
+
+      &.active {
+        opacity: 0.3;
+        pointer-events: none;
+        cursor: default;
       }
     }
 
@@ -114,10 +124,19 @@ h1 {
   }
 }
 
+/**
+ * Edit Container
+ * The Edit Container is the main part of the editing screen to the right of the sidebar
+ */
 .edit-container {
   min-height: 80vh;
 }
 
+/**
+ * Sidebar panes
+ * The sidebar panes are the different panels that are displayed in the sidebar
+ * E.g. DOM Tree and the component selections
+ */
 .sidebar-panes {
   position: relative;
 }
@@ -194,7 +213,7 @@ h1 {
  */
 #dropzone {
   min-height: 10rem;
-  padding: 1rem; /* a little room when dropzone is full */
+  padding: 1rem 1rem 3rem;
   margin-bottom: 2rem;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: var(--default-radius);
@@ -247,8 +266,12 @@ fieldset {
 
     & svg {
       flex: 1;
-      height: 1rem;
-      width: 1rem;
+      height: 1.6rem;
+      width: 1.6rem;
+
+      & * {
+        stroke: #000;
+      }
     }
   }
 
@@ -272,9 +295,9 @@ fieldset {
     justify-content: center;
     align-items: center;
     border: 1px solid var(--border-color);
-    flex: 0 0 1.6rem;
-    height: 1.6rem;
-    width: 1.6rem;
+    flex: 0 0 2rem;
+    height: 2rem;
+    width: 2rem;
     border-radius: 50%;
     color: var(--font-color);
     cursor: pointer;
@@ -307,30 +330,6 @@ fieldset {
       flex: 0 0 6rem;
       display: inline-block;
       margin-right: 1rem;
-
-      /*
-      &.with-switch {
-        flex: 1 1 auto;
-        
-        .md-select-wrapper {
-          margin-left: 7rem;
-
-          &:before {
-            content: 'Plain text';
-            padding-right: 0.5rem;
-            opacity: 0.7;
-          }
-          &:after {
-            content: 'Markdown';
-            padding-left: 0.5rem;
-            opacity: 0.7;
-          }
-          & .md-select {
-            margin: 0;
-          }
-        }
-      }
-      */
     }
     & .help {
       position: relative;
@@ -485,17 +484,22 @@ fieldset {
         justify-content: center;
         align-items: center;
         position: absolute;
-        top: 1rem;
-        right: 0;
-        width: 2rem;
-        height: 2rem;
+        top: 0.2rem;
+        right: 2rem;
         margin: 0;
         cursor: pointer;
         transition: all 0.5s ease-in-out;
 
         & svg {
-          height: 1.4rem;
-          width: 1.4rem;
+          position: absolute;
+          top: 4px;
+          left: 0;
+          width: 2rem;
+          height: 2.6rem;
+
+          & * {
+            stroke: #000;
+          }
         }
 
         & .open {
@@ -506,6 +510,8 @@ fieldset {
         }
 
         &.is-collapsed {
+          top: 0.6rem;
+
           & .open {
             display: none;
           }
@@ -579,13 +585,17 @@ fieldset {
     top: 2rem;
     right: 1rem;
     z-index: 10001;
-    width: 2rem;
-    height: 2rem;
+    width: 4rem;
+    height: 4rem;
     cursor: pointer;
     transition: all 0.5s ease-in-out;
 
     & svg {
       margin: 0.25rem;
+
+      & * {
+        stroke: #000;
+      }
     }
   }
 
@@ -612,11 +622,6 @@ fieldset {
 
     & .CodeMirror {
       background-image: var(--editor-background);
-      color: var(--font-color) !important;
-
-      & .CodeMirror-cursor {
-        border-left-color: var(--font-color) !important;
-      }
 
       &.disable-markdown-styles {
         & .cm-header {

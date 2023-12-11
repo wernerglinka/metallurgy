@@ -179,10 +179,23 @@ const renderer = ( () => {
         e.preventDefault();
         e.stopPropagation();
 
+        // remove active class from all file links
+        const allFileLinks = document.querySelectorAll( '.js-dom-tree .file a' );
+        for ( const fileLink of allFileLinks ) {
+          fileLink.classList.remove( 'active' );
+        }
+        // ... and add it to the clicked link
+        e.target.classList.add( 'active' );
+
+
         // Retrieve the file path from the link
         const selectedFile = e.target.closest( 'li' );
         let selectedFilePath = selectedFile.querySelector( 'a' ).href;
         const fileType = selectedFilePath.split( '.' ).pop();
+        const fileName = selectedFilePath.split( '/' ).pop();
+
+        const fileNameDisplay = document.getElementById( 'file-name' );
+        fileNameDisplay.textContent = fileName;
 
         // get the file contents
         const { frontmatter, content } = await getMarkdownFile( selectedFilePath );

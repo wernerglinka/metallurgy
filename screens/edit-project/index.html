@@ -2,10 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content=" default-src 'self'; script-src 'self';
+    style-src 'self' https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css;
+    font-src 'self'
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff2
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf; connect-src
+    https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic
+    https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff; 
+    "
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content=" default-src 'self'; script-src 'self';
+    style-src 'self' https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css;
+    font-src 'self'
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff2
+    https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf; connect-src
+    https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic
+    https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff; 
+    "
+    />
     <title>Metallurgy</title>
-    <link rel="stylesheet" href="css/easymde.css" />
+    <link rel="stylesheet" href="./easymde.css" />
     <link rel="stylesheet" href="../styles/index.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -111,6 +133,7 @@
       </div>
 
       <main class="js-edit-container edit-container container-background">
+        <h2 id="file-name"></h2>
         <div id="frontmatter-container">
           <form id="main-form">
             <div id="dropzone" class="dropzone js-main-dropzone"></div>

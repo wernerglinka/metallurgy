@@ -85,50 +85,7 @@ export const createComponent = ( type ) => {
     // add the label to the div
     div.appendChild( labelText );
   }
-  /*
-    if( type === 'textarea' ) {
-      // create the label for label input
-      const label = document.createElement('label');
-      label.innerHTML = `<span>Textarea Key<sup>*</sup></span>`;
-  
-      // create the label input
-      const labelInput = document.createElement('input');
-      labelInput.setAttribute('type', "text");
-      labelInput.classList.add('element-label');
-      labelInput.placeholder = "Label Placeholder";
-  
-      // create wrapper for input for styling
-      const labelInputWrapper = document.createElement('div');
-      labelInputWrapper.appendChild(labelInput);
-  
-      // add the input to the label element
-      label.appendChild(labelInputWrapper);
-      
-      // add the label to the div
-      div.appendChild(label);
-      
-      // create the label for textarea
-      const labelText = document.createElement('label');
-      labelText.innerHTML = `<span>Content</span>`;
-  
-      // create the textarea
-      const textareaInput = document.createElement('textarea');
-      textareaInput.classList.add('element-value', 'is-editor');
-      textareaInput.dataset.type = "textarea";
-      textareaInput.placeholder = "Start typing...";
-      textareaInput.value = "";
-  
-      // create wrapper for input for styling
-      const inputWrapper = document.createElement('div');
-      inputWrapper.appendChild(textareaInput);
-  
-      // add the input to the label element
-      labelText.appendChild(inputWrapper);
-      
-      // add the label to the div
-      div.appendChild(labelText);
-    }
-  */
+
   if ( type === 'textarea' ) {
     // create the label for label input
     const label = document.createElement( 'label' );
@@ -448,7 +405,7 @@ export const createComponent = ( type ) => {
     collapseIcon.innerHTML = `
       <svg class="open" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-          <g transform="translate(-2, -2)" stroke="#FFFFFF" stroke-width="2">
+          <g transform="translate(-2, 0)" stroke="#FFFFFF" stroke-width="2">
             <g stroke="#FFFFFF" stroke-width="2">
               <line x1="12" y1="22" x2="12" y2="16" id="Path"></line>
               <line x1="12" y1="8" x2="12" y2="2" id="Path"></line>
@@ -466,7 +423,7 @@ export const createComponent = ( type ) => {
       
       <svg class="collapsed viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
         <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-          <g transform="translate(-2, -2)" stroke="#FFFFFF" stroke-width="2">
+          <g transform="translate(-2, 0)" stroke="#FFFFFF" stroke-width="2">
               <g transform="translate(2, 2)">
                   <line x1="10" y1="20" x2="10" y2="14" id="Path"></line>
                   <line x1="10" y1="6" x2="10" y2="0" id="Path"></line>
