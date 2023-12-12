@@ -37,8 +37,8 @@ export const updateButtonsStatus = () => {
     hasLabelInputs = false;
   }
 
-  console.log( `hasValidLabelInputs: ${ hasValidLabelInputs }` );
-  console.log( `hasLabelInputs: ${ hasLabelInputs }` );
+  //console.log( `hasValidLabelInputs: ${ hasValidLabelInputs }` );
+  //console.log( `hasLabelInputs: ${ hasLabelInputs }` );
 
   // enable the SUBMIT button if all inputs have valid text
   if ( hasValidLabelInputs ) {

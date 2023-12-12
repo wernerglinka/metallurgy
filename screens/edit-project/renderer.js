@@ -65,6 +65,92 @@ window.dragLeave = ( e ) => {
 };
 
 /**
+ * @function getInsertionPoint
+ * @param {*} container - The drop container element in which a dragged element is being dropped
+ * @param {*} y - The vertical position of the mouse cursor at the time of the drop, typically provided by e.clientY from the drop event.
+ * @returns The closest insertion point based on the cursor's position
+ * @description This function will get the closest insertion point based on the cursor's position
+ * during a drag/drop operation. The insertion point is the element that is closest
+ * to the cursor's position. The position is either before or after the element.
+ */
+function getInsertionPoint( container, y ) {
+  // 'closest' will hold a reference to the closest child element to the drop point
+  let closest = null;
+  // 'closestDistance' will hold the distance from the drop point to the closest child element
+  let closestDistance = Infinity;
+
+  //  Iterate over each child element of the container 
+  Array.from( container.children ).forEach( child => {
+    // Get the position and size of the child element
+    const box = child.getBoundingClientRect();
+    /*
+      Calculate the vertical offset between the center of the child element 
+      and the drop point. E.g., difference between the drop point and the 
+      vertical midpoint of the child element (box.top + box.height / 2).
+    */
+    const offset = y - box.top - ( box.height / 2 );
+
+    /* 
+      Check if the absolute value of the offset for the current child element 
+      is less than the closestDistance. If it is, this child element is closer 
+      to the drop point than any previously checked elements. Then update 
+      closest to reference this child element and closestDistance to the new 
+      offset value.
+    */
+    if ( Math.abs( offset ) < Math.abs( closestDistance ) ) {
+      closestDistance = offset;
+      closest = child;
+    }
+  } );
+
+  /*
+     Along with finding the closest child, we also determine whether the dragged
+     element should be inserted before or after this child. This is decided 
+     based on whether the offset is negative or positive, indicating the cursor's 
+     position relative to the vertical center of the closest child.
+     If offset is negative, the cursor is above the center, set position to 'before'.
+     If offset is positive, the cursor is below the center, set position to 'after'.
+  */
+
+  /*
+    Return an object containing:
+    'closest': The closest child element to the drop point.
+    'position': A string indicating whether the dragged element should be inserted 
+    before or after the closest child ('before' or 'after').
+  */
+  return { closest, position: closestDistance < 0 ? 'before' : 'after' };
+}
+
+/**
+ * @function moveElement
+ * @param {*} e 
+ * @param {*} dropzone 
+ * @description This function will move an existing element within or between drop zones
+ *   To insert the dragged element either before or after an existing element 
+ *   in the drop container, including the ability to insert before the first 
+ *   element, we need to determine the relative position of the cursor to the 
+ *   center of each potential sibling element. This way, we can decide whether 
+ *   to insert the dragged element before or after each child based on the 
+ *   cursor's position.
+ */
+function moveElement( e ) {
+  const dropzone = e.target.closest( '.dropzone' );
+  if ( !dropzone ) return;
+
+  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+  if ( closest ) {
+    if ( position === 'before' ) {
+      dropzone.insertBefore( window.draggedElement, closest );
+    } else {
+      dropzone.insertBefore( window.draggedElement, closest.nextSibling );
+    }
+  } else {
+    dropzone.appendChild( window.draggedElement );
+  }
+  window.draggedElement = null; // Clear the reference
+};
+
+/**
  * @function drop
  * @param {*} event 
  * @description This function will handle the drop event. 
@@ -189,7 +275,6 @@ const renderer = ( () => {
         // ... and add it to the clicked link
         e.target.classList.add( 'active' );
 
-
         // Retrieve the file path from the link
         const selectedFile = e.target.closest( 'li' );
         let selectedFilePath = selectedFile.querySelector( 'a' ).href;
@@ -227,7 +312,6 @@ const renderer = ( () => {
    * We'll also add a button wrapper to hold all buttons for the form
    */
   const addFormHandling = ( filePath ) => {
-    console.log( "ADDFORMHANDLING!!!!" );
     const mainForm = document.getElementById( 'main-form' );
 
     // Add the dropzone to the form
@@ -273,8 +357,6 @@ const renderer = ( () => {
     mainForm.addEventListener( 'submit', ( e ) => {
       e.preventDefault();
 
-      console.log( "SUBMITTING FORM!!!!" );
-
       // Preprocess form data in the dropzones
       const allDropzones = document.querySelectorAll( '.js-dropzone' );
       allDropzones.forEach( dropzone => {
@@ -293,8 +375,6 @@ const renderer = ( () => {
       // Transform the form elements to an object
       const dropzoneValues = transformFormElementsToObject( allFormElements );
 
-      //console.log( JSON.stringify( dropzoneValues, null, 2 ) );
-
       // Cleanup
       // Remove the dummy element so we can edit and use the form again
       const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
@@ -305,15 +385,11 @@ const renderer = ( () => {
       // Convert the object to YAML
       const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
 
-      console.log( `pageYAMLObject: \n${ pageYAMLObject }` );
-
+      // Write the  YAML object to its markdown file
       const options = {
         obj: pageYAMLObject,
         path: filePath
       };
-
-      console.log( "writing yaml object to file!!!!" );
-      // Write the  YAML object to the main process
       window.electronAPI.writeObjectToFile( options );
 
     } );
