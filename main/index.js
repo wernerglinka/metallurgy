@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require( 'electron' );
 const path = require( 'node:path' );
 const fs = require( 'node:fs' );
 const matter = require( 'gray-matter' );
+const yaml = require( 'yaml' );
 
 /**
  * @function readAllFiles
@@ -92,9 +93,6 @@ app.whenReady().then( () => {
 
   // handle a read file request from the renderer process
   ipcMain.handle( 'readFile', ( e, filePath ) => {
-
-    console.log( filePath );
-
     try {
       const data = fs.readFileSync( filePath, 'utf8' );
       return { status: 'success', data: data };
@@ -124,10 +122,10 @@ app.whenReady().then( () => {
   ipcMain.handle( 'readMarkdownFile', ( e, filePath ) => {
     try {
       const fileContent = fs.readFileSync( filePath, 'utf8' );
-      const frontMatter = matter( fileContent ).data;
+      const frontmatter = matter( fileContent ).data;
       const content = matter( fileContent ).content || '';
 
-      return { status: 'success', data: { frontMatter, content } };
+      return { status: 'success', data: { frontmatter, content } };
     }
     catch ( error ) {
       return { status: 'failure', error: error.message };
@@ -167,6 +165,22 @@ app.whenReady().then( () => {
     }
     catch ( error ) {
       return { status: 'failure', error: error.message };
+    }
+  } );
+
+  // handle a request to write a YAML object to a file
+  ipcMain.handle( 'writeObjectToFile', async ( e, data ) => {
+    // convert the YAML object to frontmatter yaml
+    let yamlString = yaml.stringify( data.obj );
+    // yaml.stringfy adds a "|" or a ">" to the beginning of the string
+    // remove it
+    yamlString = yamlString.replace( /^[ | >]\s*/, '' );
+
+    // write the YAML to a file
+    try {
+      fs.writeFileSync( data.path, `---\n${ yamlString }---\n` );
+    } catch ( error ) {
+      console.error( "Error writing to file:", error );
     }
   } );
 

@@ -1,17 +1,19 @@
+/** 
+ * @function isValidLabel
+ * @param {string} label
+ * @returns {boolean}
+ * @description checks if the label is not empty and contains only letters and numbers
+*/
+function isValidLabel( label ) {
+  return /^[A-Za-z0-9]+$/.test( label );
+}
+
 export const updateButtonsStatus = () => {
   // update SUBMIT button status
   // SUBMIT button is disabled by default. It will be enabled when schema fields
   // exist, the user has added valid text to a label input in the dropzone and all 
   // other label inputs have valid text.
   const submitButton = document.getElementById( 'submit-primary' );
-
-  // check if any schemas are present
-  let hasSchemaFields = false;
-  const schemaWrapper = document.getElementById( 'existing-schemas' );
-  const schemaFields = schemaWrapper ? schemaWrapper.querySelectorAll( '.form-element' ) : [];
-  if ( schemaFields.length > 0 ) {
-    hasSchemaFields = true;
-  }
 
   // loop over all label inputs in the dropzone and check if they have valid text.
   // If all have valid text, enable the SUBMIT button
@@ -35,14 +37,11 @@ export const updateButtonsStatus = () => {
     hasLabelInputs = false;
   }
 
-  //console.log(`hasSchemaFields: ${hasSchemaFields}`);
-  //console.log(`hasValidLabelInputs: ${hasValidLabelInputs}`);
-  //console.log(`hasLabelInputs: ${hasLabelInputs}`);
+  console.log( `hasValidLabelInputs: ${ hasValidLabelInputs }` );
+  console.log( `hasLabelInputs: ${ hasLabelInputs }` );
 
   // enable the SUBMIT button if all inputs have valid text
-  if ( ( hasSchemaFields && hasValidLabelInputs ) ||
-    ( !hasSchemaFields && hasValidLabelInputs ) ||
-    ( hasSchemaFields && !hasLabelInputs ) ) {
+  if ( hasValidLabelInputs ) {
     submitButton.disabled = false;
   } else {
     submitButton.disabled = true;

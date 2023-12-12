@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require( 'electron' );
 const path = require( 'node:path' );
 const fs = require( 'node:fs' );
+const convertToYAML = require( 'yaml' );
 
 contextBridge.exposeInMainWorld( 'electronAPI', {
   // use to open a dialog from the renderer process to the main process
@@ -24,4 +25,6 @@ contextBridge.exposeInMainWorld( 'electronAPI', {
   readDirectory: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
   writeMarkdownFile: ( data ) => ipcRenderer.invoke( 'writeMarkdownFile', data ),
   readMarkdownFile: ( filePath ) => ipcRenderer.invoke( 'readMarkdownFile', filePath ),
+  writeObjectToFile: ( data ) => ipcRenderer.invoke( 'writeObjectToFile', data ),
+  toYAML: ( args ) => convertToYAML.stringify( args ),
 } );

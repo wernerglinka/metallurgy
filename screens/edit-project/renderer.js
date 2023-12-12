@@ -4,6 +4,7 @@ import { getMarkdownFile } from "../lib/get-markdown-file.js";
 import { renderMarkdownFile } from "../lib/render-markdown-file.js";
 import { renderJSONFile } from "../lib/render-json-file.js";
 import { updateButtonsStatus } from "../lib/update-buttons-status.js";
+import { transformFormElementsToObject } from "../lib/transform-form-to-object.js";
 
 
 // Add drag and drop functionality to the form
@@ -213,6 +214,9 @@ const renderer = ( () => {
             break;
         }
 
+        const filePath = selectedFilePath.replace( 'file://', '' );
+        addFormHandling( filePath );
+
       } );
 
     }
@@ -222,7 +226,8 @@ const renderer = ( () => {
    * Prepare the form for the drag and drop functionality by adding a dropzone
    * We'll also add a button wrapper to hold all buttons for the form
    */
-  const editFormHandling = () => {
+  const addFormHandling = ( filePath ) => {
+    console.log( "ADDFORMHANDLING!!!!" );
     const mainForm = document.getElementById( 'main-form' );
 
     // Add the dropzone to the form
@@ -268,6 +273,8 @@ const renderer = ( () => {
     mainForm.addEventListener( 'submit', ( e ) => {
       e.preventDefault();
 
+      console.log( "SUBMITTING FORM!!!!" );
+
       // Preprocess form data in the dropzones
       const allDropzones = document.querySelectorAll( '.js-dropzone' );
       allDropzones.forEach( dropzone => {
@@ -284,11 +291,9 @@ const renderer = ( () => {
       // Get all form-elements in the dropzone
       const allFormElements = mainForm.querySelectorAll( '.form-element' );
       // Transform the form elements to an object
-      //const dropzoneValues = transformFormElementsToObject( allFormElements );
+      const dropzoneValues = transformFormElementsToObject( allFormElements );
 
-      console.log( allFormElements );
-
-      //console.log(JSON.stringify(dropzoneValues, null, 2));
+      //console.log( JSON.stringify( dropzoneValues, null, 2 ) );
 
       // Cleanup
       // Remove the dummy element so we can edit and use the form again
@@ -297,58 +302,19 @@ const renderer = ( () => {
         element.remove();
       } );
 
-      /*
-      const dropzone = document.getElementById( 'dropzone' );
+      // Convert the object to YAML
+      const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
 
-      // first we'll add an dummy element with an "is-last" class at the end of any 
-      // dropzone. This will be used to build inner objects and arrays properly.
-      const dummyElement = document.createElement( 'div' );
-      dummyElement.classList.add( 'form-element', 'is-last' );
-      dropzone.appendChild( dummyElement );
+      console.log( `pageYAMLObject: \n${ pageYAMLObject }` );
 
-      const secondaryDropzones = dropzone.querySelectorAll( '.object-dropzone, .array-dropzone' );
-      secondaryDropzones.forEach( dropzone => {
-        // add a dummy is-last element at the end of the dropzone
-        const dummyElement = document.createElement( 'div' );
-        dummyElement.classList.add( 'form-element', 'is-last' );
-        // if array dropzone add "array-last" class
-        if ( dropzone.classList.contains( 'array-dropzone' ) ) {
-          dummyElement.classList.add( 'array-last' );
-        }
-        dropzone.appendChild( dummyElement );
-      } );
+      const options = {
+        obj: pageYAMLObject,
+        path: filePath
+      };
 
-      // Get all form-elements in the dropzone
-      const allFormElements = dropzone.querySelectorAll( '.form-element' );
-      // Transform the form elements to an object
-      const dropzoneValues = transformFormElementsToObject( allFormElements );
-
-      //console.log(JSON.stringify(dropzoneValues, null, 2));
-
-      // Cleanup
-      // Remove the dummy element so we can edit and use the form again
-      const redundantDummyElements = document.querySelectorAll( '.is-last' );
-      redundantDummyElements.forEach( element => {
-        element.remove();
-      } );
-
-      */
-
-      /**
-       * Merge the schemas and dropzone values and write the resulting object to a file
-       
-      const schemaValues = getSchemasObject();
-      // merge the dropzone values with the schema values
-      const pageObject = Object.assign( {}, schemaValues, dropzoneValues );
-  
-      const pageYAMLObject = window.electronAPI.toYAML( pageObject );
-      console.log( pageYAMLObject );
-  
-      // send the page object to the main process
-      window.electronAPI.writeObjectToFile( pageObject );
-      
-      */
-
+      console.log( "writing yaml object to file!!!!" );
+      // Write the  YAML object to the main process
+      window.electronAPI.writeObjectToFile( options );
 
     } );
   };
@@ -357,7 +323,6 @@ const renderer = ( () => {
     updateProjectName,
     manageSidebar,
     renderEditSpace,
-    editFormHandling
 
   };
 
@@ -365,5 +330,4 @@ const renderer = ( () => {
 renderer.updateProjectName();
 renderer.manageSidebar();
 renderer.renderEditSpace();
-renderer.editFormHandling();
 

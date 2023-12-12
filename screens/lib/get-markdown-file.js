@@ -6,7 +6,7 @@ export const getMarkdownFile = async ( filePath ) => {
   const fileContents = await electronAPI.readMarkdownFile( filePath );
 
   return {
-    frontmatter: fileContents.data.frontMatter,
+    frontmatter: fileContents.data.frontmatter,
     content: fileContents.data.content
   };
 };
