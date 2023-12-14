@@ -5,11 +5,7 @@ import { renderMarkdownFile } from "../lib/render-markdown-file.js";
 import { renderJSONFile } from "../lib/render-json-file.js";
 import { updateButtonsStatus } from "../lib/update-buttons-status.js";
 import { transformFormElementsToObject } from "../lib/transform-form-to-object.js";
-
-
-
-
-
+import { dragStart, dragOver, dragLeave, drop } from "../lib/drag-drop.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -44,6 +40,11 @@ const renderer = ( () => {
 
   };
 
+  /**
+   * Main function to render the edit space
+   * The function will get the content and data file names and adds a COM tree
+   * to the sidebar. It will also add event listeners to the file links.
+   */
   const renderEditSpace = async () => {
     // Get content and data files and add them to the sidebar
     await getDirectoryFiles( 'contentFolder', '.md' );
@@ -61,6 +62,11 @@ const renderer = ( () => {
 
     ////// At this point we are ready to select individual files //////
 
+    /**
+     * Add event listeners to the file links
+     * When a file link is clicked, we'll retrieve the file contents and render
+     * it in the edit space.
+     */
     // add event listener to file links
     const allFileLinks = document.querySelectorAll( '.js-dom-tree .file a' );
     for ( const fileLink of allFileLinks ) {
@@ -99,6 +105,11 @@ const renderer = ( () => {
             alert( 'File type not supported' );
             break;
         }
+
+        /**
+         * Once the file has been selected and rendered in the edit space, we'll
+         * complete the form handling by adding a dropzone and buttons to the form.
+         */
 
         const filePath = selectedFilePath.replace( 'file://', '' );
         addFormHandling( filePath );

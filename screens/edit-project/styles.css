@@ -288,8 +288,7 @@ fieldset {
     opacity: 0;
     transition: all 0.5s ease-in-out;
   }
-  .delete-button,
-  .add-button {
+  .delete-button, .add-button {
     background: none;
     display: flex;
     justify-content: center;
@@ -324,10 +323,14 @@ fieldset {
   }
 
   & label {
-    flex: 0 0 50%;
+    flex: 0 0 30%;
+
+    &:last-of-type {
+      flex: 1 1 auto;
+    }
 
     & span {
-      flex: 0 0 6rem;
+      /*flex: 0 0 6rem;*/
       display: inline-block;
       margin-right: 1rem;
     }
@@ -349,6 +352,12 @@ fieldset {
           opacity: 1;
         }
       }
+    }
+
+    /* label text for markdown file fields */
+    & .label-text {
+      font-size: 1.4rem;
+      flex: 1 1 1rem;
     }
 
     & .help-text {
@@ -387,12 +396,7 @@ fieldset {
       }
     }
 
-    & [type="text"],
-    & textarea,
-    & [type="number"],
-    & [type="date"],
-    & [type="time"],
-    & select {
+    & [type="text"], & textarea, & [type="number"], & [type="date"], & [type="time"], & select {
       font-family: "Open Sans", sans-serif;
       border: none;
       border-bottom: 1px solid var(--border-color);
@@ -466,14 +470,15 @@ fieldset {
     }
   }
 
-  &.is-array,
-  &.is-object {
+  &.is-array, &.is-object {
     display: block;
 
     & label {
       position: relative;
-      display: block;
-      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
 
       &.object-name {
         min-height: 3rem;
@@ -548,8 +553,7 @@ fieldset {
     }
   }
 
-  & .object-dropzone,
-  & .array-dropzone {
+  & .object-dropzone, & .array-dropzone {
     min-height: 5rem;
     border: 1px dotted var(--border-color);
     border-radius: var(--default-radius);

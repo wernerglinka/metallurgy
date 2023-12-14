@@ -1,5 +1,22 @@
+function isSimpleList( value ) {
+  // Check if value is an array
+  if ( Array.isArray( value ) ) {
+    // Check if every item in the array is a string -> simple list
+    return value.every( item => typeof item === 'string' );
+  }
+  return false;
+}
+
 export function convertToSchemaObject( json ) {
   function createField( key, value ) {
+    if ( isSimpleList( value ) ) {
+      console.log( `simple list: ${ key }/${ value }` );
+      return {
+        label: key,
+        type: 'simplelist',
+        value: value
+      };
+    }
     const type = typeof value;
 
     if ( type === 'string' ) {

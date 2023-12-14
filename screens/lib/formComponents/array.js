@@ -1,3 +1,5 @@
+import { dragOver, dragLeave, drop } from '../drag-drop.js';
+
 const array = ( div ) => {
   // create the array name input
   const label = document.createElement( 'label' );

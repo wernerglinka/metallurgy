@@ -1,12 +1,14 @@
 import formComponent from './formComponents/index.js';
+import { dragStart, dragOver, dragLeave, drop } from './drag-drop.js';
 
 
 /**
  * @function createComponent
- * @param {string} type 
+ * @param {string} type - text, checkbox, array, object, etc.
+ * @param {boolean} raw - if true, return the raw component with the label input field
  * @returns a form element
  */
-export const createComponent = ( type ) => {
+export const createComponent = ( type, raw ) => {
   // create a div to hold the form element
   let div = document.createElement( 'div' );
 
@@ -46,7 +48,7 @@ export const createComponent = ( type ) => {
   div.appendChild( dragHandle );
 
   // Call the form component function to create the element
-  div = formComponent[ type ]( div );
+  div = formComponent[ type ]( div, raw );
 
   // add a button wrapper to the element
   const buttonWrapper = document.createElement( 'div' );
@@ -88,11 +90,11 @@ export const createComponent = ( type ) => {
  * @description This function will first create a new element and then updates
  *   element based on prop values
  */
-export const getUpdatedElement = ( prop ) => {
+export const getUpdatedElement = ( prop, raw ) => {
   // Build the new element...
   const newElement = createComponent( prop.type );
   // ...and update it with the field data
-  const updatedElement = updateElement( newElement, prop );
+  const updatedElement = updateElement( newElement, prop, raw );
 
   /*
     Add an eventlistener to the label input to enable the submit button when the 
@@ -122,31 +124,60 @@ export const getUpdatedElement = ( prop ) => {
 
 /**
  * @function updateElement
- * @param {DOM Element} element 
- * @param {*} field 
+ * @param {element} - a raw DOM element, both lanel and value are empty
+ * @param {field} - a field object
+ * @param 
  * @returns 
  */
-function updateElement( element, field ) {
+function updateElement( element, field, raw ) {
 
   if ( field.type === "checkbox" ) {
     // Update the checkbox state
     element.querySelector( '.element-value' ).checked = field.value;
     // Update the label
-    element.querySelector( '.element-label' ).value = field.label;
+    if ( raw ) {
+      element.querySelector( '.element-label' ).value = field.label;
+    } else {
+      // Replace the "raw" input field with a label
+      element.querySelector( 'label span:first-child' ).remove();
+      element.querySelector( 'label input' ).remove();
+      const labelText = document.createElement( 'span' );
+      labelText.innerHTML = field.label;
+      labelText.classList.add( 'label-text' );
+      element.querySelector( 'label:first-of-type' ).prepend( labelText );
+    }
   } // end checkbox
 
   if ( field.type === "text" || field.type === "textarea" || field.type === "markdown editor" ) {
     // Update the text value
     element.querySelector( '.element-value' ).value = field.value;
     // Update the label
-    element.querySelector( '.element-label' ).value = field.label;
+    if ( raw ) {
+      element.querySelector( '.element-label' ).value = field.label;
+    } else {
+      // Replace the "raw" input field with a label
+      element.querySelector( 'label span:first-child' ).remove();
+      element.querySelector( 'label input' ).remove();
+      const labelText = document.createElement( 'span' );
+      labelText.innerHTML = field.label;
+      labelText.classList.add( 'label-text' );
+      element.querySelector( 'label:first-of-type' ).prepend( labelText );
+    }
     // Update the placeholder
     element.querySelector( '.element-value' ).placeholder = field.placeholder;
   } // end text, textarea, markdown editor
 
-  if ( field.type === "simple list" ) {
+  if ( field.type === "simplelist" ) {
     // Update the label
-    element.querySelector( '.object-name input' ).value = field.label;
+    if ( raw ) {
+      element.querySelector( '.object-name input' ).value = field.label;
+    } else {
+      // Replace the "raw" input field with a label
+      const labelText = document.createElement( 'span' );
+      labelText.innerHTML = field.label;
+      labelText.classList.add( 'label-text' );
+      element.querySelector( '.object-name' ).prepend( labelText );
+    }
     /* 
       Update the list items
       A new element includes only 1 list item. We'll clone it and use it to
@@ -166,7 +197,17 @@ function updateElement( element, field ) {
 
   if ( field.type === "object" || field.type === "array" ) {
     // Update the label
-    element.querySelector( '.object-name input' ).value = field.label;
+    if ( raw ) {
+      element.querySelector( '.object-name input' ).value = field.label;
+    } else {
+      // Replace the "raw" input field with a label
+      element.querySelector( '.object-name span:first-child' ).remove();
+      element.querySelector( '.object-name input' ).remove();
+      const labelText = document.createElement( 'span' );
+      labelText.innerHTML = field.label;
+      labelText.classList.add( 'label-text' );
+      element.querySelector( '.object-name' ).prepend( labelText );
+    }
 
     if ( field.value.length > 0 ) {
       // Get a reference to the object dropzone

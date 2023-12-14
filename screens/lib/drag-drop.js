@@ -86,7 +86,7 @@ function moveElement( e ) {
 
 
 // Add drag and drop functionality to the form
-window.dragStart = ( e ) => {
+const dragStart = ( e ) => {
   e.dataTransfer.setData( "text/plain", e.target.dataset.component );
   /* 
     Add the drag origin to the dragged element
@@ -111,7 +111,7 @@ window.dragStart = ( e ) => {
  * @description This function will handle the dragover event. It will indicate
  *   drop space by inserting a drop-indicator temporarily
  */
-window.dragOver = ( e ) => {
+const dragOver = ( e ) => {
   e.preventDefault();
   e.target.classList.add( 'dropzone-highlight' );
   const dropzone = e.target.closest( '.dropzone' );
@@ -132,7 +132,7 @@ window.dragOver = ( e ) => {
   }
 };
 
-window.dragLeave = ( e ) => {
+const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
   e.target.classList.remove( 'dropzone-highlight' );
 
@@ -151,7 +151,7 @@ window.dragLeave = ( e ) => {
  *  2. Dragging a new element from the sidebar to the drop zone
  *  3. Moving an existing element within or between drop zones
  */
-window.drop = async ( e ) => {
+const drop = async ( e ) => {
   e.preventDefault();
   e.stopPropagation();
 
@@ -198,3 +198,5 @@ window.drop = async ( e ) => {
     moveElement( e );
   }
 };
+
+export { dragStart, dragOver, dragLeave, drop };

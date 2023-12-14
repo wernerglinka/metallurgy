@@ -41,11 +41,16 @@ export const updateButtonsStatus = () => {
   //console.log( `hasLabelInputs: ${ hasLabelInputs }` );
 
   // enable the SUBMIT button if all inputs have valid text
+
+  /*
   if ( hasValidLabelInputs ) {
     submitButton.disabled = false;
   } else {
     submitButton.disabled = true;
   }
+  */
+
+  submitButton.disabled = false;
 
   // update CLEAR FORM button status
   // CLEAR FORM button is disabled by default. It will be enabled when the user
