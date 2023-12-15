@@ -6,6 +6,8 @@ import { renderJSONFile } from "../lib/render-json-file.js";
 import { updateButtonsStatus } from "../lib/update-buttons-status.js";
 import { transformFormElementsToObject } from "../lib/transform-form-to-object.js";
 import { dragStart, dragOver, dragLeave, drop } from "../lib/drag-drop.js";
+import { cleanMainForm } from "../lib/clean-main-form.js";
+import { addMainForm } from "../lib/add-main-form.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -82,6 +84,16 @@ const renderer = ( () => {
         // ... and add it to the clicked link
         e.target.classList.add( 'active' );
 
+        // clean the edit space, we may have rendered a file before
+        // first  fadeout the edit space, then remove all content
+        await cleanMainForm();
+
+        // Add the main form to the edit space
+        const mainForm = addMainForm();
+
+        // ... and update the buttons status
+        updateButtonsStatus();
+
         // Retrieve the file path from the link
         const selectedFile = e.target.closest( 'li' );
         let selectedFilePath = selectedFile.querySelector( 'a' ).href;
@@ -91,7 +103,7 @@ const renderer = ( () => {
         const fileNameDisplay = document.getElementById( 'file-name' );
         fileNameDisplay.textContent = fileName;
 
-        // get the file contents
+        // Get the file contents
         const { frontmatter, content } = await getMarkdownFile( selectedFilePath );
 
         switch ( fileType ) {
@@ -107,104 +119,54 @@ const renderer = ( () => {
         }
 
         /**
-         * Once the file has been selected and rendered in the edit space, we'll
-         * complete the form handling by adding a dropzone and buttons to the form.
+         *  Listen for form submittion
+         *  We'll have to preprocess form data that are added via the drag and drop
+         *  functionality. We'll have to convert the form data to an object and then
+         *  write it to a file.
          */
+        mainForm.addEventListener( 'submit', ( e ) => {
+          e.preventDefault();
 
-        const filePath = selectedFilePath.replace( 'file://', '' );
-        addFormHandling( filePath );
+          // Preprocess form data in the dropzones
+          const allDropzones = document.querySelectorAll( '.js-dropzone' );
+          allDropzones.forEach( dropzone => {
+            // add a dummy is-last element at the end of the dropzone
+            const dummyElement = document.createElement( 'div' );
+            dummyElement.classList.add( 'form-element', 'is-last' );
+            // if array dropzone add "array-last" class
+            if ( dropzone.classList.contains( 'array-dropzone' ) ) {
+              dummyElement.classList.add( 'array-last' );
+            }
+            dropzone.appendChild( dummyElement );
+          } );
 
-      } );
+          // Get all form-elements in the dropzone
+          const allFormElements = mainForm.querySelectorAll( '.form-element' );
+
+          // Transform the form elements to an object
+          const dropzoneValues = transformFormElementsToObject( allFormElements );
+
+          // Cleanup
+          // Remove the dummy element so we can edit and use the form again
+          const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
+          redundantDummyElements.forEach( element => {
+            element.remove();
+          } );
+
+          // Convert the object to YAML
+          //const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
+
+          // Write the object to its markdown file (conversion to YAML/frontmatter is done in the main process)
+          const options = {
+            obj: dropzoneValues,
+            path: selectedFilePath.replace( 'file://', '' )
+          };
+          window.electronAPI.writeObjectToFile( options );
+
+        } ); // end form submit listener
+      } ); // end file link listener
 
     }
-  };
-
-  /**
-   * Prepare the form for the drag and drop functionality by adding a dropzone
-   * We'll also add a button wrapper to hold all buttons for the form
-   */
-  const addFormHandling = ( filePath ) => {
-    const mainForm = document.getElementById( 'main-form' );
-
-    // Add the dropzone to the form
-    const dropzone = document.getElementById( 'dropzone' );
-    dropzone.addEventListener( "dragover", dragOver );
-    dropzone.addEventListener( "dragleave", dragLeave );
-    dropzone.addEventListener( "drop", drop );
-
-    // add a button wrapper to the form
-    const buttonWrapper = document.createElement( 'div' );
-    buttonWrapper.id = 'button-wrapper';
-    mainForm.appendChild( buttonWrapper );
-
-    // Add the SUBMIT button
-    const submitButton = document.createElement( 'button' );
-    submitButton.setAttribute( 'type', "submit" );
-    submitButton.id = 'submit-primary';
-    submitButton.classList.add( 'form-button' );
-    submitButton.innerHTML = "Submit";
-    buttonWrapper.appendChild( submitButton );
-
-    // Add a CLEAR DROPZONE button
-    const clearDropzoneButton = document.createElement( 'button' );
-    clearDropzoneButton.classList.add( 'form-button' );
-    clearDropzoneButton.id = 'clear-dropzone';
-    clearDropzoneButton.disabled = true;
-    clearDropzoneButton.innerHTML = "Clear Dropzone";
-    clearDropzoneButton.addEventListener( 'click', ( e ) => {
-      e.preventDefault();
-      dropzone.innerHTML = "";
-      updateButtonsStatus();
-    } );
-    buttonWrapper.appendChild( clearDropzoneButton );
-
-    updateButtonsStatus();
-
-    /**
-     *  Listen for form submittion
-     *  We'll have to preprocess form data that are added via the drag and drop
-     *  functionality. We'll have to convert the form data to an object and then
-     *  write it to a file.
-     */
-    mainForm.addEventListener( 'submit', ( e ) => {
-      e.preventDefault();
-
-      // Preprocess form data in the dropzones
-      const allDropzones = document.querySelectorAll( '.js-dropzone' );
-      allDropzones.forEach( dropzone => {
-        // add a dummy is-last element at the end of the dropzone
-        const dummyElement = document.createElement( 'div' );
-        dummyElement.classList.add( 'form-element', 'is-last' );
-        // if array dropzone add "array-last" class
-        if ( dropzone.classList.contains( 'array-dropzone' ) ) {
-          dummyElement.classList.add( 'array-last' );
-        }
-        dropzone.appendChild( dummyElement );
-      } );
-
-      // Get all form-elements in the dropzone
-      const allFormElements = mainForm.querySelectorAll( '.form-element' );
-      // Transform the form elements to an object
-      const dropzoneValues = transformFormElementsToObject( allFormElements );
-
-      // Cleanup
-      // Remove the dummy element so we can edit and use the form again
-      const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
-      redundantDummyElements.forEach( element => {
-        element.remove();
-      } );
-
-      // Convert the object to YAML
-      const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
-
-      // Write the  YAML object to its markdown file
-      const options = {
-        obj: pageYAMLObject,
-        path: filePath
-      };
-      window.electronAPI.writeObjectToFile( options );
-
-    } );
   };
 
   return {

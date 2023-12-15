@@ -21,7 +21,7 @@ const textarea = ( div ) => {
 
   // create the label for textarea
   const labelText = document.createElement( 'label' );
-  labelText.innerHTML = `<span>Text content</span>`;
+  labelText.innerHTML = `<span class="hint">Text content</span>`;
 
   // create the textarea
   const textareaInput = document.createElement( 'textarea' );

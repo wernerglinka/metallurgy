@@ -44,6 +44,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow( {
     width: 800,
     height: 600,
+    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
@@ -168,15 +169,11 @@ app.whenReady().then( () => {
     }
   } );
 
-  // handle a request to write a YAML object to a file
+  // handle a request to write an object as YAML/frontmatter to a markdown file
   ipcMain.handle( 'writeObjectToFile', async ( e, data ) => {
-    // convert the YAML object to frontmatter yaml
+    // convert the object to frontmatter yaml
     let yamlString = yaml.stringify( data.obj );
-    // yaml.stringfy adds a "|" or a ">" to the beginning of the string
-    // remove it
-    yamlString = yamlString.replace( /^[ | >]\s*/, '' );
 
-    // write the YAML to a file
     try {
       fs.writeFileSync( data.path, `---\n${ yamlString }---\n` );
     } catch ( error ) {

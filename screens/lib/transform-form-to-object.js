@@ -1,3 +1,5 @@
+import { processList } from './process-list.js';
+
 /**
  * @function getCurrentObject
  * @param {object} formObject 
@@ -53,7 +55,13 @@ export const transformFormElementsToObject = ( allFormElements ) => {
     // check if the current element is an array or object. If so, add the name to the loopStack
     // as this represents a level in the object structure
     if ( isObject || isArray ) {
-      const name = currentElement.querySelector( '.object-name input' ).value;
+      // We read the label from the label-text element, when we read a markdown
+      // file. In that case the labels are all fixed.  We read the label from the
+      // element-label input, when we have created a new element. In that case
+      // the labels are editable.
+      const name = currentElement.querySelector( '.object-name input' )
+        ? currentElement.querySelector( '.object-name input' ).value
+        : currentElement.querySelector( '.label-text' ).textContent;
       loopStack.push( name );
 
       // add an empty object to formObject with name from loopStack
@@ -73,7 +81,13 @@ export const transformFormElementsToObject = ( allFormElements ) => {
 
       } else {
         // Get the element props
-        key = currentElement.querySelector( '.element-label' ).value;
+        // We read the label from the label-text element, when we read a markdown
+        // file. In that case the labels are all fixed.  We read the label from the
+        // element-label input, when we have created a new element. In that case
+        // the labels are editable.
+        key = currentElement.querySelector( '.element-label' )
+          ? currentElement.querySelector( '.element-label' ).value
+          : currentElement.querySelector( '.label-text' ).textContent;
         value = currentElement.querySelector( '.element-value' ).value;
         widget = currentElement.querySelector( '.element-value' ).type;
       }

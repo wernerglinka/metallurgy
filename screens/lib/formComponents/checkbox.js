@@ -21,13 +21,12 @@ const checkbox = ( div ) => {
 
   // create the label for checkbox
   const labelText = document.createElement( 'label' );
-  labelText.innerHTML = `<span>Initial state of checkbox</span>`;
+  labelText.innerHTML = `<span class="hint">Initial state of checkbox</span>`;
 
   // create the checkbox
   const checkboxInput = document.createElement( 'input' );
   checkboxInput.value = "false";
   checkboxInput.classList.add( 'element-value' );
-  //checkboxInput.dataset.type = "checkbox";
   checkboxInput.setAttribute( 'type', "checkbox" );
   checkboxInput.setAttribute( 'role', "switch" );
 

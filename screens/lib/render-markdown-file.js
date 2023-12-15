@@ -15,7 +15,7 @@ export const renderMarkdownFile = ( frontmatter, content ) => {
     fragment.appendChild( schemaElement );
   } );
 
-  const dropzone = document.querySelector( '.js-main-dropzone' );
+  const dropzone = document.getElementById( 'dropzone' );
   dropzone.appendChild( fragment );
 
 };

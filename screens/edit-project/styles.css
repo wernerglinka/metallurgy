@@ -5,6 +5,9 @@
  */
 :root {
   --component-border: 1px solid #000000;
+  --white-transparent: rgba(255, 255, 255, 0.2);
+  --input-border: 1px solid rgba(255, 255, 255, 0.3);
+  --input-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
@@ -34,7 +37,7 @@ h1 {
 
 .container-background {
   padding: 1rem 2rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--white-transparent);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(5px);
@@ -196,6 +199,12 @@ h1 {
   position: relative;
   width: 100%;
   padding-bottom: 3rem;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+
+  &.fade-out {
+    opacity: 0;
+  }
 }
 
 #button-wrapper {
@@ -295,6 +304,7 @@ fieldset {
     align-items: center;
     border: 1px solid var(--border-color);
     flex: 0 0 2rem;
+    font-size: 1.6rem;
     height: 2rem;
     width: 2rem;
     border-radius: 50%;
@@ -333,6 +343,10 @@ fieldset {
       /*flex: 0 0 6rem;*/
       display: inline-block;
       margin-right: 1rem;
+
+      &.hint {
+        display: none;
+      }
     }
     & .help {
       position: relative;
@@ -399,8 +413,11 @@ fieldset {
     & [type="text"], & textarea, & [type="number"], & [type="date"], & [type="time"], & select {
       font-family: "Open Sans", sans-serif;
       border: none;
-      border-bottom: 1px solid var(--border-color);
-      background: none;
+      background: var(--white-transparent);
+      border-radius: 0.5rem;
+      box-shadow: var(--input-box-shadow);
+      backdrop-filter: blur(5px);
+      border: var(--input-border);
       color: var(--font-color);
       padding: var(--element-padding);
 
@@ -446,12 +463,18 @@ fieldset {
       background: none;
       color: var(--font-color);
       padding: var(--element-padding);
+
+      & .button-wrapper {
+        position: static;
+      }
     }
 
     & input {
       border: none;
-      border-bottom: 1px solid var(--border-color);
-      background: none;
+      background: var(--white-transparent);
+      border-radius: 0.5rem;
+      box-shadow: var(--input-box-shadow);
+      backdrop-filter: blur(5px);
       color: var(--font-color);
       padding: var(--element-padding);
       flex: 0 0 80%;
@@ -490,6 +513,10 @@ fieldset {
 
       & span {
         display: block;
+
+        &.hint {
+          display: none;
+        }
       }
 
       & .collapse-icon {
@@ -497,7 +524,6 @@ fieldset {
         justify-content: center;
         align-items: center;
         position: absolute;
-        top: 0.2rem;
         right: 2rem;
         margin: 0;
         cursor: pointer;
@@ -505,7 +531,6 @@ fieldset {
 
         & svg {
           position: absolute;
-          top: 4px;
           left: 0;
           width: 2rem;
           height: 2.6rem;
@@ -523,7 +548,6 @@ fieldset {
         }
 
         &.is-collapsed {
-          top: 0.6rem;
 
           & .open {
             display: none;
@@ -711,13 +735,14 @@ input:where([type="checkbox"][role="switch"]) {
   position: relative;
   color: inherit;
   font-size: inherit;
-  width: 2em;
-  height: 1em;
+  width: 3em;
+  height: 1.5em;
   box-sizing: content-box;
   border: 1px solid;
-  border-radius: 1em;
+  border-radius: 0.75em;
   vertical-align: text-bottom;
-  margin-right: auto;
+  margin: 0 auto 0 2rem;
+  box-shadow: var(--input-box-shadow);
 }
 
 input:where([type="checkbox"][role="switch"])::before {
@@ -727,8 +752,8 @@ input:where([type="checkbox"][role="switch"])::before {
   left: 0;
   transform: translate(0, -50%);
   box-sizing: border-box;
-  width: 0.7em;
-  height: 0.7em;
+  width: 1em;
+  height: 1em;
   margin: 0 0.15em;
   border: 1px solid;
   border-radius: 50%;

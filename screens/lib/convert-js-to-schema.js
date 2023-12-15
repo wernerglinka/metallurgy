@@ -10,7 +10,6 @@ function isSimpleList( value ) {
 export function convertToSchemaObject( json ) {
   function createField( key, value ) {
     if ( isSimpleList( value ) ) {
-      console.log( `simple list: ${ key }/${ value }` );
       return {
         label: key,
         type: 'simplelist',

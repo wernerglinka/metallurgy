@@ -15,7 +15,7 @@ export const createComponent = ( type, raw ) => {
   let elementModifier = null;
   if ( type === "object" ) { elementModifier = "is-object"; }
   if ( type === "array" ) { elementModifier = "is-array"; }
-  if ( type === "simple list" ) { elementModifier = "is-list"; }
+  if ( type === "simplelist" ) { elementModifier = "is-list"; }
 
   div.classList.add( 'form-element' );
   elementModifier && div.classList.add( elementModifier );
@@ -168,15 +168,18 @@ function updateElement( element, field, raw ) {
   } // end text, textarea, markdown editor
 
   if ( field.type === "simplelist" ) {
+    element.classList.add( 'is-list' );
     // Update the label
     if ( raw ) {
       element.querySelector( '.object-name input' ).value = field.label;
     } else {
       // Replace the "raw" input field with a label
+      element.querySelector( 'label span:first-child' ).remove();
+      element.querySelector( 'label input' ).remove();
       const labelText = document.createElement( 'span' );
       labelText.innerHTML = field.label;
       labelText.classList.add( 'label-text' );
-      element.querySelector( '.object-name' ).prepend( labelText );
+      element.querySelector( 'label:first-of-type' ).prepend( labelText );
     }
     /* 
       Update the list items

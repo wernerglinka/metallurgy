@@ -21,7 +21,7 @@ const text = ( div ) => {
 
   // create the label for text input
   const labelText = document.createElement( 'label' );
-  labelText.innerHTML = `<span>Text for Text element</span>`;
+  labelText.innerHTML = `<span class="hint">Text for Text element</span>`;
 
   // create the input
   const textInput = document.createElement( 'input' );
