@@ -207,6 +207,48 @@ h1 {
   }
 }
 
+#undo-redo-wrapper {
+  position: absolute;
+  top: -3rem;
+  right: 0.4rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+
+  & .btn {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  & svg {
+    width: 1.6rem;
+
+    & * {
+      stroke: var(--text-color);
+    }
+  }
+
+  & .undo[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  & .redo[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  & .snapshot[disabled] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
 #button-wrapper {
   position: absolute;
   bottom: 0;
@@ -214,7 +256,7 @@ h1 {
   width: 100%;
   display: flex;
   justify-content: space-between;
-}
+} 
 
 /**
  * Dropzone holds all the form elements that are added 
@@ -763,7 +805,7 @@ input:where([type="checkbox"][role="switch"])::before {
 
 input:where([type="checkbox"][role="switch"]):checked::before {
   opacity: 100%;
-  left: 1em;
+  left: 1.5em;
 }
 
 input:where([type="checkbox"][role="switch"]):disabled {

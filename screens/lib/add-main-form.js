@@ -1,5 +1,6 @@
 import { dragOver, dragLeave, drop } from './drag-drop.js';
 import { updateButtonsStatus } from './update-buttons-status.js';
+import { redoUndo } from './undo-redo.js';
 
 /**
  * @function mainForm
@@ -12,6 +13,8 @@ export const addMainForm = () => {
   // Add the main form plus dropzone
   const mainForm = document.createElement( 'form' );
   mainForm.id = 'main-form';
+
+  // Add the dropzone
   const dropzone = document.createElement( 'div' );
   dropzone.id = 'dropzone';
   dropzone.classList.add( 'dropzone', 'js-main-dropzone', 'js-dropzone' );
@@ -48,6 +51,9 @@ export const addMainForm = () => {
     updateButtonsStatus();
   } );
   buttonWrapper.appendChild( clearDropzoneButton );
+
+  // add undo/redo buttons
+  mainForm.appendChild( redoUndo() );
 
   return mainForm;
 
