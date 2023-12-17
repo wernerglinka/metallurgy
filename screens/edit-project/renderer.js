@@ -8,6 +8,7 @@ import { transformFormElementsToObject } from "../lib/transform-form-to-object.j
 import { dragStart, dragOver, dragLeave, drop } from "../lib/drag-drop.js";
 import { cleanMainForm } from "../lib/clean-main-form.js";
 import { addMainForm } from "../lib/add-main-form.js";
+import { redoUndo } from "../lib/undo-redo.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -117,6 +118,9 @@ const renderer = ( () => {
             alert( 'File type not supported' );
             break;
         }
+
+        // Now that the content has been loaded, add undo/redo buttons
+        mainForm.appendChild( redoUndo() );
 
         /**
          *  Listen for form submittion

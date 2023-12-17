@@ -53,7 +53,7 @@ export const addMainForm = () => {
   buttonWrapper.appendChild( clearDropzoneButton );
 
   // add undo/redo buttons
-  mainForm.appendChild( redoUndo() );
+  //mainForm.appendChild( redoUndo() );
 
   return mainForm;
 
