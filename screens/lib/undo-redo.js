@@ -64,7 +64,14 @@ export const redoUndo = () => {
   // Create element for stack length
   const stackLength = document.createElement( 'div' );
   stackLength.id = 'stack-length';
+  stackLength.classList.add( 'undo-redo-count' );
   wrapper.appendChild( stackLength );
+
+  // Create element for snapshot message
+  const snapshotMessage = document.createElement( 'div' );
+  snapshotMessage.id = 'snapshot-message';
+  snapshotMessage.classList.add( 'undo-redo-message' );
+  wrapper.prepend( snapshotMessage );
 
   /**
    * Provide undo and redo functionality for the dropzone
@@ -133,20 +140,20 @@ export const redoUndo = () => {
       // Clone the current state of the dropzone. We clone so we capture 
       // the event listeners as well as the HTML
       clone = dropzone.cloneNode( true );
+
       // Compare the clone to the last item on the stack. If they are the same
       // then don't push the clone onto the stack
       let lastState = undoStack[ undoStack.length - 1 ];
       if ( compareDOMElements( clone, lastState ) ) {
-        console.log( 'clones are equal - no change' );
+        snapshotMessage.innerHTML = 'Latest snapshot is up-to-date!';
+        setTimeout( () => {
+          snapshotMessage.innerHTML = '';
+        }, 2000 );
         return;
       } else {
         // Push the clone onto the stack
         undoStack.push( clone );
-
-        console.log( "pushed clone onto stack" );
       }
-
-      console.log( "stack length should increase by 1" );
 
       // Update stack length display
       stackLength.innerHTML = undoStack.length - 1;
