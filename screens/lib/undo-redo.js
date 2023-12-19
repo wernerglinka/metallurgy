@@ -1,5 +1,10 @@
 import { compareDOMElements } from './compare-dom-elements.js';
 
+/**
+ * @function redoUndo
+ * @description Add undo and redo buttons to the dropzone
+ * @returns 
+ */
 export const redoUndo = () => {
   // create wrapper div for redo, undo and snapshot buttons
   const wrapper = document.createElement( 'div' );
@@ -75,7 +80,7 @@ export const redoUndo = () => {
 
   /**
    * Provide undo and redo functionality for the dropzone
-   * We monitor the dropzone for changes. On change we enable the snapshot button.
+   * The undo/redo functions act on snapshots of the dropzone.
    * Taking a snapshot is up to the user. When the user clicks the snapshot button
    * we clone the dropzone and push the clone onto the undo stack.
    */
@@ -98,11 +103,14 @@ export const redoUndo = () => {
 
     const target = e.target;
     if ( target.closest( '.undo' ) ) {
-
+      // UNDO
+      // Push the current state onto the redo stack
       redoStack.push( undoStack.pop() );
+
+      // Get the last saved state
       let lastState = undoStack[ undoStack.length - 1 ];
 
-      // Replace the current element with the last saved state
+      // Replace the dropzone content with the last saved state
       dropzone.parentNode.replaceChild( lastState, dropzone );
 
       // Update stack length display
@@ -120,9 +128,14 @@ export const redoUndo = () => {
     }
 
     else if ( target.closest( '.redo' ) ) {
+      // REDO
       if ( redoStack.length > 0 ) {
+        // Get the last saved state from the redo stack and push it onto the undo stack
         undoStack.push( redoStack.pop() );
+
+        // Get the last saved state from the undo stack
         let nextState = undoStack[ undoStack.length - 1 ];
+
         // Replace the current element with the last saved state
         dropzone.parentNode.replaceChild( nextState, dropzone );
       }

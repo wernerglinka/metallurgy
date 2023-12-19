@@ -1,6 +1,5 @@
-import { dragOver, dragLeave, drop } from './drag-drop.js';
 import { updateButtonsStatus } from './update-buttons-status.js';
-import { redoUndo } from './undo-redo.js';
+import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons } from './event-handlers.js';
 
 /**
  * @function mainForm
@@ -14,15 +13,20 @@ export const addMainForm = () => {
   const mainForm = document.createElement( 'form' );
   mainForm.id = 'main-form';
 
+  // Add event listeners to the dropzone
+  // We delegate the event listeners to the form wrapper as the dropzone may be
+  // replaced by a new dropzone when the user uses undo/redo
+  mainForm.addEventListener( 'dragstart', dragStart );
+  mainForm.addEventListener( "dragover", dragOver );
+  mainForm.addEventListener( "dragleave", dragLeave );
+  mainForm.addEventListener( "drop", drop );
+  mainForm.addEventListener( "click", sectionCollapse );
+  mainForm.addEventListener( "click", addDeleteButtons );
+
   // Add the dropzone
   const dropzone = document.createElement( 'div' );
   dropzone.id = 'dropzone';
   dropzone.classList.add( 'dropzone', 'js-main-dropzone', 'js-dropzone' );
-  // Add event listeners to the dropzone
-  dropzone.addEventListener( "dragover", dragOver );
-  dropzone.addEventListener( "dragleave", dragLeave );
-  dropzone.addEventListener( "drop", drop );
-
   mainForm.appendChild( dropzone );
   frontmatterContainer.appendChild( mainForm );
 
@@ -51,9 +55,6 @@ export const addMainForm = () => {
     updateButtonsStatus();
   } );
   buttonWrapper.appendChild( clearDropzoneButton );
-
-  // add undo/redo buttons
-  //mainForm.appendChild( redoUndo() );
 
   return mainForm;
 

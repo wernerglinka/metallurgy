@@ -1,5 +1,3 @@
-import { dragOver, dragLeave, drop } from '../drag-drop.js';
-
 const array = ( div ) => {
   // create the array name input
   const label = document.createElement( 'label' );
@@ -49,18 +47,6 @@ const array = ( div ) => {
       </svg>
     `;
 
-  collapseIcon.addEventListener( 'click', ( e ) => {
-    const collapseIcon = e.target.closest( '.collapse-icon' );
-    const objectDropzone = collapseIcon.closest( '.object-name' ).nextSibling;
-    const isCollapsed = objectDropzone.classList.contains( 'is-collapsed' );
-    if ( isCollapsed ) {
-      objectDropzone.classList.remove( 'is-collapsed' );
-      collapseIcon.classList.remove( 'is-collapsed' );
-    } else {
-      objectDropzone.classList.add( 'is-collapsed' );
-      collapseIcon.classList.add( 'is-collapsed' );
-    }
-  } );
   label.appendChild( collapseIcon );
   div.appendChild( label );
 
@@ -68,10 +54,6 @@ const array = ( div ) => {
   const arrayDropzone = document.createElement( 'div' );
   arrayDropzone.classList.add( 'array-dropzone', 'dropzone', 'js-dropzone' );
   arrayDropzone.dataset.wrapper = "is-array";
-  arrayDropzone.addEventListener( "dragover", dragOver );
-  arrayDropzone.addEventListener( "dragleave", dragLeave );
-  arrayDropzone.addEventListener( "drop", drop );
-
   div.appendChild( arrayDropzone );
 
   return div;

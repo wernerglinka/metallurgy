@@ -1,44 +1,53 @@
+/**
+ * @function getElementString
+ * @param {nodeList} element 
+ * @returns a stringified array of objects
+ * @description This function creates a flat array of objects from the form 
+ *     elements in the dropzone and returns a stringified version of the array.
+ */
+const getElementString = ( element ) => {
+  // only select simple form elements
+  const allFormElements = element.querySelectorAll( '.form-element.no-drop:not(.is-object):not(.is-array)' );
+  const result = [];
+  allFormElements.forEach( element => {
+    if ( element.classList.contains( 'is-list' ) ) {
+      const key = element.querySelector( '.label-text' ).innerText;
+      const value = [];
+      const listItems = element.querySelectorAll( 'ul li' );
+      listItems.forEach( listItem => {
+        value.push( listItem.querySelector( 'input' ).value );
+      } );
+      result.push( { [ key ]: value } );
+    } else {
+      const key = element.querySelector( '.label-text' ).innerText;
+      const value = element.querySelector( '.element-value' ).value;
+      result.push( { [ key ]: value } );
+    }
+  } );
+  return JSON.stringify( result );
+};
+
+/**
+ * @function compareDOMElements
+ * @param {*} element1 
+ * @param {*} element2 
+ * @returns true if the elements are the same, false if the elements are 
+ *     different structurally or in value
+ */
 export const compareDOMElements = ( element1, element2 ) => {
   // First, use isEqualNode for a general structural comparison
   if ( !element1.isEqualNode( element2 ) ) {
+    console.log( "Different structure" );
     return false;
   }
 
-  // Additional function to specifically compare input elements
-  function compareInputElements( el1, el2 ) {
-    if ( el1.tagName === 'INPUT' || el1.tagName === 'TEXTAREA' || el1.tagName === 'SELECT' ) {
-      // Handle text inputs, textareas, and select elements
-      if ( el1.tagName === 'TEXTAREA' || ( el1.tagName === 'INPUT' && el1.type === 'text' ) ) {
-        if ( el1.value !== el2.value ) return false;
-      }
-
-      // Handle checkboxes and radio buttons
-      if ( el1.tagName === 'INPUT' && ( el1.type === 'checkbox' || el1.type === 'radio' ) ) {
-        if ( el1.checked !== el2.checked ) return false;
-      }
-
-      // Handle select elements (dropdowns)
-      if ( el1.tagName === 'SELECT' ) {
-        for ( let i = 0; i < el1.options.length; i++ ) {
-          if ( el1.options[ i ].selected !== el2.options[ i ].selected ) return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  // Recursively compare all children
-  if ( element1.childNodes.length !== element2.childNodes.length ) {
+  // If the structure is the same, we need to compare the values of the form elements
+  const element1String = getElementString( element1 );
+  const element2String = getElementString( element2 );
+  // compare the strings
+  if ( element1String !== element2String ) {
+    console.log( "Different values" );
     return false;
-  }
-
-  for ( let i = 0; i < element1.childNodes.length; i++ ) {
-    const child1 = element1.childNodes[ i ];
-    const child2 = element2.childNodes[ i ];
-
-    if ( !compareDOMElements( child1, child2 ) || !compareInputElements( child1, child2 ) ) {
-      return false;
-    }
   }
 
   return true;

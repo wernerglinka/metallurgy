@@ -1,5 +1,3 @@
-import { dragOver, dragLeave, drop } from '../drag-drop.js';
-
 const object = ( div ) => {
   // create the object name input
   const label = document.createElement( 'label' );
@@ -53,19 +51,6 @@ const object = ( div ) => {
       </svg>
     `;
 
-  collapseIcon.addEventListener( 'click', ( e ) => {
-    const collapseIcon = e.target.closest( '.collapse-icon' );
-    const objectDropzone = collapseIcon.closest( '.object-name' ).nextSibling;
-    const isCollapsed = objectDropzone.classList.contains( 'is-collapsed' );
-    if ( isCollapsed ) {
-      objectDropzone.classList.remove( 'is-collapsed' );
-      collapseIcon.classList.remove( 'is-collapsed' );
-    } else {
-      objectDropzone.classList.add( 'is-collapsed' );
-      collapseIcon.classList.add( 'is-collapsed' );
-    }
-
-  } );
   label.appendChild( collapseIcon );
   div.appendChild( label );
 
@@ -74,10 +59,6 @@ const object = ( div ) => {
   const objectDropzone = document.createElement( 'div' );
   objectDropzone.classList.add( 'object-dropzone', 'dropzone', 'js-dropzone' );
   objectDropzone.dataset.wrapper = "is-object";
-  objectDropzone.addEventListener( "dragover", dragOver );
-  objectDropzone.addEventListener( "dragleave", dragLeave );
-  objectDropzone.addEventListener( "drop", drop );
-
   div.appendChild( objectDropzone );
 
   return div;

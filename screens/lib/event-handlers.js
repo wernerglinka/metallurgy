@@ -86,7 +86,11 @@ function moveElement( e ) {
 
 
 // Add drag and drop functionality to the form
-const dragStart = ( e ) => {
+export const dragStart = ( e ) => {
+  // dragstart is delegated from the form element's event listener
+  if ( !e.target.closest( '.form-element' ) ) return;
+
+  // Set the data type and value of the dragged element
   e.dataTransfer.setData( "text/plain", e.target.dataset.component );
   /* 
     Add the drag origin to the dragged element
@@ -111,8 +115,10 @@ const dragStart = ( e ) => {
  * @description This function will handle the dragover event. It will indicate
  *   drop space by inserting a drop-indicator temporarily
  */
-const dragOver = ( e ) => {
+export const dragOver = ( e ) => {
   e.preventDefault();
+  if ( !e.target.closest( '.dropzone' ) ) return;
+
   e.target.classList.add( 'dropzone-highlight' );
   const dropzone = e.target.closest( '.dropzone' );
   const { closest, position } = getInsertionPoint( dropzone, e.clientY );
@@ -132,7 +138,7 @@ const dragOver = ( e ) => {
   }
 };
 
-const dragLeave = ( e ) => {
+export const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
   e.target.classList.remove( 'dropzone-highlight' );
 
@@ -151,7 +157,7 @@ const dragLeave = ( e ) => {
  *  2. Dragging a new element from the sidebar to the drop zone
  *  3. Moving an existing element within or between drop zones
  */
-const drop = async ( e ) => {
+export const drop = async ( e ) => {
   e.preventDefault();
   e.stopPropagation();
 
@@ -199,4 +205,31 @@ const drop = async ( e ) => {
   }
 };
 
-export { dragStart, dragOver, dragLeave, drop };
+export const sectionCollapse = ( e ) => {
+
+  const collapseIcon = e.target.closest( '.collapse-icon' );
+  if ( !collapseIcon ) return;
+
+  const objectDropzone = collapseIcon.closest( '.object-name' ).nextSibling;
+  const isCollapsed = objectDropzone.classList.contains( 'is-collapsed' );
+  if ( isCollapsed ) {
+    objectDropzone.classList.remove( 'is-collapsed' );
+    collapseIcon.classList.remove( 'is-collapsed' );
+  } else {
+    objectDropzone.classList.add( 'is-collapsed' );
+    collapseIcon.classList.add( 'is-collapsed' );
+  }
+};
+
+export const addDeleteButtons = ( e ) => {
+
+  // if the add button was clicked clone the element and add it after the element
+  if ( e.target.classList.contains( 'add-button' ) ) {
+    const clonedElement = e.target.parentElement.parentElement.cloneNode( true );
+    e.target.parentElement.parentElement.after( clonedElement );
+  }
+  // if the delete button was clicked remove element
+  if ( e.target.classList.contains( 'delete-button' ) ) {
+    e.target.parentElement.parentElement.remove();
+  }
+};

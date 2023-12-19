@@ -1,6 +1,4 @@
 import formComponent from './formComponents/index.js';
-import { dragStart, dragOver, dragLeave, drop } from './drag-drop.js';
-
 
 /**
  * @function createComponent
@@ -23,7 +21,9 @@ export const createComponent = ( type, raw ) => {
   // Make element draggable but nothing can be dropped into it
   div.setAttribute( 'draggable', true );
   div.classList.add( 'no-drop' );
-  div.addEventListener( 'dragstart', dragStart );
+  // we add the dragstart event listener to the form element
+  // and then delegate it to this form-element
+  // div.addEventListener( 'dragstart', dragStart );
 
   // Temp element storage so I know what type of element I'm dragging
   window.draggedElement = null;
@@ -66,19 +66,6 @@ export const createComponent = ( type, raw ) => {
   deleteButton.classList.add( 'delete-button' );
   deleteButton.innerHTML = "-";
   buttonWrapper.appendChild( deleteButton );
-
-  document.getElementById( 'dropzone' ).addEventListener( 'click', ( e ) => {
-    e.stopImmediatePropagation();
-    // if the add button was clicked clone the element and add it after the element
-    if ( e.target.classList.contains( 'add-button' ) ) {
-      const clonedElement = e.target.parentElement.parentElement.cloneNode( true );
-      e.target.parentElement.parentElement.after( clonedElement );
-    }
-    // if the delete button was clicked remove element
-    if ( e.target.classList.contains( 'delete-button' ) ) {
-      e.target.parentElement.parentElement.remove();
-    }
-  } );
 
   return div;
 };

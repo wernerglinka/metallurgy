@@ -5,7 +5,7 @@ import { renderMarkdownFile } from "../lib/render-markdown-file.js";
 import { renderJSONFile } from "../lib/render-json-file.js";
 import { updateButtonsStatus } from "../lib/update-buttons-status.js";
 import { transformFormElementsToObject } from "../lib/transform-form-to-object.js";
-import { dragStart, dragOver, dragLeave, drop } from "../lib/drag-drop.js";
+import { dragStart, dragOver, dragLeave, drop } from "../lib/event-handlers.js";
 import { cleanMainForm } from "../lib/clean-main-form.js";
 import { addMainForm } from "../lib/add-main-form.js";
 import { redoUndo } from "../lib/undo-redo.js";
@@ -120,6 +120,7 @@ const renderer = ( () => {
         }
 
         // Now that the content has been loaded, add undo/redo buttons
+        // Note: the buttons are added to the main form, but outside of the main dropzone.
         mainForm.appendChild( redoUndo() );
 
         /**
