@@ -1,6 +1,4 @@
-//import { compareDOMElements } from './compare-dom-elements.js';
-
-// TODO: Needs more testing. Seems to work but I'm not sure it's the best way to do this.
+import { compareDOMElements } from './compare-dom-elements.js';
 
 /**
  * @function redoUndo
@@ -103,49 +101,93 @@ export const redoUndo = () => {
     e.stopPropagation();
 
     const dropzone = document.getElementById( 'dropzone' );
-    const mainForm = document.getElementById( 'main-form' );
 
     const target = e.target;
-    if ( target.closest( '.undo' ) ) { // UNDO
-      if ( undoStack.length > 1 ) {
-        redoStack.push( undoStack.pop() );
-        mainForm.replaceChild( undoStack[ undoStack.length - 1 ], dropzone );
-      }
-    }
+    if ( target.closest( '.undo' ) ) {
+      // UNDO
+      // Push the current state onto the redo stack
+      redoStack.push( undoStack.pop() );
 
-    else if ( target.closest( '.redo' ) ) {  // REDO
+      // Get the last saved state
+      let lastState = undoStack[ undoStack.length - 1 ];
+
+      // Replace the dropzone content with the last saved state
+      dropzone.parentNode.replaceChild( lastState, dropzone );
+
+      // Update stack length display
+      stackLength.innerHTML = undoStack.length - 1;
+
+      // Disable the undo button if there is nothing on the stack
+      if ( undoStack.length === 1 ) {
+        undoButton.disabled = true;
+      }
+
+      // Enable the redo button if there is something on the stack
       if ( redoStack.length > 0 ) {
-        undoStack.push( redoStack.pop() );
-        mainForm.replaceChild( undoStack[ undoStack.length - 1 ], dropzone );
+        redoButton.disabled = false;
       }
     }
 
-    else if ( target.closest( '.snapshot' ) ) {  // SNAPSHOT
+    else if ( target.closest( '.redo' ) ) {
+      // REDO
+      if ( redoStack.length > 0 ) {
+        // Get the last saved state from the redo stack and push it onto the undo stack
+        undoStack.push( redoStack.pop() );
+
+        // Get the last saved state from the undo stack
+        let nextState = undoStack[ undoStack.length - 1 ];
+
+        // Replace the current element with the last saved state
+        dropzone.parentNode.replaceChild( nextState, dropzone );
+      }
+
+      // Update stack length display
+      stackLength.innerHTML = undoStack.length - 1;
+
+      // Disable the redo button if there is nothing on the stack
+      if ( redoStack.length === 0 ) {
+        redoButton.disabled = true;
+      }
+
+      // enable the undo button if there is something on the stack
+      if ( undoStack.length > 1 ) {
+        undoButton.disabled = false;
+      }
+    }
+
+    else if ( target.closest( '.snapshot' ) ) {
       // Clone the current state of the dropzone. We clone so we capture 
       // the event listeners as well as the HTML
-      const thisClone = document.getElementById( 'dropzone' ).cloneNode( true );
-      // Push the clone onto the stack
+      const thisClone = dropzone.cloneNode( true );
+
+      // Compare the clone to the last item on the stack. If they are the same
+      // then don't push the clone onto the stack
+      let lastState = undoStack[ undoStack.length - 1 ];
+
+      if ( compareDOMElements( thisClone, lastState ) ) {
+        snapshotMessage.innerHTML = 'Latest snapshot is up-to-date!';
+        setTimeout( () => {
+          snapshotMessage.innerHTML = '';
+        }, 2000 );
+        return;
+      } else {
+        // Push the clone onto the stack
+        undoStack.push( thisClone );
+      }
+
       undoStack.push( thisClone );
-      // Clear the redo stack
-      redoStack = [];
-    }
 
-    // Update stack length display
-    stackLength.innerHTML = undoStack.length - 1;
+      // Update stack length display
+      stackLength.innerHTML = undoStack.length - 1;
 
-    // enable the undo button if there is something on the stack
-    if ( undoStack.length > 1 ) {
-      undoButton.disabled = false;
-    } else {
-      undoButton.disabled = true;
-    }
-
-    // disable the redo button if there is nothing on the stack
-    if ( redoStack.length === 0 ) {
-      redoButton.disabled = true;
-    } else {
-      redoButton.disabled = false;
+      // enable the undo button if there is something on the stack
+      if ( undoStack.length > 1 ) {
+        undoButton.disabled = false;
+      }
     }
   } );
+
+
+
   return wrapper;
 };

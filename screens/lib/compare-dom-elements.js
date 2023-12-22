@@ -20,7 +20,14 @@ const getElementString = ( element ) => {
       result.push( { [ key ]: value } );
     } else {
       const key = element.querySelector( '.label-text' ).innerText;
-      const value = element.querySelector( '.element-value' ).value;
+      // check for text, textarea, checkbox, and select
+      const inputElement = element.querySelector( '.element-value' );
+      let value;
+      if ( inputElement.type === 'checkbox' ) {
+        value = inputElement.checked;
+      } else if ( inputElement.type === 'text' || inputElement.type === 'textarea' ) {
+        value = inputElement.value;
+      }
       result.push( { [ key ]: value } );
     }
   } );

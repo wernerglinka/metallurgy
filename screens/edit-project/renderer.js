@@ -109,7 +109,7 @@ const renderer = ( () => {
 
         switch ( fileType ) {
           case 'md':
-            renderMarkdownFile( frontmatter, content );
+            await renderMarkdownFile( fileName, frontmatter, content );
             break;
           case 'json':
             renderJSONFile( content );
@@ -167,6 +167,8 @@ const renderer = ( () => {
             path: selectedFilePath.replace( 'file://', '' )
           };
           window.electronAPI.writeObjectToFile( options );
+
+          console.log( "Form was send to file" );
 
         } ); // end form submit listener
       } ); // end file link listener

@@ -1,3 +1,5 @@
+import { getFromLocalStorage } from './local-storage.js';
+
 function isSimpleList( value ) {
   // Check if value is an array
   if ( Array.isArray( value ) ) {
@@ -7,7 +9,7 @@ function isSimpleList( value ) {
   return false;
 }
 
-export function convertToSchemaObject( json ) {
+export async function convertToSchemaObject( fileName, json ) {
   function createField( key, value ) {
     if ( isSimpleList( value ) ) {
       return {
@@ -57,5 +59,28 @@ export function convertToSchemaObject( json ) {
     throw new Error( `Unsupported type: ${ type }` );
   }
 
+  /**
+   * Check if we have an explicitly defined schema or if we need to infer it 
+   * from the json shape.
+   * Incoming file: fileName so we can check if a schema file exists.
+   * Incoming json: json so we can infer the schema from the json shape.
+   */
+
+  // The schema file will have the same file name but with a .json extension.
+  const schemaFileName = fileName.replace( '.md', '.json' );
+  // Get the project path from localStorage
+  const projectPath = getFromLocalStorage( 'projectFolder' );
+  // Create the schema file path
+  const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/${ schemaFileName }`;
+  // check if file exists via the main process
+  const schemaExists = await window.electronAPI.checkFileExists( schemaFilePath );
+
+  if ( schemaExists ) {
+    const explicitSchema = await window.electronAPI.readFile( schemaFilePath );
+    const explicitSchemaObject = JSON.parse( explicitSchema.data );
+    console.log( explicitSchemaObject );
+  }
+
+  // If we don't have an explicit schema, we'll infer it from the json shape
   return { fields: Object.entries( json ).map( ( [ key, value ] ) => createField( key, value ) ) };
 }
