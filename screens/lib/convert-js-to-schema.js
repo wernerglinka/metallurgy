@@ -60,18 +60,16 @@ export async function convertToSchemaObject( fileName, json ) {
   }
 
   /**
-   * Check if we have an explicitly defined schema or if we need to infer it 
+   * Check if we have explicitly defined field schemas or if we need to infer them 
    * from the json shape.
    * Incoming file: fileName so we can check if a schema file exists.
    * Incoming json: json so we can infer the schema from the json shape.
    */
 
-  // The schema file will have the same file name but with a .json extension.
-  const schemaFileName = fileName.replace( '.md', '.json' );
   // Get the project path from localStorage
   const projectPath = getFromLocalStorage( 'projectFolder' );
   // Create the schema file path
-  const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/${ schemaFileName }`;
+  const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/fields.json`;
   // check if file exists via the main process
   const schemaExists = await window.electronAPI.checkFileExists( schemaFilePath );
 
