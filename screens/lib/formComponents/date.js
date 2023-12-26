@@ -1,7 +1,7 @@
 const date = ( div ) => {
   // create the label for label input
   const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Date Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>Date Label<sup>*</sup></span>`;
 
   // create the label input
   const labelInput = document.createElement( 'input' );

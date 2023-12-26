@@ -8,6 +8,7 @@
   --white-transparent: rgba(255, 255, 255, 0.2);
   --input-border: 1px solid rgba(255, 255, 255, 0.3);
   --input-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --element-padding: 0.5rem 2rem;
 }
 
 h1 {
@@ -352,7 +353,7 @@ fieldset {
     height: 2rem;
     width: 2rem;
     border-radius: 50%;
-    color: var(--font-color);
+    color: var(--text-color);
     cursor: pointer;
     margin-left: auto;
 
@@ -379,13 +380,18 @@ fieldset {
   & label {
     flex: 0 0 30%;
 
+    &:first-of-type {
+      & div {
+        display: none;
+      }
+    }
+
     &:last-of-type {
       flex: 1 1 auto;
     }
 
     & span {
-      /*flex: 0 0 6rem;*/
-      display: inline-block;
+      display: none;
       margin-right: 1rem;
 
       &.hint {
@@ -414,6 +420,7 @@ fieldset {
 
     /* label text for markdown file fields */
     & .label-text {
+      display: inline-block;
       font-size: 1.4rem;
       flex: 1 1 1rem;
     }
@@ -437,7 +444,7 @@ fieldset {
       left: 1rem;
       font-size: 0.75rem;
       padding: 0.5rem;
-      color: var(--font-color);
+      color: var(--text-color);
       background-color: var(--error-color);
       margin: 0.25rem 0 0;
     }
@@ -462,7 +469,7 @@ fieldset {
       box-shadow: var(--input-box-shadow);
       backdrop-filter: blur(5px);
       border: var(--input-border);
-      color: var(--font-color);
+      color: var(--text-color);
       padding: var(--element-padding);
 
       &.invalid {
@@ -485,15 +492,6 @@ fieldset {
   &.is-list {
     display: block;
 
-    & label {
-      display: block;
-      margin-bottom: 1rem;
-
-      & span {
-        display: block;
-      }
-    }
-
     & ul {
       padding: 0;
       margin: 0;
@@ -505,7 +503,7 @@ fieldset {
       font-family: "Open Sans", sans-serif;
       border: none;
       background: none;
-      color: var(--font-color);
+      color: var(--text-color);
       padding: var(--element-padding);
 
       & .button-wrapper {
@@ -519,7 +517,7 @@ fieldset {
       border-radius: 0.5rem;
       box-shadow: var(--input-box-shadow);
       backdrop-filter: blur(5px);
-      color: var(--font-color);
+      color: var(--text-color);
       padding: var(--element-padding);
       flex: 0 0 80%;
     }
@@ -537,7 +535,7 @@ fieldset {
     }
   }
 
-  &.is-array, &.is-object {
+  &.is-array, &.is-object, &.is-list {
     display: block;
 
     & label {
@@ -550,16 +548,12 @@ fieldset {
       &.object-name {
         min-height: 3rem;
 
-        & .hint {
+        * {
           display: none;
         }
-      }
 
-      & span {
-        display: block;
-
-        &.hint {
-          display: none;
+        & .label-text {
+          display: inline-block;
         }
       }
 
@@ -642,12 +636,129 @@ fieldset {
   }
 }
 
+.form-element.raw {
+  align-items: flex-end;
+  
+  & label {
+    flex: 0 0 30%;
+
+    &:last-of-type {
+      flex: 1 1 auto;
+    }
+
+    & span {
+      /*flex: 0 0 6rem;*/
+      display: inline-block !important;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* label text for markdown file fields */
+    & .label-text {
+      display: none !important;
+    }
+
+    & div {
+      position: relative;
+      flex: 1 1 auto;
+      display: flex;
+      justify-content: flex-start;
+      margin-right: 2rem;
+
+      & *:not([type="checkbox"][role="switch"]) {
+        width: 100%;
+      }
+    }
+  }
+
+  &.is-list {
+    display: block;
+
+    & label {
+      display: block;
+      margin-bottom: 1rem;
+
+      & span {
+        display: block;
+      }
+    }
+
+    & ul {
+      padding: 0;
+      margin: 0;
+    }
+
+    & li {
+      position: relative;
+      display: flex;
+      font-family: "Open Sans", sans-serif;
+      border: none;
+      background: none;
+      color: var(--text-color);
+      padding: var(--element-padding);
+
+      & .button-wrapper {
+        position: static;
+      }
+    }
+
+    & input {
+      border: none;
+      background: var(--white-transparent);
+      border-radius: 0.5rem;
+      box-shadow: var(--input-box-shadow);
+      backdrop-filter: blur(5px);
+      color: var(--text-color);
+      padding: var(--element-padding);
+      flex: 0 0 80%;
+    }
+
+    & .button-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex: 0 0 5rem;
+      height: 1.6rem;
+
+      & .button {
+        position: static;
+      }
+    }
+  }
+
+  &.is-array, &.is-object, &.is-list {
+    display: block;
+
+    & label {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      
+
+      &.object-name {
+        min-height: 3rem;
+        
+        & .hint {
+          display: none !important;
+        }
+
+        & input {
+          display: inline-block;
+          max-width: 33%;
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
 .dropzone-highlight {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
 ::placeholder {
-  color: var(--font-color);
+  color: var(--text-color);
   opacity: 0.5;
   font-style: italic;
 }
@@ -668,7 +779,7 @@ fieldset {
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
-  color: var(--font-color);
+  color: var(--text-color);
   font-family: "Open Sans", sans-serif;
   justify-content: center;
   display: none;
@@ -704,7 +815,7 @@ fieldset {
       background-image: var(--editor-background);
 
       & button {
-        color: var(--font-color);
+        color: var(--text-color);
         transition: all 0.5s ease-in-out;
 
         &:hover {
@@ -741,17 +852,21 @@ fieldset {
 /**
  * A nicer looking Select Element
  */
-.select-wrapper {
+label > div:has(select) {
   position: relative;
   color: #fff;
 
   &:after {
     position: absolute;
-    top: var(--element-padding);
-    right: var(--element-padding);
-    content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="m20 9l-8 8l-8-8l1.414-1.414L12 14.172l6.586-6.586z"/></svg> ');
+    top: 0.5rem;
+    right: 2rem;
+    z-index: 1;
+    content: "";
     width: 1rem;
     height: 1rem;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    transform: rotate(45deg);
   }
 }
 
@@ -761,9 +876,8 @@ select {
   background-color: transparent;
   border: none;
   border-bottom: 1px solid var(--border-color);
-  color: var(--font-color);
+  color: black;
   cursor: pointer;
-  width: 100%;
   padding: var(--element-padding);
   font-family: "Open Sans", sans-serif;
 }
@@ -785,7 +899,7 @@ input:where([type="checkbox"][role="switch"]) {
   border: 1px solid;
   border-radius: 0.75em;
   vertical-align: text-bottom;
-  margin: 0 auto 0 2rem;
+  margin: 0.9rem auto 0.9rem 2rem;
   box-shadow: var(--input-box-shadow);
 }
 
@@ -829,7 +943,7 @@ input:where([type="checkbox"][role="switch"]):disabled {
     width: 6.75rem;
     height: 6.75rem;
     fill: none;
-    stroke: var(--font-color);
+    stroke: var(--text-color);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;

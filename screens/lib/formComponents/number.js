@@ -1,7 +1,7 @@
 const number = ( div ) => {
   // create the label for label input
   const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Number Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>Number Label<sup>*</sup></span>`;
 
   // create the label input
   const labelInput = document.createElement( 'input' );

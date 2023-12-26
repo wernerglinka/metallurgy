@@ -2,7 +2,7 @@ const object = ( div ) => {
   // create the object name input
   const label = document.createElement( 'label' );
   label.classList.add( 'object-name' );
-  label.innerHTML = `<span>Object Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>Object label<sup>*</sup></span>`;
   const hint = document.createElement( 'span' );
   hint.classList.add( 'hint' );
   hint.innerHTML = `Sections Object`;

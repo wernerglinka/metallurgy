@@ -1,7 +1,7 @@
 const checkbox = ( div ) => {
   // create the label for label input
   const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Checkbox Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>Checkbox Label<sup>*</sup></span>`;
 
   // create the label input
   const labelInput = document.createElement( 'input' );

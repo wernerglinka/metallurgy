@@ -2,7 +2,7 @@ const simplelist = ( div ) => {
   // create the array name input
   const label = document.createElement( 'label' );
   label.classList.add( 'object-name' );
-  label.innerHTML = `<span>List Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>List Label<sup>*</sup></span>`;
   const nameInput = document.createElement( 'input' );
   nameInput.setAttribute( 'type', "text" );
   nameInput.placeholder = "Name Placeholder";

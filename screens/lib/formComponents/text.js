@@ -1,44 +1,29 @@
 const text = ( div ) => {
-  // create the label for label input
-  const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Text Key<sup>*</sup></span>`;
+  const tempContainer = document.createElement( 'div' );
+  tempContainer.innerHTML = `
+    <label class="label-wrapper">
+      <div class="raw-mode">
+        <span>Text Label<sup>*</sup></span>
+        <div>
+          <input type="text" class="element-label" placeholder="Label Placeholder">
+        </div>
+        <div class="edit-mode">
+          <span class="label-text"></span>
+        </div>
+      </div>
+    </label>
+    <label class="content-wrapper">
+      <span class="hint">Text for Text element</span>
+      <div>
+        <input type="text" class="element-value" placeholder="Text Placeholder">
+      </div>
+    </label>
+  `;
 
-  // create the label input
-  const labelInput = document.createElement( 'input' );
-  labelInput.setAttribute( 'type', "text" );
-  labelInput.classList.add( 'element-label' );
-  labelInput.placeholder = "Label Placeholder";
-
-  // create wrapper for input for styling
-  const labelInputWrapper = document.createElement( 'div' );
-  labelInputWrapper.appendChild( labelInput );
-
-  // add the input to the label element
-  label.appendChild( labelInputWrapper );
-
-  // add the label to the div
-  div.appendChild( label );
-
-  // create the label for text input
-  const labelText = document.createElement( 'label' );
-  labelText.innerHTML = `<span class="hint">Text for Text element</span>`;
-
-  // create the input
-  const textInput = document.createElement( 'input' );
-  textInput.setAttribute( 'type', "text" );
-  // textInput.dataset.type = "text";
-  textInput.classList.add( 'element-value' );
-  textInput.placeholder = "Text Placeholder";
-
-  // create wrapper for input for styling
-  const inputWrapper = document.createElement( 'div' );
-  inputWrapper.appendChild( textInput );
-
-  // add the input to the label element
-  labelText.appendChild( inputWrapper );
-
-  // add the label to the div
-  div.appendChild( labelText );
+  // Append children of tempContainer to the div
+  while ( tempContainer.firstChild ) {
+    div.appendChild( tempContainer.firstChild );
+  }
 
   return div;
 

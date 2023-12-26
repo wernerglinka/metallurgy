@@ -109,7 +109,7 @@ const renderer = ( () => {
 
         switch ( fileType ) {
           case 'md':
-            await renderMarkdownFile( fileName, frontmatter, content );
+            await renderMarkdownFile( frontmatter, content );
             break;
           case 'json':
             renderJSONFile( content );

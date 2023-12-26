@@ -1,0 +1,16 @@
+<mxfile host="Electron" modified="2023-12-25T18:20:05.739Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.11 Chrome/114.0.5735.289 Electron/25.9.8 Safari/537.36" etag="eLt9CjnKYqVoQsmqg3LR" version="22.1.11" type="device">
+  <diagram name="Page-1" id="PaMad36wKIYImzMoD9JR">
+    <mxGraphModel dx="1114" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="4681" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="UuFUXGmgS0lwumH12fGc-1" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;create-element.js&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="30" y="13" width="210" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="UuFUXGmgS0lwumH12fGc-2" value="Inferrred element" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="120" width="240" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

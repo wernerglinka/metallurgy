@@ -1,0 +1,49 @@
+<mxfile host="Electron" modified="2023-12-25T18:09:18.222Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.11 Chrome/114.0.5735.289 Electron/25.9.8 Safari/537.36" etag="LDYBddBLYQha_zeolbb-" version="22.1.11" type="device">
+  <diagram name="Page-1" id="KxtlYemhHAaoghEBgscj">
+    <mxGraphModel dx="1114" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="4681" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-1" value="&lt;font style=&quot;font-size: 18px;&quot; face=&quot;Courier New&quot;&gt;&lt;b&gt;render-markdown-file.js&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="10" y="15" width="270" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="w31CdjPIzbpYg5bP8aZ8-3" target="w31CdjPIzbpYg5bP8aZ8-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-3" value="Render Markdown File" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="81" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="w31CdjPIzbpYg5bP8aZ8-10" target="w31CdjPIzbpYg5bP8aZ8-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-5" value="&lt;b&gt;convertToSchemaObject&lt;/b&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="161" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-6" value="Convert incoming Frontmatter to an object that&lt;br&gt;represents the frontmatter. This object will be used&lt;br&gt;to render DOM elements.&lt;br&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="660" y="171" width="290" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="w31CdjPIzbpYg5bP8aZ8-8" target="w31CdjPIzbpYg5bP8aZ8-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-8" value="Update DOM Elements" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="301" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="w31CdjPIzbpYg5bP8aZ8-5" target="w31CdjPIzbpYg5bP8aZ8-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="231" as="sourcePoint" />
+            <mxPoint x="440" y="281" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-10" value="DOM Elements" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="390" y="251" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-12" value="Loop over all object properties and update with values.&lt;br&gt;If the object properties are explicitly defined change&lt;br&gt;value and structure. For example a text field may be&lt;br&gt;changed into a select field with a defined number of options." style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="660" y="297" width="340" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="w31CdjPIzbpYg5bP8aZ8-15" value="Add to DOM" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="421" width="240" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

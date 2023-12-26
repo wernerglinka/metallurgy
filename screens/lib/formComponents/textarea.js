@@ -1,7 +1,7 @@
 const textarea = ( div ) => {
   // create the label for label input
   const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Textarea Key<sup>*</sup></span>`;
+  label.innerHTML = `<span>Textarea Label<sup>*</sup></span>`;
 
   // create the label input
   const labelInput = document.createElement( 'input' );
