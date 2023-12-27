@@ -548,14 +548,6 @@ fieldset {
 
       &.object-name {
         min-height: 3rem;
-
-        * {
-          display: none;
-        }
-
-        & .label-text {
-          display: inline-block;
-        }
       }
 
       & .collapse-icon {
@@ -601,12 +593,11 @@ fieldset {
     /* Special label for the object in an array */
     /* We need to hide the regular input as it results from a valid JSON to schema conversion */
     & .array-dropzone > .form-element > .object-name {
-      & span:first-child,
-      & input {
+      & span:first-child, & input {
         display: none;
       }
       & .hint {
-        display: inline-block;
+        display: inline-block !important;
         font-size: 1.4rem;
         font-style: italic;
         opacity: 0.3;

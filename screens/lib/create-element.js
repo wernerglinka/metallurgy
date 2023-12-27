@@ -210,10 +210,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     element.querySelector( '.element-value' ).value = field.value;
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
-    const labelText = document.createElement( 'span' );
-    labelText.innerHTML = field.label;
-    labelText.classList.add( 'label-text' );
-    element.querySelector( 'label:first-of-type' ).prepend( labelText );
   } // end text, textarea, image, url
 
 
@@ -236,10 +232,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     element.classList.add( 'is-list' );
     // Update the label
     element.querySelector( '.object-name input' ).value = field.label;
-    const labelText = document.createElement( 'span' );
-    labelText.innerHTML = field.label;
-    labelText.classList.add( 'label-text' );
-    element.querySelector( 'label:first-of-type' ).prepend( labelText );
 
     /* 
       Update the list items
@@ -262,11 +254,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   if ( field.type === "object" || field.type === "array" ) {
     // Update the label
     element.querySelector( '.object-name input' ).value = field.label;
-    const labelText = document.createElement( 'span' );
-    labelText.innerHTML = field.label;
-    labelText.classList.add( 'label-text' );
-    element.querySelector( '.object-name' ).prepend( labelText );
-
 
     if ( field.value.length > 0 ) {
       // Get a reference to the object dropzone
