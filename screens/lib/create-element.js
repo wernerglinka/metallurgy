@@ -10,8 +10,8 @@ export const createComponent = ( type, labelsExist ) => {
   // create a div to hold the form element
   let div = document.createElement( 'div' );
 
-  if ( !labelsExist ) {
-    div.classList.add( 'raw' );
+  if ( labelsExist ) {
+    div.classList.add( 'label-exists' );
   }
 
   let elementModifier = null;
@@ -52,7 +52,7 @@ export const createComponent = ( type, labelsExist ) => {
   div.appendChild( dragHandle );
 
   // Call the form component function to create the element
-  div = formComponent[ type ]( div );
+  div = formComponent[ type ]( div, labelsExist );
 
 
   // Add an Add and Delete button to all fields. We'll hide them later
@@ -167,9 +167,8 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   // A select field came in from the frontmatter as a text field.
   // The field will be converted to a select field according to the explicit schema
   if ( field.type === "select" ) {
-    const labelText = element.querySelector( '.label-text' );
-    labelText.textContent = field.label;
-
+    // Update the label
+    element.querySelector( '.element-label' ).value = field.label;
 
     // Replace the original element value input
     const originalValueElement = element.querySelector( '.element-value' );
@@ -203,10 +202,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     element.querySelector( '.element-value' ).checked = field.value;
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
-    const labelText = document.createElement( 'span' );
-    labelText.innerHTML = field.label;
-    labelText.classList.add( 'label-text' );
-    element.querySelector( 'label:first-of-type' ).prepend( labelText );
   } // end checkbox
 
 

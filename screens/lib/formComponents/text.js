@@ -1,15 +1,10 @@
-const text = ( div ) => {
+const text = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );
   tempContainer.innerHTML = `
     <label class="label-wrapper">
-      <div class="raw-mode">
-        <span>Text Label<sup>*</sup></span>
-        <div>
-          <input type="text" class="element-label" placeholder="Label Placeholder">
-        </div>
-        <div class="edit-mode">
-          <span class="label-text"></span>
-        </div>
+      <span>Text Label<sup>*</sup></span>
+      <div>
+        <input type="text" class="element-label" placeholder="Label Placeholder" ${ labelExists ? "readonly" : "" }>
       </div>
     </label>
     <label class="content-wrapper">

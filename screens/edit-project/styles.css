@@ -380,24 +380,16 @@ fieldset {
   & label {
     flex: 0 0 30%;
 
-    &:first-of-type {
-      & div {
-        display: none;
-      }
-    }
-
     &:last-of-type {
       flex: 1 1 auto;
     }
 
     & span {
-      display: none;
+      display: inline-block !important;
       margin-right: 1rem;
-
-      &.hint {
-        display: none;
-      }
+      margin-bottom: 0.5rem;
     }
+
     & .help {
       position: relative;
       display: inline-flex !important;
@@ -416,13 +408,6 @@ fieldset {
           opacity: 1;
         }
       }
-    }
-
-    /* label text for markdown file fields */
-    & .label-text {
-      display: inline-block;
-      font-size: 1.4rem;
-      flex: 1 1 1rem;
     }
 
     & .help-text {
@@ -475,6 +460,13 @@ fieldset {
       &.invalid {
         border-bottom-color: var(--error-color);
       }
+
+      &[readonly] {
+        background: none !important;
+        box-shadow: none;
+        backdrop-filter: none;
+        border: none;
+      }
     }
 
     & textarea {
@@ -486,6 +478,15 @@ fieldset {
 
     & [type="date"]::webkit-calendar-picker-indicator {
       color: #fff;
+    }
+  }
+
+  &.label-exists {
+    & .label-wrapper span:first-child {
+      display: none !important;
+    }
+    & .hint {
+      display: none !important;
     }
   }
 
@@ -636,6 +637,7 @@ fieldset {
   }
 }
 
+/*
 .form-element.raw {
   align-items: flex-end;
   
@@ -647,15 +649,9 @@ fieldset {
     }
 
     & span {
-      /*flex: 0 0 6rem;*/
       display: inline-block !important;
       margin-right: 1rem;
       margin-bottom: 0.5rem;
-    }
-    
-    /* label text for markdown file fields */
-    & .label-text {
-      display: none !important;
     }
 
     & div {
@@ -752,6 +748,7 @@ fieldset {
     }
   }
 }
+*/
 
 .dropzone-highlight {
   background-color: rgba(255, 255, 255, 0.1);
