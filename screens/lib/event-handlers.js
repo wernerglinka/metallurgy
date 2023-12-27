@@ -206,10 +206,10 @@ export const drop = async ( e ) => {
 };
 
 export const sectionCollapse = ( e ) => {
-
   const collapseIcon = e.target.closest( '.collapse-icon' );
   if ( !collapseIcon ) return;
 
+  e.stopPropagation();
   const objectDropzone = collapseIcon.closest( '.object-name' ).nextSibling;
   const isCollapsed = objectDropzone.classList.contains( 'is-collapsed' );
   if ( isCollapsed ) {
@@ -225,11 +225,31 @@ export const addDeleteButtons = ( e ) => {
 
   // if the add button was clicked clone the element and add it after the element
   if ( e.target.classList.contains( 'add-button' ) ) {
+    e.stopPropagation();
     const clonedElement = e.target.parentElement.parentElement.cloneNode( true );
     e.target.parentElement.parentElement.after( clonedElement );
   }
   // if the delete button was clicked remove element
   if ( e.target.classList.contains( 'delete-button' ) ) {
+    e.stopPropagation();
     e.target.parentElement.parentElement.remove();
   }
+};
+
+export const showEditor = ( e ) => {
+  // if a click occured inside a textarea, show the editor
+  const element = e.target.closest( 'textarea.element-value' );
+  if ( !element ) return;
+
+  e.stopPropagation();
+  // show the editor when the textarea is in focus
+  const editorOverlay = document.getElementById( 'editorOverlay' );
+  editorOverlay.classList.add( 'show' );
+
+  window.textareaInput = e.target;
+
+  console.log( window.mdeditor.value() );
+  // add value from the textarea to the editor
+  window.mdeditor.value( e.target.value );
+
 };

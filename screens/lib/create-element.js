@@ -261,19 +261,19 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
       originalValueParent.appendChild( tempContainer.firstChild );
     }
 
-
-    // show the editor when the textarea is in focus
-    element.addEventListener( 'click', ( e ) => {
-      const editorOverlay = document.getElementById( 'editorOverlay' );
-      editorOverlay.classList.add( 'show' );
-
-      window.textareaInput = e.target;
-
-      console.log( window.mdeditor.value() );
-      // add value from the textarea to the editor
-      window.mdeditor.value( e.target.value );
-    } );
-
+    /*
+        // show the editor when the textarea is in focus
+        element.addEventListener( 'click', ( e ) => {
+          const editorOverlay = document.getElementById( 'editorOverlay' );
+          editorOverlay.classList.add( 'show' );
+    
+          window.textareaInput = e.target;
+    
+          console.log( window.mdeditor.value() );
+          // add value from the textarea to the editor
+          window.mdeditor.value( e.target.value );
+        } );
+    */
 
     /**
      *  Create a textarea with editor

@@ -1,5 +1,5 @@
 import { updateButtonsStatus } from './update-buttons-status.js';
-import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons } from './event-handlers.js';
+import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons, showEditor } from './event-handlers.js';
 
 /**
  * @function mainForm
@@ -22,6 +22,7 @@ export const addMainForm = () => {
   mainForm.addEventListener( "drop", drop );
   mainForm.addEventListener( "click", sectionCollapse );
   mainForm.addEventListener( "click", addDeleteButtons );
+  mainForm.addEventListener( "click", showEditor );
 
   // Add the dropzone
   const dropzone = document.createElement( 'div' );
