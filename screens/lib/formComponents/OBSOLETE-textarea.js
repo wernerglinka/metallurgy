@@ -1,36 +1,29 @@
-const textarea = ( div ) => {
-  // create the label for label input
-  const label = document.createElement( 'label' );
-  label.innerHTML = `<span>Textarea Label<sup>*</sup></span>`;
+const textarea = ( div, labelExists ) => {
+  console.log( "in the textarea component" );
+  const tempContainer = document.createElement( 'div' );
+  tempContainer.innerHTML = `
+    <label class="label-wrapper">
+      <span>Textarea Label<sup>*</sup></span>
+      <div>
+        <input type="text" class="element-label" placeholder="Label Placeholder" ${ labelExists ? "readonly" : "" }>
+      </div>
+    </label>
+    <label class="content-wrapper">
+      <span class="hint">Text for Textarea</span>
+      <div>
+        <textarea class="element-value is-editor" placeholder="Click to open editor"></textarea>
+      </div>
+    </label>
+  `;
 
-  // create the label input
-  const labelInput = document.createElement( 'input' );
-  labelInput.setAttribute( 'type', "text" );
-  labelInput.classList.add( 'element-label' );
-  labelInput.placeholder = "Label Placeholder";
+  // Append children of tempContainer to the div
+  while ( tempContainer.firstChild ) {
+    div.appendChild( tempContainer.firstChild );
+  }
 
-  // create wrapper for input for styling
-  const labelInputWrapper = document.createElement( 'div' );
-  labelInputWrapper.appendChild( labelInput );
-
-  // add the input to the label element
-  label.appendChild( labelInputWrapper );
-
-  // add the label to the div
-  div.appendChild( label );
-
-  // create the label for textarea
-  const labelText = document.createElement( 'label' );
-  labelText.innerHTML = `<span class="hint">Text content</span>`;
-
-  // create the textarea
-  const textareaInput = document.createElement( 'textarea' );
-  textareaInput.classList.add( 'element-value', 'is-editor' );
-  //textareaInput.dataset.type = "textarea";
-  textareaInput.placeholder = "Click to open editor";
 
   // show the editor when the textarea is in focus
-  textareaInput.addEventListener( 'click', ( e ) => {
+  div.addEventListener( 'click', ( e ) => {
     const editorOverlay = document.getElementById( 'editorOverlay' );
     editorOverlay.classList.add( 'show' );
 
@@ -40,17 +33,6 @@ const textarea = ( div ) => {
     // add value from the textarea to the editor
     window.mdeditor.value( e.target.value );
   } );
-
-
-  // create wrapper for input for styling
-  const inputWrapper = document.createElement( 'div' );
-  inputWrapper.appendChild( textareaInput );
-
-  // add the input to the label element
-  labelText.appendChild( inputWrapper );
-
-  // add the label to the div
-  div.appendChild( labelText );
 
 
   /**

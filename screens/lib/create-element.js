@@ -78,18 +78,18 @@ export const createComponent = ( type, labelsExist ) => {
 };
 
 /**
- * @function getUpdatedElement(prop)
- * @param {object} prop 
+ * @function getUpdatedElement()
+ * @param {object} mdField 
  * @returns updatedElement
  * @description This function will first create a new element and then updates
- *   element based on prop values
+ *   element based on the original mdField values
  */
-export const getUpdatedElement = ( prop, explicitSchemaArray = [], labelsExist ) => {
+export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExist ) => {
   // Build the new element as inferred from the json shape...
-  const newElement = createComponent( prop.type, labelsExist );
-  // ...and update it with the field data and if the field is explicitly defined
-  // add structure of the element, for example text to select or text area.
-  const updatedElement = updateElement( newElement, prop, explicitSchemaArray, labelsExist );
+  const newElement = createComponent( mdField.type, labelsExist );
+  // ...and update it with the field data and if the field is 'explicitly defined
+  // add structure of the element, for example text to 'select' or 'text area'.
+  const updatedElement = updateElement( newElement, mdField, explicitSchemaArray, labelsExist );
 
   /*
     Add an eventlistener to the label input to enable the submit button when the 
@@ -138,14 +138,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     explicitFieldObject = explicitSchemaArray.find( schema => schema.name === field.label );
     // check if the implied and explicit field types are the same
     if ( explicitFieldObject.type !== field.type ) {
-      // Text/Textarea is a special case, all attributes etc are the same, except the tag
-      if ( explicitFieldObject.type === "textarea" && field.type === "text" ) {
-        element.classList.add( 'wasText' );
-      } else {
-        // If types are not the same, just update the field type
-        // We'll make changes below
-        field.type = explicitFieldObject.type;
-      }
+      field.type = explicitFieldObject.type;
     }
     // if the field value is an empty string but the explicit field object has a default value,
     // update the field value
@@ -164,8 +157,11 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   }
 
 
-  // A select field came in from the frontmatter as a text field.
-  // The field will be converted to a select field according to the explicit schema
+  /*
+   * SELECT field
+   * The markdown file presents this as a text field. We'll delete the text field
+   * and replace it with a select element.
+   */
   if ( field.type === "select" ) {
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
@@ -196,7 +192,11 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     originalValueParent.appendChild( selectElement );
   }
 
-
+  /*
+   * CHECKBOX field
+   * The markdown file presents this properly as a checkbox, but we need to
+   * update the label and value.
+   */
   if ( field.type === "checkbox" ) {
     // Update the checkbox state
     element.querySelector( '.element-value' ).checked = field.value;
@@ -204,13 +204,135 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     element.querySelector( '.element-label' ).value = field.label;
   } // end checkbox
 
+  /*
+   * DATE field
+   * The markdown file presents this as a text field. We'll delete the text field
+   * and replace it with a date input.
+   */
+  if ( field.type === "date" ) {
+    // Update the label
+    element.querySelector( '.element-label' ).value = field.label;
 
-  if ( field.type === "text" || field.type === "textarea" || field.type === "image" || field.type === "url" ) {
+    // Replace the original element value input
+    const originalValueElement = element.querySelector( '.element-value' );
+    const originalValueParent = originalValueElement.parentNode;
+    originalValueElement.remove();
+
+    // Build the date element
+    const tempContainer = document.createElement( 'div' );
+    tempContainer.innerHTML = `
+      <input type="date" class="element-value">
+    `;
+    // Append children of tempContainer to the div
+    while ( tempContainer.firstChild ) {
+      originalValueParent.appendChild( tempContainer.firstChild );
+    }
+  } // end date
+
+
+  if ( field.type === "text" || field.type === "image" || field.type === "url" ) {
     // Update the text value
     element.querySelector( '.element-value' ).value = field.value;
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
   } // end text, textarea, image, url
+
+  /*
+   * TEXTAREA field
+   * The markdown file presents this as a text field. We'll delete the text field
+   * and replace it with a textarea.
+   */
+  if ( field.type === "textarea" ) {
+    // Update the label
+    element.querySelector( '.element-label' ).value = field.label;
+
+    // Replace the original element value input
+    const originalValueElement = element.querySelector( '.element-value' );
+    const originalValueParent = originalValueElement.parentNode;
+    originalValueElement.remove();
+
+    // Build the date element
+    const tempContainer = document.createElement( 'div' );
+    tempContainer.innerHTML = `
+      <textarea class="element-value is-editor" placeholder="Click to open editor">${ field.value }</textarea>
+    `;
+    // Append children of tempContainer to the div
+    while ( tempContainer.firstChild ) {
+      originalValueParent.appendChild( tempContainer.firstChild );
+    }
+
+
+    // show the editor when the textarea is in focus
+    element.addEventListener( 'click', ( e ) => {
+      const editorOverlay = document.getElementById( 'editorOverlay' );
+      editorOverlay.classList.add( 'show' );
+
+      window.textareaInput = e.target;
+
+      console.log( window.mdeditor.value() );
+      // add value from the textarea to the editor
+      window.mdeditor.value( e.target.value );
+    } );
+
+
+    /**
+     *  Create a textarea with editor
+     */
+    // check if #editorWrapper already exists
+    const editorWrapper = document.getElementById( 'editorWrapper' );
+    if ( !editorWrapper ) {
+      // Add an overlay
+      const editorOverlay = document.createElement( 'div' );
+      editorOverlay.id = "editorOverlay";
+      // Add the editor textarea
+      const easyMDEditor = document.createElement( 'textarea' );
+      easyMDEditor.id = "editorWrapper";
+      // add the editor wrapper to the DOM
+      editorOverlay.appendChild( easyMDEditor );
+      document.body.appendChild( editorOverlay );
+      // add the editor wrapper to the DOM
+      document.body.appendChild( editorOverlay );
+
+      // add the easyMDEditor
+      window.mdeditor = new EasyMDE( { element: easyMDEditor, autoDownloadFontAwesome: true } );
+
+      // add a button to the easyMDEitor to disable the inline markdown styles
+      const disableMarkdownStyles = document.createElement( 'button' );
+      disableMarkdownStyles.id = "disableMarkdownStyles";
+      disableMarkdownStyles.innerHTML = "Inline Styles";
+      // add the button to the toolbar
+      const toolbar = document.querySelector( '.editor-toolbar' );
+      toolbar.appendChild( disableMarkdownStyles );
+
+      // add eventlistener to the disableMarkdownStyles button
+      disableMarkdownStyles.addEventListener( 'click', ( e ) => {
+        e.target.classList.toggle( 'disabled' );
+        const codemirrorWrapper = document.querySelector( '.CodeMirror' );
+        codemirrorWrapper.classList.toggle( 'disable-markdown-styles' );
+      } );
+
+      // add a close button
+      const closeButton = document.createElement( 'div' );
+      closeButton.id = "closeEditor";
+      closeButton.innerHTML = `
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#ffffff" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"> 
+            <circle cx="11" cy="11" r="10"></circle>
+            <line x1="14" y1="8" x2="8" y2="14"></line>
+            <line x1="8" y1="8" x2="14" y2="14"></line>
+          </g>
+        </svg>
+      `;
+      editorOverlay.appendChild( closeButton );
+
+      // add eventlistener to the close button
+      closeButton.addEventListener( 'click', () => {
+        // first move the editor value to the textarea
+        window.textareaInput.value = window.mdeditor.value();
+        editorOverlay.classList.remove( 'show' );
+      } );
+    }
+  } // end textarea
 
 
   if ( field.type === "textarea" && element.classList.contains( 'wasText' ) ) {
