@@ -84,7 +84,6 @@ function moveElement( e ) {
   window.draggedElement = null; // Clear the reference
 };
 
-
 // Add drag and drop functionality to the form
 export const dragStart = ( e ) => {
   // dragstart is delegated from the form element's event listener

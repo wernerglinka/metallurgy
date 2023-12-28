@@ -1,16 +1,16 @@
-const date = ( div, labelExists ) => {
+const number = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );
   tempContainer.innerHTML = `
     <label class="label-wrapper">
-      <span>Date Label<sup>*</sup></span>
+      <span>Number Label<sup>*</sup></span>
       <div>
         <input type="text" class="element-label" placeholder="Label Placeholder" ${ labelExists ? "readonly" : "" }>
       </div>
     </label>
     <label class="content-wrapper">
-      <span class="hint">date for date element</span>
+      <span class="hint">Number for Number element</span>
       <div>
-        <input type="date" value="${ new Date().toISOString() }" class="element-value" placeholder="Date Placeholder">
+        <input type="number" class="element-value" placeholder="Number Placeholder">
       </div>
     </label>
   `;
@@ -19,8 +19,9 @@ const date = ( div, labelExists ) => {
   while ( tempContainer.firstChild ) {
     div.appendChild( tempContainer.firstChild );
   }
+
   return div;
 
 };
 
-export default date;
+export default number;

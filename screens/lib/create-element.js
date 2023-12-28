@@ -51,6 +51,8 @@ export const createComponent = ( type, labelsExist ) => {
   `;
   div.appendChild( dragHandle );
 
+  console.log( type );
+
   // Call the form component function to create the element
   div = formComponent[ type ]( div, labelsExist );
 
@@ -156,7 +158,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     field.placeholder = explicitFieldObject.placeholder;
   }
 
-
   /*
    * SELECT field
    * The markdown file presents this as a text field. We'll delete the text field
@@ -192,6 +193,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     originalValueParent.appendChild( selectElement );
   }
 
+
   /*
    * CHECKBOX field
    * The markdown file presents this properly as a checkbox, but we need to
@@ -203,6 +205,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
   } // end checkbox
+
 
   /*
    * DATE field
@@ -230,12 +233,44 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   } // end date
 
 
-  if ( field.type === "text" || field.type === "image" || field.type === "url" ) {
-    // Update the text value
-    element.querySelector( '.element-value' ).value = field.value;
+  /**
+   * IMAGE and URL fields
+   * The markdown file presents this as a text field. We'll delete the text field
+   * and replace it with a url input.
+   */
+  if ( field.type === "image" || field.type === "url" ) {
     // Update the label
     element.querySelector( '.element-label' ).value = field.label;
-  } // end text, textarea, image, url
+
+    // Replace the original element value input
+    const originalValueElement = element.querySelector( '.element-value' );
+    const originalValueParent = originalValueElement.parentNode;
+    originalValueElement.remove();
+
+    // Build the date element
+    const tempContainer = document.createElement( 'div' );
+    tempContainer.innerHTML = `
+      <input type="url" class="element-value" placeholder="${ field.placeholder }">
+    `;
+    // Append children of tempContainer to the div
+    while ( tempContainer.firstChild ) {
+      originalValueParent.appendChild( tempContainer.firstChild );
+    }
+  } // end image, url
+
+
+  /**
+   * TEXT field
+   */
+  if ( field.type === "text" ) {
+    // Update the label
+    element.querySelector( '.element-label' ).value = field.label;
+    // Update the text value
+    const textInputValue = element.querySelector( '.element-value' );
+    textInputValue.value = field.value;
+    textInputValue.placeholder = field.placeholder;
+  } // end text
+
 
   /*
    * TEXTAREA field
@@ -260,20 +295,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     while ( tempContainer.firstChild ) {
       originalValueParent.appendChild( tempContainer.firstChild );
     }
-
-    /*
-        // show the editor when the textarea is in focus
-        element.addEventListener( 'click', ( e ) => {
-          const editorOverlay = document.getElementById( 'editorOverlay' );
-          editorOverlay.classList.add( 'show' );
-    
-          window.textareaInput = e.target;
-    
-          console.log( window.mdeditor.value() );
-          // add value from the textarea to the editor
-          window.mdeditor.value( e.target.value );
-        } );
-    */
 
     /**
      *  Create a textarea with editor
@@ -335,21 +356,9 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   } // end textarea
 
 
-  if ( field.type === "textarea" && element.classList.contains( 'wasText' ) ) {
-    // replace the text input with a textarea
-    const originalValueElement = element.querySelector( '.element-value' );
-    const originalValueParent = originalValueElement.parentNode;
-    originalValueElement.remove();
-
-    const textareaElement = document.createElement( 'textarea' );
-    textareaElement.classList.add( 'element-value' );
-    textareaElement.value = field.value;
-    textareaElement.placeholder = field.placeholder;
-
-    originalValueParent.appendChild( textareaElement );
-  } // end new textarea
-
-
+  /**
+   * SIMPLE LIST field
+   */
   if ( field.type === "listField" ) {
     element.classList.add( 'is-list' );
     // Update the label
@@ -371,6 +380,22 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
       listWrapper.appendChild( clonedListItem );
     } );
   } // end simple list
+
+
+  /**
+   * NUMBER field
+   * The markdown file presents this as a text field. We'll delete the text field
+   * and replace it with a number input.
+   */
+  if ( field.type === "number" ) {
+    const numberFieldValue = element.querySelector( '.element-value' );
+    // Update the label
+    element.querySelector( '.element-label' ).value = field.label;
+    // Update the number value
+    numberFieldValue.value = field.value;
+    numberFieldValue.placeholder = field.placeholder;
+
+  } // end number
 
 
   if ( field.type === "object" || field.type === "array" ) {
