@@ -331,16 +331,17 @@ fieldset {
 
   .button-wrapper {
     position: absolute;
-    top: calc(50% - 0.75rem);
-    right: 0.5rem;
+    right: 1rem;
+    top: calc(50% - 0.5rem);
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
     align-items: center;
     flex: 0 0 6rem;
+    padding-left: 1rem;
     height: 1.6rem;
     opacity: 0;
-    transition: all 0.5s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
   }
   .delete-button, .add-button {
     background: none;
@@ -355,11 +356,15 @@ fieldset {
     color: var(--text-color);
     cursor: pointer;
     margin-left: auto;
-    transition: all 0.3s ease-in-out;
 
-    &:hover {
-      background-color: var(--link-color-hover);
+    & svg g {
+      stroke: var(--text-color) ;
     }
+
+    &:hover svg g {
+        stroke: var(--link-color-hover);
+        transition: stroke 0.3s;
+      }
   }
 
   &:hover {
@@ -509,6 +514,7 @@ fieldset {
 
       & .button-wrapper {
         position: static;
+        margin-top: 0.5rem;
       }
     }
 
@@ -628,119 +634,6 @@ fieldset {
     }
   }
 }
-
-/*
-.form-element.raw {
-  align-items: flex-end;
-  
-  & label {
-    flex: 0 0 30%;
-
-    &:last-of-type {
-      flex: 1 1 auto;
-    }
-
-    & span {
-      display: inline-block !important;
-      margin-right: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    & div {
-      position: relative;
-      flex: 1 1 auto;
-      display: flex;
-      justify-content: flex-start;
-      margin-right: 2rem;
-
-      & *:not([type="checkbox"][role="switch"]) {
-        width: 100%;
-      }
-    }
-  }
-
-  &.is-list {
-    display: block;
-
-    & label {
-      display: block;
-      margin-bottom: 1rem;
-
-      & span {
-        display: block;
-      }
-    }
-
-    & ul {
-      padding: 0;
-      margin: 0;
-    }
-
-    & li {
-      position: relative;
-      display: flex;
-      font-family: "Open Sans", sans-serif;
-      border: none;
-      background: none;
-      color: var(--text-color);
-      padding: var(--element-padding);
-
-      & .button-wrapper {
-        position: static;
-      }
-    }
-
-    & input {
-      border: none;
-      background: var(--white-transparent);
-      border-radius: 0.5rem;
-      box-shadow: var(--input-box-shadow);
-      backdrop-filter: blur(5px);
-      color: var(--text-color);
-      padding: var(--element-padding);
-      flex: 0 0 80%;
-    }
-
-    & .button-wrapper {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      flex: 0 0 5rem;
-      height: 1.6rem;
-
-      & .button {
-        position: static;
-      }
-    }
-  }
-
-  &.is-array, &.is-object, &.is-list {
-    display: block;
-
-    & label {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      
-
-      &.object-name {
-        min-height: 3rem;
-        
-        & .hint {
-          display: none !important;
-        }
-
-        & input {
-          display: inline-block;
-          max-width: 33%;
-          margin-bottom: 0.5rem;
-        }
-      }
-    }
-  }
-}
-*/
 
 .dropzone-highlight {
   background-color: rgba(255, 255, 255, 0.1);
