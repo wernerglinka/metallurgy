@@ -51,30 +51,8 @@ export const createComponent = ( type, labelsExist ) => {
   `;
   div.appendChild( dragHandle );
 
-  console.log( type );
-
   // Call the form component function to create the element
   div = formComponent[ type ]( div, labelsExist );
-
-
-  // Add an Add and Delete button to all fields. We'll hide them later
-  // based on the field type and the explicit schema.
-  const buttonWrapper = document.createElement( 'div' );
-  buttonWrapper.classList.add( 'button-wrapper' );
-  div.appendChild( buttonWrapper );
-
-  //add the ADD button
-  const addButton = document.createElement( 'div' );
-  addButton.classList.add( 'add-button', 'button' );
-  addButton.innerHTML = "+";
-  buttonWrapper.appendChild( addButton );
-
-  //add the DELETE button
-  const deleteButton = document.createElement( 'div' );
-  deleteButton.classList.add( 'delete-button' );
-  deleteButton.innerHTML = "-";
-  buttonWrapper.appendChild( deleteButton );
-
 
   return div;
 };
@@ -133,26 +111,36 @@ export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExis
  */
 function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   let explicitFieldObject;
+  let addDeleteButton;
+  let addDuplicateButton;
 
   // Loop over the explicit schema array to find the field object
   // for simple types, the field name is the same as the label
   if ( field.type !== "object" && field.type !== "array" ) {
     explicitFieldObject = explicitSchemaArray.find( schema => schema.name === field.label );
+
     // check if the implied and explicit field types are the same
+    // if not, overwrite the implied field type
     if ( explicitFieldObject.type !== field.type ) {
       field.type = explicitFieldObject.type;
     }
-    // if the field value is an empty string but the explicit field object has a default value,
-    // update the field value
+
+    // if the field value is an empty string but the explicit field object
+    // has a default value, update the field value
     if ( field.value === "" && explicitFieldObject.default ) {
       field.value = explicitFieldObject.default;
     }
+
     // if the field type is a select and the explicit field object has options
     // update the field options and add the default value
     if ( field.type === "select" && explicitFieldObject.options ) {
       field.options = explicitFieldObject.options;
       field.default = explicitFieldObject.default;
     }
+
+    // Get the permits of the add/delete buttons
+    addDeleteButton = !explicitFieldObject.noDeletion;
+    addDuplicateButton = !explicitFieldObject.noDuplication;
 
     // Finally, add the placeholder from the explicit field object
     field.placeholder = explicitFieldObject.placeholder;
@@ -414,6 +402,62 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
       } );
     }
   } // end object/array
+
+  /*
+   * Add the add/delete buttons
+   * Add/Delete buttons are enabled in the explicit field schema.
+   * Buttons are defined in the context of a page. E.g. a page must have
+   * a layout, but that field can not be duplicated. A simple list item
+   * can be duplicated or deleted.
+  */
+  if ( addDeleteButton || addDuplicateButton ) {
+
+    // create a button wrapper
+    const buttonWrapper = document.createElement( 'div' );
+    buttonWrapper.classList.add( 'button-wrapper' );
+    element.appendChild( buttonWrapper );
+
+    // add the DUPLICATE button
+    if ( addDuplicateButton ) {
+      //add the ADD button
+      const addButton = document.createElement( 'div' );
+      addButton.classList.add( 'add-button', 'button' );
+      addButton.innerHTML = `
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+            <g stroke="#000000" stroke-width="2">
+              <g transform="translate(2, 2)">
+                <circle cx="10" cy="10" r="10"></circle>
+                <line x1="6" y1="10" x2="14" y2="10"></line>
+                <line x1="10" y1="6" x2="10" y2="14"></line>
+              </g>
+            </g>
+          </g>
+        </svg>
+      `;
+      buttonWrapper.appendChild( addButton );
+    }
+
+    //add the DELETE button
+    if ( addDeleteButton ) {
+      const deleteButton = document.createElement( 'div' );
+      deleteButton.classList.add( 'delete-button' );
+      deleteButton.innerHTML = `
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" >
+          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+            <g stroke="#000000" stroke-width="2">
+              <g transform="translate(2, 2)">
+                <circle cx="10" cy="10" r="10"></circle>
+                <line x1="13" y1="7" x2="7" y2="13"></line>
+                <line x1="7" y1="7" x2="13" y2="13"></line>
+              </g>
+            </g>
+          </g>
+        </svg>
+      `;
+      buttonWrapper.appendChild( deleteButton );
+    }
+  }
 
   return element;
 }

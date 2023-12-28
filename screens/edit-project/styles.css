@@ -8,7 +8,7 @@
   --white-transparent: rgba(255, 255, 255, 0.2);
   --input-border: 1px solid rgba(255, 255, 255, 0.3);
   --input-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  --element-padding: 0.5rem 2rem;
+  --element-padding: 0.5rem 2rem; 
 }
 
 h1 {
@@ -347,7 +347,6 @@ fieldset {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid var(--border-color);
     flex: 0 0 2rem;
     font-size: 1.6rem;
     height: 2rem;
@@ -356,9 +355,10 @@ fieldset {
     color: var(--text-color);
     cursor: pointer;
     margin-left: auto;
+    transition: all 0.3s ease-in-out;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
+      background-color: var(--link-color-hover);
     }
   }
 

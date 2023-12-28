@@ -223,15 +223,17 @@ export const sectionCollapse = ( e ) => {
 export const addDeleteButtons = ( e ) => {
 
   // if the add button was clicked clone the element and add it after the element
-  if ( e.target.classList.contains( 'add-button' ) ) {
+  if ( e.target.closest( '.add-button' ) ) {
     e.stopPropagation();
-    const clonedElement = e.target.parentElement.parentElement.cloneNode( true );
-    e.target.parentElement.parentElement.after( clonedElement );
+    const thisButton = e.target.closest( '.add-button' );
+    const clonedElement = thisButton.parentElement.parentElement.cloneNode( true );
+    thisButton.parentElement.parentElement.after( clonedElement );
   }
   // if the delete button was clicked remove element
-  if ( e.target.classList.contains( 'delete-button' ) ) {
+  if ( e.target.closest( '.delete-button' ) ) {
     e.stopPropagation();
-    e.target.parentElement.parentElement.remove();
+    const thisButton = e.target.closest( '.delete-button' );
+    thisButton.parentElement.parentElement.remove();
   }
 };
 
