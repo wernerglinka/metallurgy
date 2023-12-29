@@ -114,10 +114,17 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   let addDeleteButton;
   let addDuplicateButton;
 
+  explicitFieldObject = explicitSchemaArray.find( schema => schema.name === field.label );
+
+  // Get the permits of the add/delete buttons
+  // If the explicit field object does not exist, add the buttons
+  addDeleteButton = explicitFieldObject ? !explicitFieldObject.noDeletion : true;
+  addDuplicateButton = explicitFieldObject ? !explicitFieldObject.noDuplication : true;
+
   // Loop over the explicit schema array to find the field object
   // for simple types, the field name is the same as the label
   if ( field.type !== "object" && field.type !== "array" ) {
-    explicitFieldObject = explicitSchemaArray.find( schema => schema.name === field.label );
+
 
     // check if the implied and explicit field types are the same
     // if not, overwrite the implied field type
@@ -137,11 +144,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
       field.options = explicitFieldObject.options;
       field.default = explicitFieldObject.default;
     }
-
-    // Get the permits of the add/delete buttons
-    // If the explicit field object does not exist, add the buttons
-    addDeleteButton = explicitFieldObject ? !explicitFieldObject.noDeletion : true;
-    addDuplicateButton = explicitFieldObject ? !explicitFieldObject.noDuplication : true;
 
     // Finally, add the placeholder from the explicit field object
     field.placeholder = explicitFieldObject ? explicitFieldObject.placeholder : field.placeholder;
