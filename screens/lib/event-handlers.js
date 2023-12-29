@@ -209,7 +209,7 @@ export const sectionCollapse = ( e ) => {
   if ( !collapseIcon ) return;
 
   e.stopPropagation();
-  const objectDropzone = collapseIcon.closest( '.object-name' ).nextSibling;
+  const objectDropzone = collapseIcon.closest( '.object-name' ).nextElementSibling;
   const isCollapsed = objectDropzone.classList.contains( 'is-collapsed' );
   if ( isCollapsed ) {
     objectDropzone.classList.remove( 'is-collapsed' );

@@ -114,9 +114,6 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   let addDeleteButton;
   let addDuplicateButton;
 
-  console.log( field );
-  console.log( explicitSchemaArray );
-
   // Loop over the explicit schema array to find the field object
   // for simple types, the field name is the same as the label
   if ( field.type !== "object" && field.type !== "array" ) {
@@ -142,6 +139,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     }
 
     // Get the permits of the add/delete buttons
+    // If the explicit field object does not exist, add the buttons
     addDeleteButton = explicitFieldObject ? !explicitFieldObject.noDeletion : true;
     addDuplicateButton = explicitFieldObject ? !explicitFieldObject.noDuplication : true;
 
