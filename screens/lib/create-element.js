@@ -17,7 +17,7 @@ export const createComponent = ( type, labelsExist ) => {
   let elementModifier = null;
   if ( type === "object" ) { elementModifier = "is-object"; }
   if ( type === "array" ) { elementModifier = "is-array"; }
-  if ( type === "simplelist" ) { elementModifier = "is-list"; }
+  if ( type === "list" ) { elementModifier = "is-list"; }
 
   div.classList.add( 'form-element' );
   elementModifier && div.classList.add( elementModifier );
@@ -114,6 +114,9 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   let addDeleteButton;
   let addDuplicateButton;
 
+  console.log( field );
+  console.log( explicitSchemaArray );
+
   // Loop over the explicit schema array to find the field object
   // for simple types, the field name is the same as the label
   if ( field.type !== "object" && field.type !== "array" ) {
@@ -121,7 +124,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
 
     // check if the implied and explicit field types are the same
     // if not, overwrite the implied field type
-    if ( explicitFieldObject.type !== field.type ) {
+    if ( explicitFieldObject && explicitFieldObject.type !== field.type ) {
       field.type = explicitFieldObject.type;
     }
 
@@ -139,11 +142,11 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
     }
 
     // Get the permits of the add/delete buttons
-    addDeleteButton = !explicitFieldObject.noDeletion;
-    addDuplicateButton = !explicitFieldObject.noDuplication;
+    addDeleteButton = explicitFieldObject ? !explicitFieldObject.noDeletion : true;
+    addDuplicateButton = explicitFieldObject ? !explicitFieldObject.noDuplication : true;
 
     // Finally, add the placeholder from the explicit field object
-    field.placeholder = explicitFieldObject.placeholder;
+    field.placeholder = explicitFieldObject ? explicitFieldObject.placeholder : field.placeholder;
   }
 
   /*
@@ -347,7 +350,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   /**
    * SIMPLE LIST field
    */
-  if ( field.type === "listField" ) {
+  if ( field.type === "list" ) {
     element.classList.add( 'is-list' );
     // Update the label
     element.querySelector( '.object-name input' ).value = field.label;

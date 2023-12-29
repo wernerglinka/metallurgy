@@ -227,6 +227,8 @@ export const addDeleteButtons = ( e ) => {
     e.stopPropagation();
     const thisButton = e.target.closest( '.add-button' );
     const clonedElement = thisButton.parentElement.parentElement.cloneNode( true );
+    clonedElement.classList.remove( 'label-exists' );
+    clonedElement.querySelector( '.element-label' ).removeAttribute( 'readonly' );
     thisButton.parentElement.parentElement.after( clonedElement );
   }
   // if the delete button was clicked remove element

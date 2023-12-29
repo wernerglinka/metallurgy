@@ -1,4 +1,4 @@
-const simplelist = ( div, labelExists ) => {
+const list = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );
   tempContainer.innerHTML = `
     <label class="label-wrapper object-name">
@@ -49,4 +49,4 @@ const simplelist = ( div, labelExists ) => {
 
 };
 
-export default simplelist;
+export default list;

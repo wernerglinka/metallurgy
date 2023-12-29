@@ -14,7 +14,7 @@ export async function convertToSchemaObject( json ) {
     if ( isSimpleList( value ) ) {
       return {
         label: key,
-        type: 'simplelist',
+        type: 'list',
         value: value
       };
     }
