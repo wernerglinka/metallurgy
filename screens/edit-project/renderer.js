@@ -104,7 +104,7 @@ const renderer = ( () => {
         const fileType = selectedFilePath.split( '.' ).pop();
         const fileName = selectedFilePath.split( '/' ).pop();
 
-        const fileNameDisplay = document.getElementById( 'file-name' );
+        const fileNameDisplay = document.querySelector( '#file-name span' );
         fileNameDisplay.textContent = fileName;
 
         // Get the file contents
@@ -179,15 +179,62 @@ const renderer = ( () => {
     }
   };
 
+  const managePreview = () => {
+    const editPane = document.querySelector( ".js-edit-pane" );
+    const previewButton = document.getElementById( "preview-button" );
+    previewButton.addEventListener( "click", ( e ) => {
+      e.preventDefault();
+      editPane.classList.toggle( "active" );
+
+      // Preprocess form data in the dropzones
+      const allDropzones = document.querySelectorAll( '.js-dropzone' );
+      allDropzones.forEach( dropzone => {
+        // add a dummy is-last element at the end of the dropzone
+        const dummyElement = document.createElement( 'div' );
+        dummyElement.classList.add( 'form-element', 'is-last' );
+        // if array dropzone add "array-last" class
+        if ( dropzone.classList.contains( 'array-dropzone' ) ) {
+          dummyElement.classList.add( 'array-last' );
+        }
+        dropzone.appendChild( dummyElement );
+      } );
+
+      // Get all form-elements in the dropzone
+      const mainForm = document.getElementById( 'main-form' );
+      const allFormElements = mainForm.querySelectorAll( '.form-element' );
+
+      // Transform the form elements to an object
+      const dropzoneValues = transformFormElementsToObject( allFormElements );
+
+      // Cleanup
+      // Remove the dummy element so we can edit and use the form again
+      const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
+      redundantDummyElements.forEach( element => {
+        element.remove();
+      } );
+
+      // Convert the object to YAML
+      const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
+
+      // display the yaml in the preview pane as code
+      const previewPane = document.querySelector( ".js-preview-pane" );
+      previewPane.innerHTML = `<pre>${ pageYAMLObject }</pre>`;
+
+    } );
+
+  };
+
+
   return {
     updateProjectName,
     manageSidebar,
     renderEditSpace,
-
+    managePreview
   };
 
 } )();
 renderer.updateProjectName();
 renderer.manageSidebar();
 renderer.renderEditSpace();
+renderer.managePreview();
 

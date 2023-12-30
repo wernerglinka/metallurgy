@@ -23,12 +23,62 @@ h1 {
   }
 }
 
+h2 {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  & .btn {
+    margin-left: 2rem;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & svg {
+      width: 1.6rem;
+      height: 1.6rem;
+
+      & * {
+        stroke: var(--text-color);
+      }
+    }
+  }
+}
+
 .edit-pane {
-  display: grid;
-  grid-template-columns: minmax(30rem, 20%) 1fr;
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+  transition: all 0.5s ease;
+}
+
+.edit-container {
+  flex: 1 1 auto;
+}
+
+.right-sidebar {
+  padding: 0;
+  flex: 0 0 0;
+  overflow: hidden;
+  transition: all 0.5s ease-in-out;
+
+  & .preview-pane {
+    height: 100%;
+    font-size: 1.2rem;
+    font-family: monospace;
+  }
+} 
+
+.active .right-sidebar {
+  padding-left: 1.5rem;
+  flex: 0 0 20%;
+   min-with: 30rem;
 }
 
 .sidebar {
+  flex: 0 0 20%;
+  min-with: 30rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
