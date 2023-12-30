@@ -4,6 +4,7 @@ import number from "./number.js";
 import object from "./object.js";
 import list from "./list.js";
 import text from "./text.js";
+import textarea from "./textarea.js";
 
 const formComponent = {
   array,
@@ -12,6 +13,7 @@ const formComponent = {
   object,
   list,
   text,
+  textarea
 };
 
 export default formComponent;

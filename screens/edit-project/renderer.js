@@ -41,6 +41,9 @@ const renderer = ( () => {
       } );
     }
 
+    // Add a dragstart event listener to the sidebar
+    const newComponentsSidebar = document.getElementById( 'js-add-component' );
+    newComponentsSidebar.addEventListener( 'dragstart', dragStart );
   };
 
   /**

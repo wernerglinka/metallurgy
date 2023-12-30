@@ -1,3 +1,77 @@
+import { createComponent } from "./create-element.js";
+import { updateButtonsStatus } from "./update-buttons-status.js";
+
+/**
+ * @function processSidebarDraggables
+ * @param {*} e 
+ * @param {*} component 
+ * @param {*} dropzone
+ * @description This function will process the sidebar draggables
+ */
+function processSidebarDraggables( e, component ) {
+  const dropzone = e.target.closest( '.dropzone' );
+  if ( !dropzone ) return;
+
+  // Create new element with requested component type
+  const newElement = createComponent( component, false );
+
+  // If an object is placed in an array dropzone, hide the label input
+  // since the object will not need a name
+  if ( component === "object" && e.target.dataset.wrapper === "is-array" ) {
+    const labelInput = newElement.querySelector( '.object-name' );
+
+    // check if any objects already exists in the array dropzone
+    // to avoid duplicate names. E.g. we will generate  'neverMind1', 'neverMind2', etc.
+    const objectsInArray = e.target.querySelectorAll( '.object-name' );
+    const objectIndex = objectsInArray.length;
+    labelInput.querySelector( 'input' ).value = `neverMind${ objectIndex + 1 }`; // something for the loopstack
+    labelInput.style.display = "none";
+  }
+
+  /*
+    Add an eventlistener to the label input to enable the button when the user
+    has added text to the label input and all other label inputs have text
+  */
+  const newElementLabelInput = newElement.querySelector( '.element-label, .object-name input' );
+  newElementLabelInput && newElementLabelInput.addEventListener( 'change', ( e ) => {
+    const thisElement = e.target;
+
+    // check if the input is valid, if not valid, show error message and disable the button
+    if ( !isValidLabel( thisElement.value ) ) {
+      showErrorMessage( thisElement, "Label must only use characters and numbers" );
+      updateButtonsStatus();
+      return;
+    }
+
+    // remove error message if it exists
+    if ( thisElement.classList.contains( 'invalid' ) ) {
+      removeErrorMessage( thisElement );
+    }
+    updateButtonsStatus();
+  } );
+
+  /*
+    To insert the dragged element either before or after an existing element 
+    in the drop container, including the ability to insert before the first 
+    element, we need to determine the relative position of the cursor to the 
+    center of each potential sibling element. This way, we can decide whether 
+    to insert the dragged element before or after each child based on the 
+    cursor's position.
+  */
+  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+  if ( closest ) {
+    if ( position === 'before' ) {
+      dropzone.insertBefore( newElement, closest );
+    } else {
+      dropzone.insertBefore( newElement, closest.nextSibling );
+    }
+  } else {
+    dropzone.appendChild( newElement );
+  }
+
+  updateButtonsStatus();
+};
+
 /**
  * @function getInsertionPoint
  * @param {*} container - The drop container element in which a dragged element is being dropped
@@ -76,7 +150,7 @@ function moveElement( e ) {
     if ( position === 'before' ) {
       dropzone.insertBefore( window.draggedElement, closest );
     } else {
-      dropzone.insertBefore( window.draggedElement, closest.nextSibling );
+      dropzone.insertBefore( window.draggedElement, closest.nextElementSibling );
     }
   } else {
     dropzone.appendChild( window.draggedElement );
@@ -87,7 +161,7 @@ function moveElement( e ) {
 // Add drag and drop functionality to the form
 export const dragStart = ( e ) => {
   // dragstart is delegated from the form element's event listener
-  if ( !e.target.closest( '.form-element' ) ) return;
+  if ( !e.target.closest( '.form-element' ) && !e.target.closest( '.component-selection' ) ) return;
 
   // Set the data type and value of the dragged element
   e.dataTransfer.setData( "text/plain", e.target.dataset.component );
@@ -126,8 +200,8 @@ export const dragOver = ( e ) => {
     if ( position === 'before' ) {
       closest.style.marginBottom = "2rem";
     } else {
-      if ( closest.nextSibling ) {
-        closest.nextSibling.style.marginTop = "2rem";
+      if ( closest.nextElementSibling ) {
+        closest.nextElementSibling.style.marginTop = "2rem";
       }
     }
   } else {
