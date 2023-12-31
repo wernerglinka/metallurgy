@@ -236,9 +236,9 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
 
     // Build the date element
     const tempContainer = document.createElement( 'div' );
-    // NOTE: We are receiving a date object for example: 
-    // "Wed Nov 01 2023 19:00:00 GMT-0500 (Central Daylight Time)", so we need
-    // to convert it to a string in the format "yyyy-MM-dd"
+    // We are receiving a date object for example: 
+    // "Wed Nov 01 2023 19:00:00 GMT-0500 (Central Daylight Time)"
+    // The required input value format is "yyyy-MM-dd"
     tempContainer.innerHTML = `
       <input type="date" class="element-value" value="${ formatDate( field.value ) }">
     `;

@@ -40,25 +40,27 @@
     <div class="edit-pane js-edit-pane">
       <div class="js-sidebar sidebar">
         <div class="sidebar-container container-background">
-          <h3>Project Files</h3>
-
           <ul class="sidebar-pane-selection js-sidebar-pane-selection">
             <li class="select-file">
               <a class="active btn" data-pane="js-select-file">Select File</a>
             </li>
+            <li class="add-field">
+              <a class="btn" data-pane="js-add-field">Add Field</a>
+            </li>
             <li class="add-component">
-              <a class="btn" data-pane="js-add-component">Add Components</a>
+              <a class="btn" data-pane="js-add-component">Add Component</a>
             </li>
           </ul>
         </div>
 
         <div class="sidebar-panes">
-          <div id="js-add-component" class="sidebar-pane js-sidebar-pane">
+          <div id="js-add-field" class="sidebar-pane js-sidebar-pane">
             <div class="sidebar-hint container-background">
-              <p>Drag a component into the editor...</p>
+              <p>Drag a field into the editor...</p>
             </div>
 
             <div class="container-background">
+              <h3>Empty Fields</h3>
               <div
                 id="component1"
                 class="component-selection draggable"
@@ -128,12 +130,23 @@
 
           <div id="js-select-file" class="sidebar-pane js-sidebar-pane active">
             <div class="sidebar-hint container-background">
-              <p>Select a project below file to start editing...</p>
+              <p>Select a project file to start editing...</p>
             </div>
-            <div class="js-dom-tree-wrapper container-background"></div>
+            <div class="js-dom-tree-wrapper container-background">
+              <h3>Project Files</h3>
+            </div>
           </div>
-        </div>
-      </div>
+
+          <div id="js-add-component" class="sidebar-pane js-sidebar-pane">
+            <div class="sidebar-hint container-background">
+              <p>Drag a component into the editor...</p>
+            </div>
+            <div class="js-components-wrapper container-background">
+              <h3>Page Components</h3>
+            </div>
+          </div>
+        </div> <!-- end sidebar panes -->
+      </div> <!-- end sidebar -->
 
       <main class="js-edit-container edit-container container-background">
         <h2 id="file-name">

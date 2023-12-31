@@ -42,7 +42,7 @@ const renderer = ( () => {
     }
 
     // Add a dragstart event listener to the sidebar
-    const newComponentsSidebar = document.getElementById( 'js-add-component' );
+    const newComponentsSidebar = document.getElementById( 'js-add-field' );
     newComponentsSidebar.addEventListener( 'dragstart', dragStart );
   };
 
