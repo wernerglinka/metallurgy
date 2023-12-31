@@ -7,8 +7,6 @@ import formComponent from './formComponents/index.js';
  * @returns a form element
  */
 export const createComponent = ( type, labelsExist ) => {
-
-  console.log( type );
   // create a div to hold the form element
   let div = document.createElement( 'div' );
 

@@ -94,7 +94,18 @@ export const transformFormElementsToObject = ( allFormElements ) => {
 
       // Add the element to its parent object
       currentLevelObject = getCurrentObject( formObject, loopStack );
-      currentLevelObject[ loopStack[ loopStack.length - 1 ] ][ key ] = widget !== "checkbox" ? value : currentElement.querySelector( '.element-value' ).checked;
+      // Insure that the values are converted to the correct type
+      if ( widget === "number" ) {
+        value = Number( value );
+      }
+      if ( widget === "checkbox" ) {
+        value = currentElement.querySelector( '.element-value' ).checked;
+      }
+      if ( widget === "date" ) {
+        value = new Date( value );
+      }
+      currentLevelObject[ loopStack[ loopStack.length - 1 ] ][ key ] = value;
+      //currentLevelObject[ loopStack[ loopStack.length - 1 ] ][ key ] = widget !== "checkbox" ? value : currentElement.querySelector( '.element-value' ).checked;
 
     } else {
       // if the current element is the last in an array or object, remove the

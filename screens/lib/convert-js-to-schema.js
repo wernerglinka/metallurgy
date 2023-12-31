@@ -9,8 +9,27 @@ function isSimpleList( value ) {
   return false;
 }
 
+function isDateString( input ) {
+  // Attempt to parse the input string as a date
+  const parsedDate = new Date( input );
+
+  // Check if the parsed date is a valid date and not NaN
+  if ( !isNaN( parsedDate.getTime() ) ) {
+    return true; // It's a valid date string
+  } else {
+    return false; // It's not a valid date string
+  }
+}
+
+function isDateObject( input ) {
+  return input instanceof Date;
+}
+
 export async function convertToSchemaObject( json ) {
   function createField( key, value ) {
+
+    console.log( key, value, typeof value );
+
     if ( isSimpleList( value ) ) {
       return {
         label: key,
@@ -41,6 +60,13 @@ export async function convertToSchemaObject( json ) {
         value: value,
         placeholder: `Add ${ key }`
       };
+    } else if ( isDateObject( value ) ) {  // must come before we test for object
+      return {
+        label: key,
+        type: 'date',
+        value: value,
+        placeholder: `Add ${ key }`
+      };
     } else if ( Array.isArray( value ) ) {
       return {
         label: key,
@@ -55,7 +81,6 @@ export async function convertToSchemaObject( json ) {
         value: Object.entries( value ).map( ( [ subKey, subValue ] ) => createField( subKey, subValue ) )
       };
     }
-
     throw new Error( `Unsupported type: ${ type }` );
   };
 
