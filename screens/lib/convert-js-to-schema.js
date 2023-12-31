@@ -28,8 +28,6 @@ function isDateObject( input ) {
 export async function convertToSchemaObject( json ) {
   function createField( key, value ) {
 
-    console.log( key, value, typeof value );
-
     if ( isSimpleList( value ) ) {
       return {
         label: key,

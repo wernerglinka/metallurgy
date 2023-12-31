@@ -1,5 +1,27 @@
 import formComponent from './formComponents/index.js';
 
+function formatDate( inputDateString ) {
+  // Parse the input date string into a Date object
+  const inputDate = new Date( inputDateString );
+
+  // Check if the inputDate is a valid Date object
+  if ( isNaN( inputDate.getTime() ) ) {
+    return "Invalid Date"; // Return an error message if parsing fails
+  }
+
+  // Extract year, month, and day components
+  const year = inputDate.getFullYear();
+  const month = String( inputDate.getMonth() + 1 ).padStart( 2, "0" ); // Month is zero-based
+  const day = String( inputDate.getDate() ).padStart( 2, "0" );
+
+  // Format the components into "yyyy-MM-dd" format
+  const formattedDate = `${ year }-${ month }-${ day }`;
+
+  return formattedDate;
+}
+
+
+
 /**
  * @function createComponent
  * @param {string} type - text, checkbox, array, object, etc.
@@ -214,8 +236,11 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
 
     // Build the date element
     const tempContainer = document.createElement( 'div' );
+    // NOTE: We are receiving a date object for example: 
+    // "Wed Nov 01 2023 19:00:00 GMT-0500 (Central Daylight Time)", so we need
+    // to convert it to a string in the format "yyyy-MM-dd"
     tempContainer.innerHTML = `
-      <input type="date" class="element-value">
+      <input type="date" class="element-value" value="${ formatDate( field.value ) }">
     `;
     // Append children of tempContainer to the div
     while ( tempContainer.firstChild ) {
