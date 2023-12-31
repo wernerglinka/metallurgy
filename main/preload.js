@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld( 'electronAPI', {
       return false;
     }
   },
+  getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName ),
   showConfirmationDialog: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
   readDirectory: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
   writeMarkdownFile: ( data ) => ipcRenderer.invoke( 'writeMarkdownFile', data ),

@@ -9,6 +9,7 @@ import { dragStart, dragOver, dragLeave, drop } from "../lib/event-handlers.js";
 import { cleanMainForm } from "../lib/clean-main-form.js";
 import { addMainForm } from "../lib/add-main-form.js";
 import { redoUndo } from "../lib/undo-redo.js";
+import { preprocessFormData } from "../lib/preprocess-form-data.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -44,6 +45,14 @@ const renderer = ( () => {
     // Add a dragstart event listener to the sidebar
     const newComponentsSidebar = document.getElementById( 'js-add-field' );
     newComponentsSidebar.addEventListener( 'dragstart', dragStart );
+  };
+
+  const buildTemplatesSelection = async () => {
+    // Get templates if they exists
+    const templates = await electronAPI.getTemplates( 'templates' );
+
+    console.log( templates.data );
+
   };
 
   /**
@@ -110,6 +119,8 @@ const renderer = ( () => {
         // Get the file contents
         const { frontmatter, content } = await getMarkdownFile( selectedFilePath );
 
+        console.log( JSON.stringify( frontmatter, null, 2 ) );
+
         switch ( fileType ) {
           case 'md':
             await renderMarkdownFile( frontmatter, content );
@@ -136,33 +147,7 @@ const renderer = ( () => {
           e.preventDefault();
 
           // Preprocess form data in the dropzones
-          const allDropzones = document.querySelectorAll( '.js-dropzone' );
-          allDropzones.forEach( dropzone => {
-            // add a dummy is-last element at the end of the dropzone
-            const dummyElement = document.createElement( 'div' );
-            dummyElement.classList.add( 'form-element', 'is-last' );
-            // if array dropzone add "array-last" class
-            if ( dropzone.classList.contains( 'array-dropzone' ) ) {
-              dummyElement.classList.add( 'array-last' );
-            }
-            dropzone.appendChild( dummyElement );
-          } );
-
-          // Get all form-elements in the dropzone
-          const allFormElements = mainForm.querySelectorAll( '.form-element' );
-
-          // Transform the form elements to an object
-          const dropzoneValues = transformFormElementsToObject( allFormElements );
-
-          // Cleanup
-          // Remove the dummy element so we can edit and use the form again
-          const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
-          redundantDummyElements.forEach( element => {
-            element.remove();
-          } );
-
-          // Convert the object to YAML
-          //const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
+          const dropzoneValues = preprocessFormData();
 
           // Write the object to its markdown file (conversion to YAML/frontmatter is done in the main process)
           const options = {
@@ -187,31 +172,7 @@ const renderer = ( () => {
       editPane.classList.toggle( "active" );
 
       // Preprocess form data in the dropzones
-      const allDropzones = document.querySelectorAll( '.js-dropzone' );
-      allDropzones.forEach( dropzone => {
-        // add a dummy is-last element at the end of the dropzone
-        const dummyElement = document.createElement( 'div' );
-        dummyElement.classList.add( 'form-element', 'is-last' );
-        // if array dropzone add "array-last" class
-        if ( dropzone.classList.contains( 'array-dropzone' ) ) {
-          dummyElement.classList.add( 'array-last' );
-        }
-        dropzone.appendChild( dummyElement );
-      } );
-
-      // Get all form-elements in the dropzone
-      const mainForm = document.getElementById( 'main-form' );
-      const allFormElements = mainForm.querySelectorAll( '.form-element' );
-
-      // Transform the form elements to an object
-      const dropzoneValues = transformFormElementsToObject( allFormElements );
-
-      // Cleanup
-      // Remove the dummy element so we can edit and use the form again
-      const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
-      redundantDummyElements.forEach( element => {
-        element.remove();
-      } );
+      const dropzoneValues = preprocessFormData();
 
       // Convert the object to YAML
       const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
@@ -229,6 +190,7 @@ const renderer = ( () => {
     updateProjectName,
     manageSidebar,
     renderEditSpace,
+    buildTemplatesSelection,
     managePreview
   };
 
@@ -236,5 +198,6 @@ const renderer = ( () => {
 renderer.updateProjectName();
 renderer.manageSidebar();
 renderer.renderEditSpace();
+renderer.buildTemplatesSelection();
 renderer.managePreview();
 

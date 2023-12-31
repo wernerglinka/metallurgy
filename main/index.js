@@ -169,6 +169,19 @@ app.whenReady().then( () => {
     }
   } );
 
+  // handle a get templates request from the renderer process
+  ipcMain.handle( 'getTemplates', ( e, templatesDirName ) => {
+    // build path to templates directory
+    const templatesDir = path.join( __dirname, '../', templatesDirName );
+    try {
+      const allFiles = readDirectoryStructure( templatesDir );
+      return { status: 'success', data: allFiles };
+    }
+    catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  } );
+
   // handle a request to write an object as YAML/frontmatter to a markdown file
   ipcMain.handle( 'writeObjectToFile', async ( e, data ) => {
     // convert the object to frontmatter yaml
