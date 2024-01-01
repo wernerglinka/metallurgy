@@ -32,6 +32,9 @@ export function createDomTree( data, type ) {
             if ( subKey.endsWith( '.json' ) ) {
               fileLi.classList.add( 'json' );
             }
+            if ( subKey.endsWith( '.js' ) ) {
+              fileLi.classList.add( 'js' );
+            }
 
             const link = document.createElement( 'a' );
             link.href = subValue;

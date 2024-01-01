@@ -156,7 +156,7 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
 
     // if the field value is an empty string but the explicit field object
     // has a default value, update the field value
-    if ( field.value === "" && explicitFieldObject.default ) {
+    if ( field.value === "" && explicitFieldObject?.default ) {
       field.value = explicitFieldObject.default;
     }
 

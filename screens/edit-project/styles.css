@@ -87,7 +87,7 @@ h2 {
 }
 
 .container-background {
-  padding: 1rem 2rem;
+  padding: 1rem 2rem 2rem;
   background: var(--white-transparent);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -150,36 +150,38 @@ h2 {
       max-height: 100rem;
     }
   }
+}
 
-  & .folder span {
-    display: block;
-    font-weight: 600;
-    cursor: pointer;
-  }
+.folder span {
+  display: block;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-  & .file a:before,
-  & .folder span:before {
-    content: "";
-    display: inline-block;
-    width: 1.6rem;
-    height: 1.6rem;
-    margin-right: 1.6rem;
-    position: relative;
-    top: 0.6rem;
-  }
+.file a:before, .folder span:before {
+  content: "";
+  display: inline-block;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-right: 1.6rem;
+  position: relative;
+  top: 0.6rem;
+}
 
-  & .file.md a:before {
-    content: url(../icons/file-md.svg);
-  }
-  & .file.json a:before {
-    content: url(../icons/file-json.svg);
-  }
-  & .folder span:before {
-    content: url(../icons/folder.svg);
-  }
-  & .folder.open span:before {
-    content: url(../icons/folder-open.svg);
-  }
+.file.md a:before {
+  content: url(../icons/file-md.svg);
+}
+.file.json a:before {
+  content: url(../icons/file-json.svg);
+}
+.file.js a:before {
+  content: url(../icons/file-js.svg);
+}
+.folder span:before {
+  content: url(../icons/folder.svg);
+}
+.folder.open > span:before {
+  content: url(../icons/folder-open.svg);
 }
 
 /**
@@ -211,6 +213,7 @@ h2 {
   &.active {
     opacity: 1;
     pointer-events: all;
+    margin-bottom: 5rem;
   }
 }
 

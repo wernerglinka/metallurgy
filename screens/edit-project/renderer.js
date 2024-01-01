@@ -10,6 +10,7 @@ import { cleanMainForm } from "../lib/clean-main-form.js";
 import { addMainForm } from "../lib/add-main-form.js";
 import { redoUndo } from "../lib/undo-redo.js";
 import { preprocessFormData } from "../lib/preprocess-form-data.js";
+import { createDomTree } from "../lib/create-dom-tree.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -50,8 +51,11 @@ const renderer = ( () => {
   const buildTemplatesSelection = async () => {
     // Get templates if they exists
     const templates = await electronAPI.getTemplates( 'templates' );
-
-    console.log( templates.data );
+    const templatesList = templates.data;
+    const templatesSelect = document.querySelector( '.js-templates-wrapper' );
+    const templatesSelectList = createDomTree( templatesList, '.js' );
+    templatesSelectList.classList.add( 'dom-tree', 'js-dom-tree' );
+    templatesSelect.appendChild( templatesSelectList );
 
   };
 
