@@ -161,7 +161,12 @@ function moveElement( e ) {
 // Add drag and drop functionality to the form
 export const dragStart = ( e ) => {
   // dragstart is delegated from the form element's event listener
-  if ( !e.target.closest( '.form-element' ) && !e.target.closest( '.component-selection' ) ) return;
+  if ( !e.target.closest( '.form-element' ) // for dragging/sorting existing elements
+    && !e.target.closest( '.component-selection' ) // for adding fields
+    && !e.target.closest( '.template-selection' ) // for adding templates
+  ) return;
+
+  console.log( e.target );
 
   // Set the data type and value of the dragged element
   e.dataTransfer.setData( "text/plain", e.target.dataset.component );
@@ -172,11 +177,20 @@ export const dragStart = ( e ) => {
   */
   let origin = "sidebar";
 
-  // Find if an acestor with id 'dropzone' exists
+  // Find if an ancestor with id 'dropzone' exists, then we just move the
+  // element inside the dropzone
   const dropzone = e.target.closest( '.dropzone' );
   origin = dropzone ? "dropzone" : origin;
   // Set the origin
   e.dataTransfer.setData( "origin", origin );
+
+
+  // Find if an ancestor with class 'js-templates-list' exists, then we are 
+  // dragging a template in
+  const templateList = e.target.closest( '.js-templates-list' );
+  if ( templateList ) {
+    e.dataTransfer.setData( "origin", "templates" );
+  }
 
   // store the dragged element
   window.draggedElement = e.target;

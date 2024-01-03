@@ -7,7 +7,7 @@ import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons
  */
 
 export const addMainForm = () => {
-  const frontmatterContainer = document.getElementById( 'frontmatter-container' );
+  const frontmatterContainer = document.getElementById( 'content-container' );
 
   // Add the main form plus dropzone
   const mainForm = document.createElement( 'form' );

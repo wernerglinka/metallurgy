@@ -11,6 +11,7 @@ import { addMainForm } from "../lib/add-main-form.js";
 import { redoUndo } from "../lib/undo-redo.js";
 import { preprocessFormData } from "../lib/preprocess-form-data.js";
 import { createDomTree } from "../lib/create-dom-tree.js";
+import { getFlatTemplateList } from "../lib/get-flat-template-list.js";
 
 const renderer = ( () => {
   const updateProjectName = () => {
@@ -43,9 +44,11 @@ const renderer = ( () => {
       } );
     }
 
-    // Add a dragstart event listener to the sidebar
+    // Add a dragstart event listeners to the sidebar
     const newComponentsSidebar = document.getElementById( 'js-add-field' );
     newComponentsSidebar.addEventListener( 'dragstart', dragStart );
+    const newTemplatesSidebar = document.getElementById( 'js-add-template' );
+    newTemplatesSidebar.addEventListener( 'dragstart', dragStart );
   };
 
   const buildTemplatesSelection = async () => {
@@ -53,10 +56,37 @@ const renderer = ( () => {
     const templates = await electronAPI.getTemplates( 'templates' );
     const templatesList = templates.data;
     const templatesSelect = document.querySelector( '.js-templates-wrapper' );
-    const templatesSelectList = createDomTree( templatesList, '.js' );
-    templatesSelectList.classList.add( 'dom-tree', 'js-dom-tree' );
+
+    // List of templates included draggables, set third attribute to true
+    const templatesSelectList = createDomTree( templatesList, '.js', true );
+    templatesSelectList.classList.add( 'dom-tree', 'js-dom-tree', 'js-templates-list' );
     templatesSelect.appendChild( templatesSelectList );
 
+    // Add event handler for button to start a new page
+    const newPageButton = document.getElementById( 'init-new-page' );
+    newPageButton.addEventListener( 'click', ( e ) => {
+      e.preventDefault();
+      // Create a new form with a dropzone and place in the edit space
+      const mainForm = addMainForm();
+      // ... and update the buttons status
+      updateButtonsStatus();
+    } );
+
+    /* we may not need this
+    // Get all template files and load them into an object
+    const allTemplatesObject = {};
+    // get a flat list of all templates
+    let flatArray = getFlatTemplateList( templatesList );
+    //loop over the array and get the content of each file
+    for ( const template of flatArray ) {
+      const templatePath = Object.values( template )[ 0 ];
+      const templateName = Object.keys( template )[ 0 ];
+      const templateContent = await electronAPI.readFile( templatePath );
+      allTemplatesObject[ templateName ] = templateContent.data;
+    }
+ 
+    console.log( allTemplatesObject );
+    */
   };
 
   /**
@@ -86,8 +116,7 @@ const renderer = ( () => {
      * When a file link is clicked, we'll retrieve the file contents and render
      * it in the edit space.
      */
-    // add event listener to file links
-    const allFileLinks = document.querySelectorAll( '.js-dom-tree .file a' );
+    const allFileLinks = document.querySelectorAll( '.js-files-list .file a' );
     for ( const fileLink of allFileLinks ) {
       fileLink.addEventListener( 'click', async ( e ) => {
         e.preventDefault();
@@ -122,8 +151,6 @@ const renderer = ( () => {
 
         // Get the file contents
         const { frontmatter, content } = await getMarkdownFile( selectedFilePath );
-
-        console.log( JSON.stringify( frontmatter, null, 2 ) );
 
         switch ( fileType ) {
           case 'md':
@@ -165,8 +192,26 @@ const renderer = ( () => {
         } ); // end form submit listener
       } ); // end file link listener
 
-    }
-  };
+    };
+
+    /**
+    * Add event listeners to the template links
+    * When a template link is clicked, we'll retrieve the file contents and render
+    * it in the edit space.
+    */
+    const allTemplateLinks = document.querySelectorAll( '.js-templates-list .file a' );
+    for ( const templateLink of allTemplateLinks ) {
+      templateLink.addEventListener( 'click', async ( e ) => {
+        // template files will be dragged to the main form. Here we just prevent the
+        // default behavior of the link
+        e.preventDefault();
+        e.stopPropagation();
+
+      } ); // end template link listener
+    };
+
+  }; // end renderEditSpace
+
 
   const managePreview = () => {
     const editPane = document.querySelector( ".js-edit-pane" );

@@ -12,7 +12,7 @@ export const getDirectoryFiles = async ( directoryKey, type ) => {
   // Allow only markdown files
   const domTree = createDomTree( directory.data, type );
 
-  domTree.classList.add( 'dom-tree', 'js-dom-tree' );
+  domTree.classList.add( 'dom-tree', 'js-dom-tree', 'js-files-list' );
 
   // add the dom tree to the folder ui
   const sidebar = document.querySelector( '.js-dom-tree-wrapper' );

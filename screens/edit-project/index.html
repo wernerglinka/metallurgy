@@ -48,7 +48,7 @@
               <a class="btn" data-pane="js-add-field">Add Field</a>
             </li>
             <li class="add-component">
-              <a class="btn" data-pane="js-add-templates">Add Component</a>
+              <a class="btn" data-pane="js-add-template">Add Template</a>
             </li>
           </ul>
         </div>
@@ -137,12 +137,13 @@
             </div>
           </div>
 
-          <div id="js-add-templates" class="sidebar-pane js-sidebar-pane">
+          <div id="js-add-template" class="sidebar-pane js-sidebar-pane">
             <div class="sidebar-hint container-background">
-              <p>Build a page from scratch. Drag a component into the editor...</p>
+              <p>Build a page from scratch. Drag a tempolate into the editor...</p>
             </div>
             <div class="js-templates-wrapper container-background">
-              <h3>Page Components</h3>
+              <h3>Page Templates</h3>
+              <a id="init-new-page" class="btn">Build New Page</a>
             </div>
           </div>
         </div> <!-- end sidebar panes -->
@@ -168,7 +169,7 @@
             </svg>
           </button>
         </h2>
-        <div id="frontmatter-container"></div>
+        <div id="content-container"></div>
       </main>
 
       <div class="js-right-sidebar right-sidebar">

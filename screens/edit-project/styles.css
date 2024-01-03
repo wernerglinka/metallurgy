@@ -96,6 +96,10 @@ h2 {
   border-radius: 1rem;
   margin-bottom: 2rem;
 
+  & #init-new-page {
+    margin-bottom: 2rem;
+  }
+
   h3 {
     padding-bottom: 2rem;
   }

@@ -1,4 +1,4 @@
-export function createDomTree( data, type ) {
+export function createDomTree( data, type, itemsAreDraggable = false ) {
   const ul = document.createElement( 'ul' );
 
   for ( const [ key, value ] of Object.entries( data ) ) {
@@ -11,6 +11,7 @@ export function createDomTree( data, type ) {
       dirLi.classList.add( 'folder' );
       const subUl = document.createElement( 'ul' );
 
+      let loopIndex = 0;
       for ( const item of value ) {
         for ( const [ subKey, subValue ] of Object.entries( item ) ) {
           if ( typeof subValue === 'string' ) {
@@ -24,6 +25,12 @@ export function createDomTree( data, type ) {
             // content files or 'json' for data files
             const fileLi = document.createElement( 'li' );
             fileLi.classList.add( 'file' );
+            if ( itemsAreDraggable ) {
+              fileLi.id = `${ subKey.split( '.' ).shift() }${ loopIndex }`;
+              fileLi.classList.add( 'template-selection', 'draggable' );
+              fileLi.draggable = true;
+              fileLi.dataset.component = subKey;
+            }
 
             // add filetype classes to use the proper icon in file list
             if ( subKey.endsWith( '.md' ) ) {
@@ -52,6 +59,7 @@ export function createDomTree( data, type ) {
             subUl.appendChild( fragment );
           }
         }
+        loopIndex++;
       }
       dirLi.appendChild( subUl );
       ul.appendChild( dirLi );
