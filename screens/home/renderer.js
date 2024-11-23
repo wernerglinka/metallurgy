@@ -11,127 +11,90 @@ const renderer = ( () => {
   const getProjectFolder = () => {
     const trigger = document.querySelector( '.js-get-project-folder' );
 
-    if ( trigger ) {
-      trigger.addEventListener( 'click', async ( e ) => {
-        e.preventDefault();
-
-        console.log( "Get project folder" );
-
-        try {
-          const targetScreen = e.target.href;
-          const currentLocation = document.location;
-
-          // Show a dialog to select the project folder
-          const projectFolder = await selectProject();
-
-          console.log( `projectFolder: ${ projectFolder }` );
-
-          if ( projectFolder === "abort" ) {
-            // User cancelled the dialog, so reload the page
-
-            console.log( "user canceled" );
-
-            //currentLocation.reload();
-            return;
-          }
-
-          console.log( "Saved project folder to local storage" );
-          saveToLocalStorage( "projectFolder", projectFolder );
-
-          // we are starting a new project, so clear the existing project
-          // data from localStorage
-          deleteFromLocalStorage( "contentFolder" );
-          deleteFromLocalStorage( "dataFolder" );
-
-          console.log( `targetScreen: ${ targetScreen }` );
-
-          location.assign( "../new-project/index.html" );
-
-        } catch ( error ) {
-          console.error( "Error in getProjectFolder", error );
-          // Provide user feedback here, such as showing an error message
-          alert( "Error selecting project folder" );
-          return;
-        }
-      } );
-    } else {
+    if ( !trigger ) {
       console.warn( "Trigger element not found for getProjectFolder" );
       return;
     }
+
+    trigger.addEventListener( 'click', async ( e ) => {
+      e.preventDefault();
+
+      try {
+        const targetScreen = e.target.href;
+        const projectFolder = await selectProject();
+
+        if ( projectFolder === "abort" ) {
+          console.log( "User canceled project selection" );
+          return;
+        }
+
+        // Save project folder and clear existing data
+        saveToLocalStorage( "projectFolder", projectFolder );
+        [ "contentFolder", "dataFolder" ].forEach( key =>
+          deleteFromLocalStorage( key ) );
+
+        location.assign( "../new-project/index.html" );
+      } catch ( error ) {
+        console.error( "Error in getProjectFolder:", error );
+        alert( "Error selecting project folder" );
+      }
+    } );
   };
 
   const deleteProject = () => {
     const trigger = document.querySelector( '.js-delete-project-folder' );
 
-    if ( trigger ) {
-      trigger.addEventListener( 'click', async ( e ) => {
-        e.preventDefault();
-
-        console.log( "Delete project folder" );
-
-        // Show a dialog to select the project folder
-        const projectFolder = await selectProject();
-        // Get projeect name
-        const projectName = projectFolder.split( "/" ).pop();
-
-        if ( !projectFolder ) {
-          // User cancelled the dialog, so reload the page
-          currentLocation.reload();
-        }
-
-        // display a confirmation dialog
-        const confirmDelete = `Are you sure you want to remove the ${ projectName } project?`;
-        const userConfirmed = await window.electronAPI.showConfirmationDialog( confirmDelete );
-        if ( !userConfirmed ) {
-
-          console.log( 'User cancelled action' );
-
-          // Do nothing, just reload the page
-          location.reload();
-        }
-
-        // Build path to project data file
-        const filePath = `${ projectFolder }/.metallurgy/projectData.json`;
-
-        try {
-          const result = await electronAPI.deleteFile( filePath );
-
-          console.log( `Deleting project ${ projectName }: ${ result }` );
-
-        } catch ( error ) {
-          console.error( `Error deleting ${ projectName }:`, error );
-        }
-
-        // we are deleting a project, so clear the existing project
-        // data from localStorage as well
-        deleteFromLocalStorage( "projectFolder" );
-        deleteFromLocalStorage( "contentFolder" );
-        deleteFromLocalStorage( "dataFolder" );
-
-        // Reload the page
-        location.reload();
-
-      } );
-    } else {
+    if ( !trigger ) {
       console.warn( "Trigger element not found for deleteProjectFolder" );
       return false;
     }
+
+    trigger.addEventListener( 'click', async ( e ) => {
+      e.preventDefault();
+
+      try {
+        const projectFolder = await selectProject();
+        if ( !projectFolder ) return location.reload();
+
+        const projectName = projectFolder.split( "/" ).pop();
+        const confirmDelete = `Are you sure you want to remove the ${ projectName } project?`;
+
+        const userConfirmed = await window.electronAPI.dialog.showConfirmation( confirmDelete );
+        if ( !userConfirmed ) {
+          console.log( 'User cancelled deletion' );
+          return location.reload();
+        }
+
+        const filePath = `${ projectFolder }/.metallurgy/projectData.json`;
+        await window.electronAPI.files.delete( filePath );
+        console.log( `Project ${ projectName } deleted successfully` );
+
+        // Clear all project data from localStorage
+        [ "projectFolder", "contentFolder", "dataFolder" ].forEach( key =>
+          deleteFromLocalStorage( key ) );
+
+        location.reload();
+      } catch ( error ) {
+        console.error( `Error deleting project:`, error );
+        alert( `Failed to delete project: ${ error.message }` );
+      }
+    } );
   };
 
   const getRecentProject = () => {
     const recentProject = getFromLocalStorage( "projectFolder" );
-    if ( recentProject ) {
-      const recentProjectSlot = document.querySelector( '.js-recent-project' );
-      const recentProjectName = recentProject.split( "/" ).pop();
-      recentProjectSlot.innerHTML = recentProjectName;
+    if ( !recentProject ) return;
 
-      recentProjectSlot.addEventListener( 'click', ( e ) => {
-        e.preventDefault();
+    const recentProjectSlot = document.querySelector( '.js-recent-project' );
+    if ( !recentProjectSlot ) return;
 
-        const targetScreen = e.target.href;
-        location.assign( targetScreen );
-      } );
-    }
+    const recentProjectName = recentProject.split( "/" ).pop();
+    recentProjectSlot.innerHTML = recentProjectName;
+
+    recentProjectSlot.addEventListener( 'click', ( e ) => {
+      e.preventDefault();
+      location.assign( e.target.href );
+    } );
   };
 
   const openProject = async () => {
@@ -145,40 +108,32 @@ const renderer = ( () => {
     trigger.addEventListener( 'click', async ( e ) => {
       e.preventDefault();
 
-      // Get the target and home screen
-      const targetScreen = e.target.href;
+      try {
+        const targetScreen = e.target.href;
+        const projectFolder = await selectProject();
 
-      // Get the project folder
-      const projectFolder = await selectProject();
+        if ( projectFolder === "abort" ) return;
 
-      if ( projectFolder === "abort" ) {
-        return;
-      }
+        saveToLocalStorage( "projectFolder", projectFolder );
+        const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
 
-      saveToLocalStorage( "projectFolder", projectFolder );
+        const exists = await window.electronAPI.files.exists( configFilePath );
+        if ( !exists ) {
+          alert( "This folder is not a valid project - projectData.json missing!" );
+          return;
+        }
 
-      // Check if a config file already exists in this project folder
-      // <projectFolder>/.metallurgy/projectData.json
-      const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
+        const { data: fileContents } = await window.electronAPI.files.read( configFilePath );
 
-      const exists = await electronAPI.checkFileExists( configFilePath );
-
-      if ( exists ) {
-        // Get the content and data folder from the config file
-        const fileContents = await window.electronAPI.readFile( configFilePath );
-        const contentFolder = fileContents.data.contentPath;
-        const dataFolder = fileContents.data.dataPath;
-
-        // Save the content and data folders to local storage
-        saveToLocalStorage( "contentFolder", contentFolder );
-        saveToLocalStorage( "dataFolder", dataFolder );
+        // Save project paths to localStorage
+        saveToLocalStorage( "contentFolder", fileContents.contentPath );
+        saveToLocalStorage( "dataFolder", fileContents.dataPath );
 
         location.assign( targetScreen );
-      } else {
-        alert( "This folder is not a valid project - projectData.json missing!" );
-        return;
+      } catch ( error ) {
+        console.error( "Error opening project:", error );
+        alert( `Failed to open project: ${ error.message }` );
       }
-
     } );
   };
 

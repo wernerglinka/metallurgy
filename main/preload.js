@@ -1,31 +1,50 @@
 const { contextBridge, ipcRenderer } = require( 'electron' );
-const path = require( 'node:path' );
 const fs = require( 'node:fs' );
 const convertToYAML = require( 'yaml' );
 
-contextBridge.exposeInMainWorld( 'electronAPI', {
-  // use to open a dialog from the renderer process to the main process
-  openDialog: ( method, config ) => ipcRenderer.invoke( 'dialog', method, config ),
-  writeFile: ( data ) => ipcRenderer.invoke( 'writeFile', data ),
-  readFile: ( filePath ) => ipcRenderer.invoke( 'readFile', filePath ),
-  deleteFile: ( filePath ) => ipcRenderer.invoke( 'deleteFile', filePath ),
-  checkFileExists: async ( filePath ) => {
-    try {
-      if ( fs.existsSync( filePath ) ) {
-        return true;
-      }
-      else {
+/**
+ * API exposed to renderer process
+ * Groups functionality into logical categories for better organization
+ */
+const electronAPI = {
+  // Dialog operations
+  dialog: {
+    open: ( method, config ) => ipcRenderer.invoke( 'dialog', method, config ),
+    showConfirmation: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message )
+  },
+
+  // File operations
+  files: {
+    write: ( data ) => ipcRenderer.invoke( 'writeFile', data ),
+    read: ( filePath ) => ipcRenderer.invoke( 'readFile', filePath ),
+    delete: ( filePath ) => ipcRenderer.invoke( 'deleteFile', filePath ),
+    exists: async ( filePath ) => {
+      try {
+        return fs.existsSync( filePath );
+      } catch {
         return false;
       }
-    } catch ( error ) {
-      return false;
     }
   },
-  getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName ),
-  showConfirmationDialog: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
-  readDirectory: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
-  writeMarkdownFile: ( data ) => ipcRenderer.invoke( 'writeMarkdownFile', data ),
-  readMarkdownFile: ( filePath ) => ipcRenderer.invoke( 'readMarkdownFile', filePath ),
-  writeObjectToFile: ( data ) => ipcRenderer.invoke( 'writeObjectToFile', data ),
-  toYAML: ( args ) => convertToYAML.stringify( args ),
-} );
+
+  // Directory operations
+  directories: {
+    read: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
+    getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName )
+  },
+
+  // Markdown specific operations
+  markdown: {
+    write: ( data ) => ipcRenderer.invoke( 'writeMarkdownFile', data ),
+    read: ( filePath ) => ipcRenderer.invoke( 'readMarkdownFile', filePath ),
+    writeObject: ( data ) => ipcRenderer.invoke( 'writeObjectToFile', data )
+  },
+
+  // Utility functions
+  utils: {
+    toYAML: ( args ) => convertToYAML.stringify( args )
+  }
+};
+
+// Expose the API to the renderer process
+contextBridge.exposeInMainWorld( 'electronAPI', electronAPI );

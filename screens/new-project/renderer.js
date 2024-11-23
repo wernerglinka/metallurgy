@@ -17,12 +17,12 @@ const renderer = ( () => {
     // <projectFolder>/.metallurgy/projectData.json
     const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
 
-    const exists = await electronAPI.checkFileExists( configFilePath );
+    const exists = await electronAPI.files.exists( configFilePath );
 
     if ( exists ) {
       console.log( "config file exists" );
       // Get the content and data folder from the config file
-      const fileContentsRaw = await window.electronAPI.readFile( configFilePath );
+      const fileContentsRaw = await window.electronAPI.files.read( configFilePath );
       const fileContents = JSON.parse( fileContentsRaw.data );
 
       const contentFolder = fileContents.contentPath;
@@ -145,7 +145,7 @@ const renderer = ( () => {
         };
 
         // Send the project data to the main process to create the project config file
-        const response = await electronAPI.writeFile( projectData );
+        const response = await electronAPI.files.write( projectData );
 
         if ( response.status === "success" ) {
           // Redirect to open project screen

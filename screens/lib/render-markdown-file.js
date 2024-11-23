@@ -2,45 +2,70 @@ import { convertToSchemaObject } from './convert-js-to-schema.js';
 import { getUpdatedElement } from './create-element.js';
 import { getFromLocalStorage } from './local-storage.js';
 
+/**
+ * Renders a markdown file's frontmatter as form elements
+ * @param {Object} frontmatter - The frontmatter object from the markdown file
+ * @param {string} content - The content of the markdown file
+ * @throws {Error} If schema file operations fail
+ */
 export const renderMarkdownFile = async ( frontmatter, content ) => {
-  const schema = await convertToSchemaObject( frontmatter );
+  try {
+    // Convert frontmatter to schema
+    const schema = await convertToSchemaObject( frontmatter );
 
-  /**
-   * Check if we have explicitly defined field schemas or if we need to infer them 
-   * from the json shape.
-   * Field schemas are defined in the fields.json file in the .metallurgy folder of the project
-   */
+    // Get project configuration
+    const projectPath = getFromLocalStorage( 'projectFolder' );
+    if ( !projectPath ) {
+      throw new Error( 'No project path found in localStorage' );
+    }
 
-  // Get the project path from localStorage
-  const projectPath = getFromLocalStorage( 'projectFolder' );
-  // Create the schema file path
-  const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/fields.json`;
-  // check if file exists via the main process
-  const schemaExists = await window.electronAPI.checkFileExists( schemaFilePath );
+    // Check for explicit field schemas
+    const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/fields.json`;
 
-  let explicitSchemaArray;
+    let explicitSchemaArray = null;
+    const schemaExists = await window.electronAPI.files.exists( schemaFilePath );
 
-  if ( schemaExists ) {
-    const explicitSchema = await window.electronAPI.readFile( schemaFilePath );
-    explicitSchemaArray = JSON.parse( explicitSchema.data );
+    if ( schemaExists ) {
+      try {
+        const { status, data, error } = await window.electronAPI.files.read( schemaFilePath );
+
+        if ( status === 'failure' ) {
+          throw new Error( `Failed to read schema file: ${ error }` );
+        }
+
+        explicitSchemaArray = JSON.parse( data );
+      } catch ( error ) {
+        console.error( 'Error parsing schema file:', error );
+        // Continue without explicit schema if parsing fails
+      }
+    }
+
+    // Render schema to DOM
+    const fragment = document.createDocumentFragment();
+
+    if ( !schema.fields || !Array.isArray( schema.fields ) ) {
+      throw new Error( 'Invalid schema structure' );
+    }
+
+    // Create form elements for each field
+    schema.fields.forEach( field => {
+      const schemaElement = getUpdatedElement(
+        field,
+        explicitSchemaArray,
+        true // labelsExist = true for markdown file rendering
+      );
+      fragment.appendChild( schemaElement );
+    } );
+
+    // Add to dropzone
+    const dropzone = document.getElementById( 'dropzone' );
+    if ( !dropzone ) {
+      throw new Error( 'Dropzone element not found' );
+    }
+
+    dropzone.appendChild( fragment );
+  } catch ( error ) {
+    console.error( 'Error in renderMarkdownFile:', error );
+    throw error;
   }
-
-  // render the schema to the DOM
-  const fragment = document.createDocumentFragment();
-  schema.fields.forEach( ( field ) => {
-    // create a new element
-    // Since we are rendering a markdown file, all labels will be rendered as they are
-    // in the file, so we need to set labelsExist to true.
-    // If we'd render a new file, the labels would be rendered as input fields, so we'd
-    // need to set labelsExist to false.
-    const labelsExist = true;
-    const schemaElement = getUpdatedElement( field, explicitSchemaArray, labelsExist );
-
-    // Append the new element to the tempWrapper
-    fragment.appendChild( schemaElement );
-  } );
-
-  const dropzone = document.getElementById( 'dropzone' );
-  dropzone.appendChild( fragment );
-
 };

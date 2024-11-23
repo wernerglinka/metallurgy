@@ -5,43 +5,12 @@ const matter = require( 'gray-matter' );
 const yaml = require( 'yaml' );
 
 /**
- * @function readAllFiles
- * @param {*} dir 
- * @param {*} result 
- * @returns {Object} Contains all files in the directory and subdirectories
- * @description Creates object (result) with arrays of file paths, organized by
- *     their parent directory paths. The result object is initialized as an empty
- *     object and gets populated recursively as the function traverses the 
- *     directory structure.
+ * Application Constants
  */
-function readDirectoryStructure( rootDir ) {
-  function readAllFiles( dir ) {
-    const files = fs.readdirSync( dir, { withFileTypes: true } );
-    let result = [];
-
-    for ( const file of files ) {
-      // Skip .DS_Store files
-      if ( file.name === '.DS_Store' ) {
-        continue;
-      }
-      const fullPath = path.join( dir, file.name );
-      if ( file.isDirectory() ) {
-        result.push( { [ file.name ]: readAllFiles( fullPath ) } );
-      } else {
-        result.push( { [ file.name ]: fullPath } );
-      }
-    }
-
-    return result;
-  }
-
-  return { [ rootDir ]: readAllFiles( rootDir ) };
-}
-
-let mainWindow;
-
-const createWindow = () => {
-  mainWindow = new BrowserWindow( {
+const CONSTANTS = {
+  PROJECT_CONFIG_DIR: '.metallurgy',
+  PROJECT_CONFIG_FILE: 'projectData.json',
+  WINDOW_CONFIG: {
     width: 800,
     height: 600,
     titleBarStyle: 'hidden',
@@ -50,153 +19,198 @@ const createWindow = () => {
       contextIsolation: true,
       preload: path.join( __dirname, 'preload.js' )
     }
-  } );
-
-  mainWindow.loadFile( 'screens/home/index.html' );
+  }
 };
 
-// Load the window when Electron is ready
-app.whenReady().then( () => {
+/**
+ * File System Utilities
+ */
+const FileSystem = {
+  /**
+   * Recursively reads directory structure
+   * @param {string} rootDir - Root directory to start from
+   * @returns {Object} Tree structure of directories and files
+   */
+  readDirectoryStructure( rootDir ) {
+    function readAllFiles( dir ) {
+      const files = fs.readdirSync( dir, { withFileTypes: true } );
+      let result = [];
 
-  createWindow();
+      for ( const file of files ) {
+        if ( file.name === '.DS_Store' ) continue;
 
-  // On macOS, re-create the window when the dock icon is clicked
-  app.on( 'activate', () => {
-    if ( BrowserWindow.getAllWindows().length === 0 ) {
-      createWindow();
-    };
-  } );
-
-  // handle dialog requests from the renderer process
-  ipcMain.handle( 'dialog', ( e, method, params ) => {
-    return dialog[ method ]( mainWindow, params );
-  } );
-
-  // handle a write file request from the renderer process
-  ipcMain.handle( 'writeFile', ( e, projectData ) => {
-    try {
-      // Create the path for the project data file
-      const filePath = path.join( projectData.projectPath, "/.metallurgy/projectData.json" );
-      const directoryPath = path.dirname( filePath );
-
-      // Ensure the directory exists
-      if ( !fs.existsSync( directoryPath ) ) {
-        fs.mkdirSync( directoryPath, { recursive: true } );
+        const fullPath = path.join( dir, file.name );
+        if ( file.isDirectory() ) {
+          result.push( { [ file.name ]: readAllFiles( fullPath ) } );
+        } else {
+          result.push( { [ file.name ]: fullPath } );
+        }
       }
 
+      return result;
+    }
+
+    return { [ rootDir ]: readAllFiles( rootDir ) };
+  },
+
+  /**
+   * Ensures a directory exists, creates if it doesn't
+   * @param {string} dirPath - Directory path to check/create
+   */
+  ensureDirectoryExists( dirPath ) {
+    if ( !fs.existsSync( dirPath ) ) {
+      fs.mkdirSync( dirPath, { recursive: true } );
+    }
+  }
+};
+
+/**
+ * Main Window Management
+ */
+class MainWindow {
+  static window = null;
+
+  static createWindow() {
+    MainWindow.window = new BrowserWindow( CONSTANTS.WINDOW_CONFIG );
+    MainWindow.window.loadFile( 'screens/home/index.html' );
+  }
+
+  static getWindow() {
+    return MainWindow.window;
+  }
+}
+
+/**
+ * IPC Handler Functions
+ */
+const IPCHandlers = {
+  async handleDialog( event, method, params ) {
+    return dialog[ method ]( MainWindow.getWindow(), params );
+  },
+
+  async handleWriteFile( event, projectData ) {
+    try {
+      const filePath = path.join(
+        projectData.projectPath,
+        CONSTANTS.PROJECT_CONFIG_DIR,
+        CONSTANTS.PROJECT_CONFIG_FILE
+      );
+      FileSystem.ensureDirectoryExists( path.dirname( filePath ) );
       fs.writeFileSync( filePath, JSON.stringify( projectData ) );
       return { status: 'success' };
-    }
-    catch ( err ) {
+    } catch ( err ) {
       return { status: 'failure', error: err.message };
     }
-  } );
+  },
 
-  // handle a read file request from the renderer process
-  ipcMain.handle( 'readFile', ( e, filePath ) => {
+  async handleReadFile( event, filePath ) {
     try {
       const data = fs.readFileSync( filePath, 'utf8' );
-      return { status: 'success', data: data };
-    }
-    catch ( error ) {
+      return { status: 'success', data: JSON.parse( data ) };
+    } catch ( error ) {
       return { status: 'failure', error: error.message };
     }
-  } );
+  },
 
-  // handle a write markdown file request from the renderer process
-  ipcMain.handle( 'writeMarkdownFile', ( e, filePath, data ) => {
+  async handleMarkdownOperations( event, operation, filePath, data = null ) {
     try {
-      // Ensure the directory exists
-      if ( !fs.existsSync( filePath ) ) {
-        fs.mkdirSync( filePath, { recursive: true } );
+      switch ( operation ) {
+        case 'read':
+          const fileContent = fs.readFileSync( filePath, 'utf8' );
+          const { data: frontmatter, content } = matter( fileContent );
+          return { status: 'success', data: { frontmatter, content: content || '' } };
+
+        case 'write':
+          FileSystem.ensureDirectoryExists( path.dirname( filePath ) );
+          fs.writeFileSync( filePath, data );
+          return { status: 'success' };
+
+        default:
+          throw new Error( `Unknown operation: ${ operation }` );
       }
-
-      fs.writeFileSync( filePath, JSON.stringify( projectData ) );
-      return { status: 'success' };
-    }
-    catch ( err ) {
-      return { status: 'failure', error: err.message };
-    }
-  } );
-
-  // handle a read markdown file request from the renderer process
-  ipcMain.handle( 'readMarkdownFile', ( e, filePath ) => {
-    try {
-      const fileContent = fs.readFileSync( filePath, 'utf8' );
-      const frontmatter = matter( fileContent ).data;
-      const content = matter( fileContent ).content || '';
-
-      return { status: 'success', data: { frontmatter, content } };
-    }
-    catch ( error ) {
+    } catch ( error ) {
       return { status: 'failure', error: error.message };
     }
-  } );
+  },
 
-  // handle delete file request from the renderer process
-  ipcMain.handle( 'deleteFile', ( e, filePath ) => {
+  async handleDeleteFile( event, filePath ) {
     try {
       fs.unlinkSync( filePath );
       return { status: 'success' };
-    }
-    catch ( error ) {
+    } catch ( error ) {
       return { status: 'failure', error: error.message };
     }
-  } );
+  },
 
-  // handle confirmation dialog requests from the renderer process
-  ipcMain.handle( 'showConfirmationDialog', async ( event, message ) => {
+  async handleGetTemplates( event, templatesDirName ) {
+    try {
+      const templatesDir = path.join( __dirname, '../', templatesDirName );
+      const allFiles = FileSystem.readDirectoryStructure( templatesDir );
+      return { status: 'success', data: allFiles };
+    } catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  },
+
+  async handleWriteObjectToFile( event, { path: filePath, obj } ) {
+    try {
+      const yamlString = yaml.stringify( obj );
+      fs.writeFileSync( filePath, `---\n${ yamlString }---\n` );
+      return { status: 'success' };
+    } catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  },
+
+  async handleConfirmationDialog( event, message ) {
     const options = {
       type: 'question',
       buttons: [ 'Yes', 'No' ],
       defaultId: 1,
       title: 'Confirm',
-      message: message,
+      message
     };
-
     const result = await dialog.showMessageBox( options );
-    return result.response === 0; // Returns true if 'Yes' was clicked
-  } );
+    return result.response === 0;
+  }
+};
 
-  // handle a read directory request from the renderer process
-  ipcMain.handle( 'readDirectory', ( e, directoryPath ) => {
-    try {
-      const allFiles = readDirectoryStructure( directoryPath );
-      return { status: 'success', data: allFiles };
-    }
-    catch ( error ) {
-      return { status: 'failure', error: error.message };
-    }
-  } );
+/**
+ * Application Setup
+ */
+function setupIPC() {
+  ipcMain.handle( 'dialog', IPCHandlers.handleDialog );
+  ipcMain.handle( 'writeFile', IPCHandlers.handleWriteFile );
+  ipcMain.handle( 'readFile', IPCHandlers.handleReadFile );
+  ipcMain.handle( 'readMarkdownFile', ( e, path ) =>
+    IPCHandlers.handleMarkdownOperations( e, 'read', path ) );
+  ipcMain.handle( 'writeMarkdownFile', ( e, path, data ) =>
+    IPCHandlers.handleMarkdownOperations( e, 'write', path, data ) );
+  ipcMain.handle( 'deleteFile', IPCHandlers.handleDeleteFile );
+  ipcMain.handle( 'getTemplates', IPCHandlers.handleGetTemplates );
+  ipcMain.handle( 'writeObjectToFile', IPCHandlers.handleWriteObjectToFile );
+  ipcMain.handle( 'showConfirmationDialog', IPCHandlers.handleConfirmationDialog );
+  ipcMain.handle( 'readDirectory', ( e, path ) => ( {
+    status: 'success',
+    data: FileSystem.readDirectoryStructure( path )
+  } ) );
+}
 
-  // handle a get templates request from the renderer process
-  ipcMain.handle( 'getTemplates', ( e, templatesDirName ) => {
-    // build path to templates directory
-    const templatesDir = path.join( __dirname, '../', templatesDirName );
-    try {
-      const allFiles = readDirectoryStructure( templatesDir );
-      return { status: 'success', data: allFiles };
-    }
-    catch ( error ) {
-      return { status: 'failure', error: error.message };
-    }
-  } );
+app.whenReady().then( () => {
+  MainWindow.createWindow();
+  setupIPC();
 
-  // handle a request to write an object as YAML/frontmatter to a markdown file
-  ipcMain.handle( 'writeObjectToFile', async ( e, data ) => {
-    // convert the object to frontmatter yaml
-    let yamlString = yaml.stringify( data.obj );
-
-    try {
-      fs.writeFileSync( data.path, `---\n${ yamlString }---\n` );
-    } catch ( error ) {
-      console.error( "Error writing to file:", error );
+  // MacOS-specific window handling
+  app.on( 'activate', () => {
+    if ( BrowserWindow.getAllWindows().length === 0 ) {
+      MainWindow.createWindow();
     }
   } );
+} );
 
-  // Quit when all windows are closed, except on macOS
-  app.on( 'window-all-closed', () => {
-    if ( process.platform !== 'darwin' ) app.quit();
-  } );
-
+// Handle window closing
+app.on( 'window-all-closed', () => {
+  if ( process.platform !== 'darwin' ) {
+    app.quit();
+  }
 } );

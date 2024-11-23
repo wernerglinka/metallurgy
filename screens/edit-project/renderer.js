@@ -53,7 +53,7 @@ const renderer = ( () => {
 
   const buildTemplatesSelection = async () => {
     // Get templates if they exists
-    const templates = await electronAPI.getTemplates( 'templates' );
+    const templates = await electronAPI.directories.getTemplates( 'templates' );
     const templatesList = templates.data;
     const templatesSelect = document.querySelector( '.js-templates-wrapper' );
 
@@ -81,7 +81,7 @@ const renderer = ( () => {
     for ( const template of flatArray ) {
       const templatePath = Object.values( template )[ 0 ];
       const templateName = Object.keys( template )[ 0 ];
-      const templateContent = await electronAPI.readFile( templatePath );
+      const templateContent = await electronAPI.files.read( templatePath );
       allTemplatesObject[ templateName ] = templateContent.data;
     }
  
@@ -185,7 +185,7 @@ const renderer = ( () => {
             obj: dropzoneValues,
             path: selectedFilePath.replace( 'file://', '' )
           };
-          window.electronAPI.writeObjectToFile( options );
+          window.electronAPI.files.write( options );
 
           console.log( "Form was send to file" );
 
@@ -224,7 +224,7 @@ const renderer = ( () => {
       const dropzoneValues = preprocessFormData();
 
       // Convert the object to YAML
-      const pageYAMLObject = window.electronAPI.toYAML( dropzoneValues );
+      const pageYAMLObject = window.electronAPI.utiles.toYAML( dropzoneValues );
 
       // display the yaml in the preview pane as code
       const previewPane = document.querySelector( ".js-preview-pane" );
