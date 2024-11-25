@@ -1,3 +1,10 @@
+/**
+ * NOTE:
+ * Preload scripts in Electron run in a special context that's more compatible 
+ * with CommonJS, Even when the main process uses ES modules, preload scripts 
+ * should use CommonJS. The contextBridge API is specifically designed to work 
+ * with CommonJS modules in the preload context.
+ */
 const { contextBridge, ipcRenderer } = require( 'electron' );
 const fs = require( 'node:fs' );
 const convertToYAML = require( 'yaml' );
