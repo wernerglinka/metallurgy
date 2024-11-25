@@ -46,15 +46,89 @@ h2 {
   }
 }
 
+@keyframes slideSidebarOut {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideSidebarIn {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes expandContainer {
+  0% {
+    width: calc(100% - 30rem);
+    margin-left: 30rem;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@keyframes collapseContainer {
+  0% {
+    width: 100%;
+    margin-left: 0;
+  }
+  100% {
+    width: calc(100% - 30rem);
+    margin-left: 30rem;
+  }
+}
+
 .edit-pane {
   display: flex;
   width: 100%;
   justify-content: flex-start;
-  transition: all 0.5s ease;
+  position: relative;
 }
 
 .edit-container {
-  flex: 1 1 auto;
+  width: calc(100% - 30rem);
+  margin-left: 30rem;
+  animation: collapseContainer 0.8s ease-in-out forwards;
+}
+
+.full-width .edit-container {
+  animation: expandContainer 0.8s ease-in-out forwards;
+}
+
+.sidebar-toggle {
+  svg {
+    width: 2rem;
+    height: 2rem;
+    fill: none;
+    stroke: #000; 
+    stroke-width: 2px; 
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+
+.sidebar {
+  position: absolute;
+  width: 30rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-right: 2rem;
+  font-size: 1.6rem;
+  animation: slideSidebarIn 0.8s ease-in-out forwards;
+
+  &.hidden {
+    animation: slideSidebarOut 0.8s ease-in-out forwards;
+  }
 }
 
 .right-sidebar {
@@ -74,16 +148,6 @@ h2 {
   padding-left: 1.5rem;
   flex: 0 0 20%;
    min-with: 30rem;
-}
-
-.sidebar {
-  flex: 0 0 20%;
-  min-with: 30rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding-right: 2rem;
-  font-size: 1.6rem;
 }
 
 .container-background {

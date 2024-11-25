@@ -81,11 +81,15 @@ const renderer = ( () => {
         return;
       }
 
+      console.log( projectFolder );
+
       // Save project folder first
       StorageOperations.saveProjectPath( projectFolder );
 
       // Load project configuration
       const config = await ProjectOperations.loadProjectConfig( projectFolder );
+
+      console.log( config );
 
       // Save all project data consisting of project path, the paths to the 
       // website content and data folder path      

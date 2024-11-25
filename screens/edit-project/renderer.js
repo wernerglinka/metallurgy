@@ -20,8 +20,59 @@ const renderer = ( () => {
     document.getElementById( 'project-name' ).prepend( projectName );
   };
 
+
+  /**
+   * Manage sidebar visibility
+   * The sidebar can be hidden or shown by clicking the toggle button
+   */
+  const manageSidebarVisibility = () => {
+
+    const viewSidebarIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" >
+        <rect width="18" height="18" x="3" y="3" rx="2"/>
+        <path d="M9 3v18"/>
+        <path d="m14 9 3 3-3 3"/>
+      </svg>
+    `;
+    const hideSidebarIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <rect width="18" height="18" x="3" y="3" rx="2"/>
+        <path d="M9 3v18"/>
+        <path d="m16 15-3-3 3-3"/>
+      </svg>
+    `;
+    const sidebarToggle = document.querySelector( '.js-sidebar-toggle' );
+    const editPane = document.querySelector( '.edit-pane' );
+    const sidebar = document.querySelector( '.js-sidebar' );
+
+    sidebarToggle.addEventListener( 'click', () => {
+      console.log( "YAY" );
+
+      sidebarToggle.classList.toggle( 'isClosed' );
+      sidebar.classList.toggle( 'hidden' );
+      editPane.classList.toggle( 'full-width' );
+
+      if ( sidebarToggle.classList.contains( 'isClosed' ) ) {
+        sidebarToggle.innerHTML = viewSidebarIcon;
+      } else {
+        sidebarToggle.innerHTML = hideSidebarIcon;
+      }
+    } );
+  };
+
+  /** 
+   * Manages the sidebar
+   * The sidebar can show various panes, depending on the link clicked.
+   * - Select File
+   *   Displays a list of files in the content and data folders
+   * - Add Field
+   *   Displays a list of fields that can be added to the main form
+   * - Add Template
+   *   Displays a list of templates that can be added to the main form
+   */
   const manageSidebar = () => {
     const sidebarSelectLinks = document.querySelectorAll( '.js-sidebar-pane-selection a' );
+
     for ( const link of sidebarSelectLinks ) {
       link.addEventListener( 'click', ( e ) => {
         e.preventDefault();
@@ -51,6 +102,11 @@ const renderer = ( () => {
     newTemplatesSidebar.addEventListener( 'dragstart', dragStart );
   };
 
+  /**  
+   * Build the templates selection
+   * The function will get the templates from the metallurgy templates folder
+   * and add them to the sidebar. It will also add event listeners to the template links.
+   */
   const buildTemplatesSelection = async () => {
     // Get templates if they exists
     const templates = await electronAPI.directories.getTemplates( 'templates' );
@@ -236,6 +292,7 @@ const renderer = ( () => {
 
 
   return {
+    manageSidebarVisibility,
     updateProjectName,
     manageSidebar,
     renderEditSpace,
@@ -244,6 +301,7 @@ const renderer = ( () => {
   };
 
 } )();
+renderer.manageSidebarVisibility();
 renderer.updateProjectName();
 renderer.manageSidebar();
 renderer.renderEditSpace();

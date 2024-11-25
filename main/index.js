@@ -1,9 +1,14 @@
+import { config } from 'dotenv';
+config();
+
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
 import { setupIPC } from './lib/ipc-handlers.js';
 import { FileSystem } from './lib/file-system.js';
 import { CONSTANTS } from './lib/constants.js';
+
+import { isDev, isMac } from './lib/env.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -24,6 +29,12 @@ let mainWindow = null;
 const createWindow = () => {
   mainWindow = new BrowserWindow( WINDOW_CONFIG );
   mainWindow.loadFile( 'screens/home/index.html' );
+
+  // Show devtools automatically if in development
+  if ( isDev ) {
+    mainWindow.webContents.openDevTools();
+  }
+
   return mainWindow;
 };
 
