@@ -1,5 +1,5 @@
-import { getFromLocalStorage } from './local-storage.js';
-import { createDomTree } from './create-dom-tree.js';
+import { getFromLocalStorage } from '../local-storage.js';
+import { createDomTree } from '../page-elements/create-dom-tree.js';
 
 /**
  * Gets directory files and creates a DOM tree representation

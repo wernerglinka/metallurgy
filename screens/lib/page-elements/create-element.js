@@ -1,4 +1,4 @@
-import formComponent from './formComponents/index.js';
+import formComponent from '../formComponents/index.js';
 
 function formatDate( inputDateString ) {
   // Parse the input date string into a Date object

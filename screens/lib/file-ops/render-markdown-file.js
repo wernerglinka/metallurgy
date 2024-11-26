@@ -1,6 +1,6 @@
 import { convertToSchemaObject } from './convert-js-to-schema.js';
-import { getUpdatedElement } from './create-element.js';
-import { getFromLocalStorage } from './local-storage.js';
+import { getUpdatedElement } from '../page-elements/create-element.js';
+import { getFromLocalStorage } from '../local-storage.js';
 
 /**
  * Renders a markdown file's frontmatter as form elements
