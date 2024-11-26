@@ -1,5 +1,5 @@
 import getFolderName from "./utilities/get-folder-name.js";
-import { getFromLocalStorage } from "./local-storage.js";
+import { StorageOperations } from "./storage-operations.js";
 
 /**
  * @typedef {Object} FolderUIElements
@@ -32,6 +32,7 @@ const getFolderUIElements = ( folderType ) => {
  * @param {string} folderType - Type of folder being updated
  * @param {string} contentFolder - Content folder path
  * @throws {Error} If update fails or inputs invalid
+ * @returns {void}
  */
 export const updateFolderUI = ( folderType, contentFolder ) => {
   try {
@@ -41,13 +42,13 @@ export const updateFolderUI = ( folderType, contentFolder ) => {
     }
 
     // Get project info
-    const projectFolder = getFromLocalStorage( 'projectFolder' );
+    const projectFolder = StorageOperations.getProjectPath();
     if ( !projectFolder ) {
-      throw new Error( 'Project folder not found in localStorage' );
+      throw new Error( 'Project folder not found in storage' );
     }
 
     // Generate folder name
-    const projectName = projectFolder.split( '/' ).pop();
+    const projectName = StorageOperations.getProjectName( projectFolder );
     const folderName = getFolderName( projectName, contentFolder );
 
     // Update UI

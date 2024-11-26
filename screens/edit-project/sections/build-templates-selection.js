@@ -1,8 +1,8 @@
 // screens/edit-project/build-templates-selection.js
 
-import { createDomTree } from "../page-elements/create-dom-tree.js";
-import { addMainForm } from "../page-elements/add-main-form.js";
-import { updateButtonsStatus } from "../page-elements/update-buttons-status.js";
+import { createDomTree } from "../../lib/page-elements/create-dom-tree.js";
+import { addMainForm } from "../../lib/page-elements/add-main-form.js";
+import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
 /**
  * @typedef {Object} TemplatesElements
  * @property {HTMLElement} wrapper - Templates wrapper element

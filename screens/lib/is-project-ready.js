@@ -1,13 +1,18 @@
-import { getFromLocalStorage } from "./local-storage.js";
+import { StorageOperations } from './storage-operations.js';
 
+/**
+ * Checks if all required project paths are set in storage
+ * @returns {boolean} True if all paths are set
+ */
 export const isProjectReady = () => {
-  // check is all folder paths are stored in local storage
-  const projectFolder = getFromLocalStorage( "projectFolder" );
-  const contentFolder = getFromLocalStorage( "contentFolder" );
-  const dataFolder = getFromLocalStorage( "dataFolder" );
+  try {
+    const projectFolder = StorageOperations.getProjectPath();
+    const contentFolder = StorageOperations.getContentPath();
+    const dataFolder = StorageOperations.getDataPath();
 
-  if ( projectFolder && contentFolder && dataFolder ) {
-    return true;
+    return Boolean( projectFolder && contentFolder && dataFolder );
+  } catch ( error ) {
+    console.error( 'Failed to check project status:', error );
+    return false;
   }
-  return false;
 };

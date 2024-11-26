@@ -1,6 +1,6 @@
 // screens/edit-project/preview/manage-preview.js
 
-import { preprocessFormData } from "../preprocess-form-data.js";
+import { preprocessFormData } from "../../lib/preprocess-form-data.js";
 /**
  * @typedef {Object} PreviewElements
  * @property {HTMLElement} editPane - Main edit pane
@@ -36,7 +36,7 @@ const getPreviewElements = () => {
  */
 const updatePreviewContent = ( elements, data ) => {
   try {
-    const yamlContent = window.electronAPI.utiles.toYAML( data );
+    const yamlContent = window.electronAPI.utils.toYAML( data );
     elements.previewPane.innerHTML = `<pre>${ yamlContent }</pre>`;
   } catch ( error ) {
     console.error( 'Failed to convert data to YAML:', error );

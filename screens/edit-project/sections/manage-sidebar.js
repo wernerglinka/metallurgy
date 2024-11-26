@@ -1,7 +1,7 @@
 // screens/edit-project/manage-sidebar.js
 
 /**
- * Manages sidebar pane visibility and drag-drop initialization
+ * Manages sidebar panes selection and drag-drop initialization
  * @param {Function} dragStartHandler - Handler for drag start events
  * @throws {Error} If required DOM elements not found
  */

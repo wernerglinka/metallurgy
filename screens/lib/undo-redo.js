@@ -1,4 +1,4 @@
-//import { compareDOMElements } from './compare-dom-elements.js';
+//import { compareDOMElements } from './tools/compare-dom-elements.js';
 
 // TODO: Needs more testing. Seems to work but I'm not sure it's the best way to do this.
 

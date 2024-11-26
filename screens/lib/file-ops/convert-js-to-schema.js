@@ -1,5 +1,3 @@
-import { getFromLocalStorage } from '../local-storage.js';
-
 function isSimpleList( value ) {
   // Check if value is an array
   if ( Array.isArray( value ) ) {

@@ -23,6 +23,7 @@ const electronAPI = {
   // File operations
   files: {
     write: ( data ) => ipcRenderer.invoke( 'writeFile', data ),
+    writeYAML: ( data ) => ipcRenderer.invoke( 'writeYAMLFile', data ),
     read: ( filePath ) => ipcRenderer.invoke( 'readFile', filePath ),
     delete: ( filePath ) => ipcRenderer.invoke( 'deleteFile', filePath ),
     exists: async ( filePath ) => {

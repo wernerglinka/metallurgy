@@ -1,17 +1,14 @@
-// screens/edit-project/render-edit-space.js
+// screens/edit-project/sections/render-edit-space.js
 
-import { getDirectoryFiles } from "../file-ops/get-directory-files.js";
-import { addMainForm } from "../page-elements/add-main-form.js";
-import { updateButtonsStatus } from "../page-elements/update-buttons-status.js";
-import { getMarkdownFile } from "../file-ops/get-markdown-file.js";
-import { renderMarkdownFile } from "../file-ops/render-markdown-file.js";
-import { renderJSONFile } from "../file-ops/render-json-file.js";
-import { cleanMainForm } from "../utilities/clean-main-form.js";
-import { redoUndo } from "../undo-redo.js";
-import { preprocessFormData } from "../preprocess-form-data.js";
-
-
-// screens/edit-project/edit-space/render-space.js
+import { getDirectoryFiles } from "../../lib/file-ops/get-directory-files.js";
+import { addMainForm } from "../../lib/page-elements/add-main-form.js";
+import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
+import { getMarkdownFile } from "../../lib/file-ops/get-markdown-file.js";
+import { renderMarkdownFile } from "../../lib/file-ops/render-markdown-file.js";
+import { renderJSONFile } from "../../lib/file-ops/render-json-file.js";
+import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
+import { redoUndo } from "../../lib/undo-redo.js";
+import { preprocessFormData } from "../../lib/preprocess-form-data.js";
 
 /**
  * @typedef {Object} FileData
@@ -20,7 +17,8 @@ import { preprocessFormData } from "../preprocess-form-data.js";
  */
 
 /**
- * Loads directory files and builds sidebar structure
+ * Get directory files and render a DOM tree representation
+ * for content and metadata files
  * @throws {Error} If file loading fails
  */
 const loadDirectoryFiles = async () => {
@@ -64,6 +62,7 @@ const updateActiveLinkState = ( activeLink ) => {
  * @returns {HTMLFormElement} The main form element
  */
 const setupEditForm = async ( fileName ) => {
+  // Clean up the main form and add a new one
   await cleanMainForm();
   const mainForm = addMainForm();
   updateButtonsStatus();
@@ -94,24 +93,32 @@ const handleFileContent = async ( filePath, fileType ) => {
 };
 
 /**
- * Sets up form submission handler
- * @param {HTMLFormElement} form - The main form
- * @param {string} filePath - Path to save file
+ * Sets up form submission handler with YAML conversion
+ * @param {HTMLFormElement} form - The form element
+ * @param {string} filePath - Path to save the file
  */
 const setupFormSubmission = ( form, filePath ) => {
-  form.addEventListener( 'submit', ( e ) => {
+  form.addEventListener( 'submit', async ( e ) => {
     e.preventDefault();
-    const dropzoneValues = preprocessFormData();
 
-    window.electronAPI.files.write( {
-      obj: dropzoneValues,
-      path: filePath.replace( 'file://', '' )
-    } );
+    try {
+      const dropzoneValues = preprocessFormData();
+
+      // Write YAML to file using IPC
+      await window.electronAPI.files.writeYAML( {
+        obj: dropzoneValues,
+        path: filePath.replace( 'file://', '' )
+      } );
+
+    } catch ( error ) {
+      console.error( 'Form submission failed:', error );
+      // TODO: Add user feedback for error
+    }
   } );
 };
 
 /**
- * Handles file selection
+ * When filename in sidebar is clicked, open the file in the editor
  * @param {Event} e - Click event
  */
 const handleFileSelection = async ( e ) => {
@@ -154,10 +161,13 @@ const setupTemplateLinks = () => {
  */
 const renderEditSpace = async () => {
   try {
+    // Get directory files and render a DOM tree representation
     await loadDirectoryFiles();
+
+    // directories are closed by default, toggle open by clicking on folder name
     setupFolderToggles();
 
-    // Set up file handlers
+    // Click on a file name to open the file in the editor
     document.querySelectorAll( '.js-files-list .file a' )
       .forEach( link => link.addEventListener( 'click', handleFileSelection ) );
 

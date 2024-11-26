@@ -1,4 +1,4 @@
-import { compareDOMElements } from './compare-dom-elements.js';
+import { compareDOMElements } from './tools/compare-dom-elements.js';
 
 /**
  * @function redoUndo
