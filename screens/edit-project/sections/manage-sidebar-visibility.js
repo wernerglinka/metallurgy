@@ -1,7 +1,6 @@
 // screens/edit-project/manage-sidebar-visibility.js
 
-import { viewSidebar } from '../../icons/view-sidebar.js';
-import { hideSidebar } from '../../icons/hide-sidebar.js';
+import { ICONS } from '../../icons/index.js';
 
 /**
  * Manages sidebar visibility state and toggle button appearance
@@ -28,7 +27,7 @@ const manageSidebarVisibility = () => {
    * @param {boolean} isVisible - Current sidebar visibility
    */
   const updateToggleState = ( isVisible ) => {
-    elements.toggle.innerHTML = isVisible ? hideSidebar : viewSidebar;
+    elements.toggle.innerHTML = isVisible ? ICONS.HIDESIDEBAR : ICONS.VIEWSIDEBAR;
     elements.toggle.setAttribute( 'aria-expanded', isVisible.toString() );
     elements.toggle.setAttribute( 'aria-label', `${ isVisible ? 'Hide' : 'Show' } Sidebar` );
   };

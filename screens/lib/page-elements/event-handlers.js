@@ -1,5 +1,6 @@
 import { createComponent } from "./create-element.js";
 import { updateButtonsStatus } from "./update-buttons-status.js";
+import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
 
 /**
  * @function processSidebarDraggables
@@ -309,17 +310,27 @@ export const sectionCollapse = ( e ) => {
 };
 
 export const addDeleteButtons = ( e ) => {
-
-  // if the add button was clicked clone the element and add it after the element
   if ( e.target.closest( '.add-button' ) ) {
     e.stopPropagation();
     const thisButton = e.target.closest( '.add-button' );
     const clonedElement = thisButton.parentElement.parentElement.cloneNode( true );
     clonedElement.classList.remove( 'label-exists' );
-    clonedElement.querySelector( '.element-label' ).removeAttribute( 'readonly' );
+
+    const elementLabel = clonedElement.querySelector( '.element-label' );
+    if ( elementLabel ) {
+      elementLabel.removeAttribute( 'readonly' );
+    }
+
+    // Generate unique name for duplicated section
+    const objectNameInput = clonedElement.querySelector( '.object-name input' );
+    if ( objectNameInput ) {
+      const timestamp = Date.now();
+      objectNameInput.value = `neverMind${ timestamp }`;
+    }
+
     thisButton.parentElement.parentElement.after( clonedElement );
   }
-  // if the delete button was clicked remove element
+
   if ( e.target.closest( '.delete-button' ) ) {
     e.stopPropagation();
     const thisButton = e.target.closest( '.delete-button' );

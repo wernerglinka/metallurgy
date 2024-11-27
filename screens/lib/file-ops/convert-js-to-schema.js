@@ -1,27 +1,4 @@
-function isSimpleList( value ) {
-  // Check if value is an array
-  if ( Array.isArray( value ) ) {
-    // Check if every item in the array is a string -> simple list
-    return value.every( item => typeof item === 'string' );
-  }
-  return false;
-}
-
-function isDateString( input ) {
-  // Attempt to parse the input string as a date
-  const parsedDate = new Date( input );
-
-  // Check if the parsed date is a valid date and not NaN
-  if ( !isNaN( parsedDate.getTime() ) ) {
-    return true; // It's a valid date string
-  } else {
-    return false; // It's not a valid date string
-  }
-}
-
-function isDateObject( input ) {
-  return input instanceof Date;
-}
+import { isSimpleList, isDateObject } from '../utilities/type-validators.js';
 
 export async function convertToSchemaObject( json ) {
   function createField( key, value ) {

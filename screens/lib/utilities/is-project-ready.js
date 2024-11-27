@@ -1,4 +1,4 @@
-import { StorageOperations } from './storage-operations.js';
+import { StorageOperations } from '../storage-operations.js';
 
 /**
  * Checks if all required project paths are set in storage
