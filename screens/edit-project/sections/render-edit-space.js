@@ -4,7 +4,7 @@ import { getDirectoryFiles } from "../../lib/file-ops/get-directory-files.js";
 import { addMainForm } from "../../lib/page-elements/add-main-form.js";
 import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
 import { getMarkdownFile } from "../../lib/file-ops/get-markdown-file.js";
-import { renderMarkdownFile } from "../../lib/file-ops/render-markdown-file.js";
+import { frontmatterToForm } from "../../lib/form-generation/frontmatter-to-form.js";
 import { renderJSONFile } from "../../lib/file-ops/render-json-file.js";
 import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
 import { redoUndo } from "../../lib/undo-redo.js";
@@ -82,7 +82,7 @@ const handleFileContent = async ( filePath, fileType ) => {
 
   switch ( fileType ) {
     case 'md':
-      await renderMarkdownFile( frontmatter, content );
+      await frontmatterToForm( frontmatter, content );
       break;
     case 'json':
       renderJSONFile( content );

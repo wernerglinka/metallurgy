@@ -1,4 +1,4 @@
-import { isSimpleList, isDateObject } from '../utilities/type-validators.js';
+import { isSimpleList, isDateObject } from '../../utilities/type-validators.js';
 
 export async function convertToSchemaObject( json ) {
   function createField( key, value ) {

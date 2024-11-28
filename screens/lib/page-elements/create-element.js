@@ -15,28 +15,6 @@ import { updateObjectField } from './field-handlers/object.js';
 
 import { processExplicitField } from './field-initialization/explicit-fields.js';
 
-function formatDate( inputDateString ) {
-  // Parse the input date string into a Date object
-  const inputDate = new Date( inputDateString );
-
-  // Check if the inputDate is a valid Date object
-  if ( isNaN( inputDate.getTime() ) ) {
-    return "Invalid Date"; // Return an error message if parsing fails
-  }
-
-  // Extract year, month, and day components
-  const year = inputDate.getFullYear();
-  const month = String( inputDate.getMonth() + 1 ).padStart( 2, "0" ); // Month is zero-based
-  const day = String( inputDate.getDate() ).padStart( 2, "0" );
-
-  // Format the components into "yyyy-MM-dd" format
-  const formattedDate = `${ year }-${ month }-${ day }`;
-
-  return formattedDate;
-}
-
-
-
 /**
  * @function createComponent
  * @param {string} type - text, checkbox, array, object, etc.
@@ -130,7 +108,7 @@ export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExis
  *  Based on the labelsExist parameter, the function will either render the element with the
  *  label as an input field or as a label.
  */
-function updateElement( element, field, explicitSchemaArray, labelsExist ) {
+export const updateElement = ( element, field, explicitSchemaArray, labelsExist ) => {
   // Process explicit field schema and get updated field data and permissions
   const { field: processedField, permissions } = processExplicitField( field, explicitSchemaArray );
   const { addDeleteButton, addDuplicateButton } = permissions;
@@ -217,4 +195,4 @@ function updateElement( element, field, explicitSchemaArray, labelsExist ) {
   addActionButtons( element, { addDeleteButton, addDuplicateButton } );
 
   return element;
-}
+};
