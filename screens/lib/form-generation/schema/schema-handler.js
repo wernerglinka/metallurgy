@@ -1,14 +1,31 @@
 /**
  * @module schema/schema-handler
- * @description Handles reading and processing of explicit schema files
+ * @description Handles project schema file operations
  */
 
 import { StorageOperations } from '../../storage-operations.js';
+import { FIELD_TYPES } from './field-types.js';
+import { validateField } from './validate-schema.js';
 
 /**
- * Reads and processes explicit schema file
- * @returns {Promise<Array|null>} Schema array or null if not found/invalid
- * @throws {Error} If project path not found
+ * Validates and processes field from schema file
+ * @param {Object} field - Field definition from schema file
+ * @throws {Error} If field is invalid
+ */
+const processSchemaField = ( field ) => {
+  validateField( field );
+  const fieldType = Object.values( FIELD_TYPES ).find( t => t.type === field.type );
+
+  if ( !field.default && fieldType.default !== undefined ) {
+    field.default = fieldType.default;
+  }
+
+  return field;
+};
+
+/**
+ * Reads and validates project schema file
+ * @returns {Promise<Array|null>} Processed schema array or null
  */
 export const getExplicitSchema = async () => {
   const projectPath = StorageOperations.getProjectPath();
@@ -19,9 +36,7 @@ export const getExplicitSchema = async () => {
   const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/fields.json`;
   const schemaExists = await window.electronAPI.files.exists( schemaFilePath );
 
-  if ( !schemaExists ) {
-    return null;
-  }
+  if ( !schemaExists ) return null;
 
   const { status, data, error } = await window.electronAPI.files.read( schemaFilePath );
   if ( status === 'failure' ) {
@@ -29,5 +44,5 @@ export const getExplicitSchema = async () => {
     return null;
   }
 
-  return data;
+  return Array.isArray( data ) ? data.map( processSchemaField ) : null;
 };
