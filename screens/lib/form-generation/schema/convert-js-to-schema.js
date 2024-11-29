@@ -33,5 +33,6 @@ function createField( key, value ) {
 }
 
 export async function convertToSchemaObject( json ) {
+  //console.log( JSON.stringify( json, null, 2 ) );
   return { fields: Object.entries( json ).map( ( [ key, value ] ) => createField( key, value ) ) };
 }

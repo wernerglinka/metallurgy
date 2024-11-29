@@ -102,9 +102,19 @@ const setupFormSubmission = ( form, filePath ) => {
     e.preventDefault();
 
     try {
+      // Keep existing data processing
       const dropzoneValues = preprocessFormData();
 
-      // Write YAML to file using IPC
+      // Add basic validation before save
+      const requiredFields = form.querySelectorAll( '[required]' );
+      const invalidFields = Array.from( requiredFields )
+        .filter( field => !field.value.trim() );
+
+      if ( invalidFields.length > 0 ) {
+        throw new Error( 'Required fields are missing' );
+      }
+
+      // Keep existing save mechanism
       await window.electronAPI.files.writeYAML( {
         obj: dropzoneValues,
         path: filePath.replace( 'file://', '' )
@@ -112,7 +122,7 @@ const setupFormSubmission = ( form, filePath ) => {
 
     } catch ( error ) {
       console.error( 'Form submission failed:', error );
-      // TODO: Add user feedback for error
+      // TODO: Show error to user
     }
   } );
 };

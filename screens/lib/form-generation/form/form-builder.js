@@ -14,6 +14,7 @@ import { getUpdatedElement } from '../../page-elements/create-element.js';
 export const createFormFragment = ( fields, explicitSchemaArray ) => {
   const fragment = document.createDocumentFragment();
 
+  // convert fields to form elements
   fields.forEach( field => {
     const schemaElement = getUpdatedElement(
       field,

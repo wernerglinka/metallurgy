@@ -3,24 +3,31 @@
  * @description Schema structure and field validation
  */
 import { FIELD_TYPES } from './field-types.js';
+import { createValidationError } from './schema-errors.js';
 
 const validateFieldStructure = ( field ) => {
-  if ( !field.type ) throw new Error( 'Field must have a type' );
-  if ( !field.label && !field.name ) throw new Error( 'Field must have label or name' );
+  if ( !field.type ) {
+    throw createValidationError( 'Field must have a type', field );
+  }
+  if ( !field.label && !field.name ) {
+    throw createValidationError( 'Field must have label or name', field );
+  }
 
   const fieldType = Object.values( FIELD_TYPES )
     .find( t => t.type === field.type.toLowerCase() );
-  if ( !fieldType ) throw new Error( `Invalid field type: ${ field.type }` );
+  if ( !fieldType ) {
+    throw createValidationError( `Invalid field type: ${ field.type }`, field );
+  }
 
   if ( fieldType.requiresOptions && !field.options?.length ) {
-    throw new Error( `${ field.type } field requires options` );
+    throw createValidationError( `${ field.type } field requires options`, field );
   }
 };
 
 const validateFieldValue = ( field ) => {
-  const fieldType = Object.values( FIELD_TYPES ).find( t => t.type === field.type );
+  const fieldType = Object.values( FIELD_TYPES )
+    .find( t => t.type === field.type.toLowerCase() );
 
-  // Skip validation for object type since it may be empty initially
   if ( field.type === 'object' ) return;
 
   if ( field.value === undefined && field.default === undefined ) {
@@ -30,12 +37,12 @@ const validateFieldValue = ( field ) => {
   switch ( field.type ) {
     case 'list':
       if ( !Array.isArray( field.value ) && !Array.isArray( field.default ) ) {
-        throw new Error( 'List field must have array value' );
+        throw createValidationError( 'List field must have array value', field );
       }
       break;
     case 'select':
       if ( field.value && !field.options.find( opt => opt.value === field.value ) ) {
-        throw new Error( 'Select value must match an option' );
+        throw createValidationError( 'Select value must match an option', field );
       }
       break;
   }
@@ -48,8 +55,12 @@ export const validateField = ( field ) => {
 };
 
 export const validateSchema = ( schema ) => {
-  if ( !schema?.fields ) throw new Error( 'Schema must contain fields property' );
-  if ( !Array.isArray( schema.fields ) ) throw new Error( 'Schema fields must be an array' );
+  if ( !schema?.fields ) {
+    throw createValidationError( 'Schema must contain fields property', schema );
+  }
+  if ( !Array.isArray( schema.fields ) ) {
+    throw createValidationError( 'Schema fields must be an array', schema );
+  }
 
   schema.fields.forEach( validateField );
   return true;

@@ -1,8 +1,10 @@
+// __tests__/setup.js
 import { jest } from '@jest/globals';
 
 // Create mock functions
 const mockDialogOpen = jest.fn();
 const mockFilesExists = jest.fn();
+const mockWriteYAML = jest.fn();  // Add writeYAML mock
 
 // Set up window and electronAPI before any tests run
 Object.defineProperty( globalThis, 'window', {
@@ -12,7 +14,8 @@ Object.defineProperty( globalThis, 'window', {
         open: mockDialogOpen
       },
       files: {
-        exists: mockFilesExists
+        exists: mockFilesExists,
+        writeYAML: mockWriteYAML  // Add to electronAPI.files
       }
     }
   },
@@ -25,7 +28,8 @@ export const mocks = {
     open: mockDialogOpen
   },
   files: {
-    exists: mockFilesExists
+    exists: mockFilesExists,
+    writeYAML: mockWriteYAML
   }
 };
 
