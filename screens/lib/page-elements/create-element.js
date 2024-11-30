@@ -66,6 +66,7 @@ export const createComponent = ( type, labelsExist ) => {
 export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExist ) => {
   // Build the new element as inferred from the json shape...
   const newElement = createComponent( mdField.type, labelsExist );
+
   // ...and update it with the field data and if the field is 'explicitly defined
   // add structure of the element, for example text to 'select' or 'text area'.
   const updatedElement = updateElement( newElement, mdField, explicitSchemaArray, labelsExist );

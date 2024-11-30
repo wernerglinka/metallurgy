@@ -21,6 +21,7 @@ export const createFormFragment = ( fields, explicitSchemaArray ) => {
       explicitSchemaArray,
       true // labelsExist = true for markdown file rendering
     );
+
     fragment.appendChild( schemaElement );
   } );
 
