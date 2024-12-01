@@ -10,6 +10,9 @@ import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
 import { redoUndo } from "../../lib/undo-redo.js";
 import { preprocessFormData } from "../../lib/preprocess-form-data.js";
 
+import { handleFormSubmission } from '../../lib/form-submission/submit-handler.js';
+
+
 /**
  * @typedef {Object} FileData
  * @property {string} frontmatter - YAML frontmatter
@@ -96,7 +99,7 @@ const handleFileContent = async ( filePath, fileType ) => {
  * Sets up form submission handler with YAML conversion
  * @param {HTMLFormElement} form - The form element
  * @param {string} filePath - Path to save the file
- */
+ 
 const setupFormSubmission = ( form, filePath ) => {
   form.addEventListener( 'submit', async ( e ) => {
     e.preventDefault();
@@ -126,6 +129,16 @@ const setupFormSubmission = ( form, filePath ) => {
     }
   } );
 };
+*/
+
+const setupFormSubmission = ( form, filePath, schema ) => {
+  form.addEventListener( 'submit', async ( e ) => {
+    e.preventDefault();
+
+    const result = await handleFormSubmission( form, filePath, schema );
+    updateButtonsStatus( result.success ? 'success' : 'error', result.error );
+  } );
+};
 
 /**
  * When filename in sidebar is clicked, open the file in the editor
@@ -141,6 +154,7 @@ const handleFileSelection = async ( e ) => {
   const fileName = filePath.split( '/' ).pop();
 
   updateActiveLinkState( e.target );
+
   const mainForm = await setupEditForm( fileName );
 
   try {

@@ -19,6 +19,28 @@ const createIPCHandlers = ( window ) => {
      */
 
     /**
+     * Checks if a file exists in the filesystem
+     * @param {Event} event - IPC event object
+     * @param {string} filePath - Path to check
+     * @returns {Object} Operation result with exists boolean
+     * @example
+     * const result = await handleFileExists(event, '/path/to/check.md')
+     */
+    handleFileExists: async ( event, filePath ) => {
+      try {
+        return {
+          status: 'success',
+          data: FileSystem.exists( filePath )
+        };
+      } catch ( error ) {
+        return {
+          status: 'failure',
+          error: error.message
+        };
+      }
+    },
+
+    /**
      * Shows a dialog with specified method and parameters
      * @param {Event} event - IPC event object
      * @param {string} method - Dialog method to use (e.g., 'showOpenDialog')
@@ -246,6 +268,7 @@ const setupIPC = ( window ) => {
   const handlers = createIPCHandlers( window );
 
   // Register all handlers
+  ipcMain.handle( 'fileExists', handlers.handleFileExists );
   ipcMain.handle( 'dialog', handlers.handleDialog );
   ipcMain.handle( 'showConfirmationDialog', handlers.handleConfirmationDialog );
   ipcMain.handle( 'writeFile', handlers.handleWriteFile );

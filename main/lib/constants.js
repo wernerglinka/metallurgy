@@ -9,6 +9,7 @@ export const CONSTANTS = {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: true,
+      sandbox: false,
       // Note: preload path will be set in index.js
       preload: null
     }

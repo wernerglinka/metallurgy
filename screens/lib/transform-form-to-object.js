@@ -1,213 +1,191 @@
+// lib/transform-form-to-object.js
 import { processList } from './process-list.js';
 
 /**
- * @function getCurrentObject
- * @param {object} formObject 
- * @param {array} loopStack 
- * @returns {object} currentObject
- * @description getCurrentObject navigates through the nested formObject based on 
- * an array representing the path to traverse within this object and returns the
- * object at that specific location. 
+ * Pure functions for path operations
+ * These functions never modify their inputs, always return new arrays/objects
  */
-function getCurrentObject( formObject, loopStack ) {
-  let currentObject = formObject;
-  for ( let i = 0; i < loopStack.length - 1; i++ ) {
-    let key = loopStack[ i ];
-    if ( !currentObject[ key ] ) {
-      currentObject[ key ] = {};
-    }
-    currentObject = currentObject[ key ];
+const PathOps = {
+  // Takes a path array and name, returns new array with name added
+  // e.g., push(['main', 'seo'], 'title') returns ['main', 'seo', 'title']
+  push: ( path, name ) => [ ...path, name ],
+
+  // Takes a path array, returns new array without last element
+  // e.g., pop(['main', 'seo', 'title']) returns ['main', 'seo']
+  pop: path => path.slice( 0, -1 ),
+
+  // Safely traverses nested object structure, creating objects as needed
+  // e.g., getIn({a: {b: {}}}, ['a', 'b', 'c']) returns {} and ensures path exists
+  getIn: ( obj, path ) =>
+    path.reduce( ( current, key ) => {
+      current[ key ] = current[ key ] || {};
+      return current[ key ];
+    }, obj ),
+
+  // Sets value at nested path, returning entirely new object structure
+  // Preserves immutability by creating new objects along the path
+  // e.g., setIn({a: {b: {}}}, ['a', 'b', 'c'], 'value') returns new object
+  // with value set at a.b.c
+  setIn: ( obj, path, value ) => {
+    if ( path.length === 0 ) return value;
+
+    const [ head, ...rest ] = path;
+    return {
+      ...obj,
+      [ head ]: PathOps.setIn( obj[ head ] || {}, rest, value )
+    };
   }
-  return currentObject;
-}
+};
 
 /**
- * @function transformFormElementsToObject
- * @param {Nodelist} allFormElements 
- * @returns {object} formObject
- * @description This function will transform the form elements to an 
- *   object which will be used to create the frontmatter YAML. The function
- *   uses a loopStack to keep track of the current object's depth. The loopStack is
- *   an array of strings. An array item is the name of the current object.
- *   The previous item in the array is the name of the parent object, etc. The
- *   first item in the array is the name of the main object. This approach is
- *   necessary to create the correct deep object structure.   
+ * Pure functions for extracting and converting values from DOM elements
+ * Each function handles one specific aspect of value extraction
+ */
+const ValueOps = {
+  // Extracts name from either input or text element
+  // Handles both editable (input) and static (span) cases
+  getName: element => {
+    const input = element.querySelector( '.object-name input' );
+    const text = element.querySelector( '.label-text' );
+    return input ? input.value : text.textContent;
+  },
+
+  // Converts form values to appropriate types based on input type
+  // Handles numbers, checkboxes, dates, and default string values
+  getValue: element => {
+    const input = element.querySelector( '.element-value' );
+    if ( !input ) return '';
+
+    switch ( input.type ) {
+      case 'number': return Number( input.value );
+      case 'checkbox': return input.checked;
+      case 'date': return new Date( input.value );
+      default: return input.value;
+    }
+  },
+
+  // Extracts both key and value from a form element
+  // Returns an object with both properties
+  getKeyValue: element => {
+    const input = element.querySelector( '.element-label' );
+    const text = element.querySelector( '.label-text' );
+    return {
+      key: input ? input.value : text.textContent,
+      value: ValueOps.getValue( element )
+    };
+  }
+};
+
+/**
+ * Functions for handling form state transitions
+ * Each function takes current state and returns new state
+ * State consists of:
+ * - path: array of keys showing current position in object structure
+ * - result: the accumulated result object
+ */
+const FormStateOps = {
+  // Creates initial state object with 'main' as root
+  createState: () => ( {
+    path: [ 'main' ],
+    result: { main: {} }
+  } ),
+
+  // Handles object/array type elements by adding their name to the path
+  // Returns new state with updated path
+  handleStructural: ( state, element ) => {
+    const name = ValueOps.getName( element );
+    return {
+      ...state,
+      path: PathOps.push( state.path, name )
+    };
+  },
+
+  // Handles simple value elements and list elements
+  // Updates result object with new key-value pair at current path
+  handleValue: ( state, element ) => {
+    if ( element.classList.contains( 'is-list' ) ) {
+      const { key, value } = processList( element );
+      return {
+        ...state,
+        result: PathOps.setIn(
+          state.result,
+          state.path,
+          { ...PathOps.getIn( state.result, state.path ), [ key ]: value }
+        )
+      };
+    }
+
+    const { key, value } = ValueOps.getKeyValue( element );
+    return {
+      ...state,
+      result: PathOps.setIn(
+        state.result,
+        state.path,
+        { ...PathOps.getIn( state.result, state.path ), [ key ]: value }
+      )
+    };
+  },
+
+  // Converts object to array at current path and moves up one level
+  // Used when processing array-type structures
+  handleArrayConversion: ( state ) => {
+    const currentObj = PathOps.getIn( state.result, state.path );
+    // Convert object key-values to array items
+    const arrayVersion = Object.entries( currentObj ).map( ( [ key, value ] ) =>
+      typeof value === 'object' ? value : { [ key ]: value }
+    );
+
+    return {
+      ...state,
+      path: PathOps.pop( state.path ),
+      result: PathOps.setIn( state.result, state.path, arrayVersion )
+    };
+  },
+
+  // Moves up one level in the path when finishing an object
+  handleObjectEnd: ( state ) => ( {
+    ...state,
+    path: PathOps.pop( state.path )
+  } )
+};
+
+/**
+ * Processes a single form element, determining its type and applying
+ * appropriate state transformation
+ * Returns new state object after processing element
+ */
+const processElement = ( state, element ) => {
+  // Classify element by its type using class markers
+  const isObject = element.classList.contains( 'is-object' );
+  const isArray = element.classList.contains( 'is-array' );
+  const isLast = element.classList.contains( 'is-last' );
+  const isLastInArray = element.classList.contains( 'array-last' );
+
+  // Apply appropriate state transformation based on element type
+  if ( isObject || isArray ) {
+    return FormStateOps.handleStructural( state, element );
+  }
+  if ( !isLast ) {
+    return FormStateOps.handleValue( state, element );
+  }
+  if ( isLastInArray ) {
+    return FormStateOps.handleArrayConversion( state );
+  }
+  return FormStateOps.handleObjectEnd( state );
+};
+
+/**
+ * Main transformation function that processes form elements into object structure
+ * Uses reduce to thread state through all elements, maintaining immutability
+ * Returns final transformed object without the 'main' wrapper
  */
 export const transformFormElementsToObject = ( allFormElements ) => {
-  const numberOfFormElements = allFormElements.length;
-  const loopStack = [ "main" ];
-  const formObject = {};
-  // Add object to formObject with name from loopStack. This is initially 
-  // the main object, e.g. formObject.main = {}
-  formObject[ loopStack[ 0 ] ] = {};
-  let currentLevelObject;
+  // Convert NodeList to Array and reduce over elements
+  const finalState = Array.from( allFormElements ).reduce(
+    ( state, element ) => processElement( state, element ),
+    FormStateOps.createState()
+  );
 
-  for ( let i = 0; i < numberOfFormElements; i++ ) {
-    const currentElement = allFormElements[ i ];
-
-    // get status of the current element
-    const isObject = currentElement.classList.contains( 'is-object' );
-    const isArray = currentElement.classList.contains( 'is-array' );
-    const isList = currentElement.classList.contains( 'is-list' );
-    const isLast = currentElement.classList.contains( 'is-last' );
-    const isLastInArray = currentElement.classList.contains( 'array-last' );
-
-    // check if the current element is an array or object. If so, add the name to the loopStack
-    // as this represents a level in the object structure
-    if ( isObject || isArray ) {
-      // We read the label from the label-text element, when we read a markdown
-      // file. In that case the labels are all fixed.  We read the label from the
-      // element-label input, when we have created a new element. In that case
-      // the labels are editable.
-      const name = currentElement.querySelector( '.object-name input' )
-        ? currentElement.querySelector( '.object-name input' ).value
-        : currentElement.querySelector( '.label-text' ).textContent;
-      loopStack.push( name );
-
-      // add an empty object to formObject with name from loopStack
-      currentLevelObject = getCurrentObject( formObject, loopStack );
-      currentLevelObject[ loopStack[ loopStack.length - 1 ] ] = {};
-    }
-
-    // process all simple prop elements
-    else if ( !isLast ) {
-      let key, value, widget;
-
-      // A list is a simple prop variants
-      if ( isList ) {
-        const list = processList( currentElement );
-        key = list.key;
-        value = list.value;
-
-      } else {
-        // Get the element props
-        // We read the label from the label-text element, when we read a markdown
-        // file. In that case the labels are all fixed.  We read the label from the
-        // element-label input, when we have created a new element. In that case
-        // the labels are editable.
-        key = currentElement.querySelector( '.element-label' )
-          ? currentElement.querySelector( '.element-label' ).value
-          : currentElement.querySelector( '.label-text' ).textContent;
-        value = currentElement.querySelector( '.element-value' ).value;
-        widget = currentElement.querySelector( '.element-value' ).type;
-      }
-
-      // Add the element to its parent object
-      currentLevelObject = getCurrentObject( formObject, loopStack );
-      // Insure that the values are converted to the correct type
-      if ( widget === "number" ) {
-        value = Number( value );
-      }
-      if ( widget === "checkbox" ) {
-        value = currentElement.querySelector( '.element-value' ).checked;
-      }
-      if ( widget === "date" ) {
-        value = new Date( value );
-      }
-      currentLevelObject[ loopStack[ loopStack.length - 1 ] ][ key ] = value;
-      //currentLevelObject[ loopStack[ loopStack.length - 1 ] ][ key ] = widget !== "checkbox" ? value : currentElement.querySelector( '.element-value' ).checked;
-
-    } else {
-      // if the current element is the last in an array or object, remove the
-      // parent name from the loopStack. This will move the currentLevelObject up one level
-      currentLevelObject = getCurrentObject( formObject, loopStack );
-
-      // remove the last item from the loopStack
-      const parentName = loopStack.pop();
-
-      /************************************************************************
-        Objects when direct array children do not have a name to aid in the 
-        conversion from object to YAML. This example shows the issue:
-        
-        NOTE: that initially we use a dummy name for the object, e.g. neverMind1, neverMind2, etc.
-        so we can create the correct object structure. This dummy name will be removed later.
-      
-      {
-        "layout": "sections",
-        "draft": false,
-        "sections": {
-          "neverMind1": {
-            "container": "article",
-            "inContainer": true,
-            "background": {
-              "color": "#333",
-              "image": ""
-            }
-          },
-          "neverMind2": {
-            "container": "aside",
-            "inContainer": false,
-            "background": {
-              "color": "#333",
-              "image": ""
-            }
-          }
-        }
-      }
-      
-      will be converted to this:
-      NOTE: that the dummy name is removed and the object is converted to an array
-      
-      {
-        "layout": "sections",
-        "draft": false,
-        "sections": [
-          {
-            "container": "article",
-            "inContainer": true,
-            "background": {
-              "color": "#333",
-              "image": ""
-            }
-          },
-          {
-            "container": "aside",
-            "inContainer": false,
-            "background": {
-              "color": "#333",
-              "image": ""
-            }
-          }
-        ]
-      }
-
-      This will finally result in this YAML object:
-
-      layout: sections
-      draft: false
-      sections:
-        - container: article
-          inContainer: true
-          background:
-            color: '#333'
-            image: ''
-        - container: aside
-          inContainer: false
-          background:
-            color: '#333'
-            image: ''
-
-       *************************************************************************/
-
-      // Check if the current element is the last in an array
-      // if so, convert object props to array members
-      if ( isLastInArray ) {
-        const arrayVersion = [];
-        Object.entries( currentLevelObject[ parentName ] ).forEach( ( [ key, value ] ) => {
-          // if object, just push the value
-          if ( typeof value === 'object' ) {
-            arrayVersion.push( value );
-          } else {
-            // if not object, create an object with the key and value and push it
-            arrayVersion.push( { [ key ]: value } );
-          }
-        } );
-
-        // replace the object with the array
-        currentLevelObject[ parentName ] = arrayVersion;
-      }
-    }
-  };
-
-  return formObject.main;
+  // Return just the 'main' object's contents
+  return finalState.result.main;
 };

@@ -6,7 +6,6 @@
  * with CommonJS modules in the preload context.
  */
 const { contextBridge, ipcRenderer } = require( 'electron' );
-const fs = require( 'node:fs' );
 const convertToYAML = require( 'yaml' );
 
 /**
@@ -26,13 +25,7 @@ const electronAPI = {
     writeYAML: ( data ) => ipcRenderer.invoke( 'writeYAMLFile', data ),
     read: ( filePath ) => ipcRenderer.invoke( 'readFile', filePath ),
     delete: ( filePath ) => ipcRenderer.invoke( 'deleteFile', filePath ),
-    exists: async ( filePath ) => {
-      try {
-        return fs.existsSync( filePath );
-      } catch {
-        return false;
-      }
-    }
+    exists: ( filePath ) => ipcRenderer.invoke( 'fileExists', filePath )
   },
 
   // Directory operations
@@ -48,7 +41,7 @@ const electronAPI = {
     writeObject: ( data ) => ipcRenderer.invoke( 'writeObjectToFile', data )
   },
 
-  // Utility functions
+  // Utility functions that don't require file system access
   utils: {
     toYAML: ( args ) => convertToYAML.stringify( args )
   }
