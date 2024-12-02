@@ -47,7 +47,6 @@ export const ValueOps = {
   getName: element => {
     const input = element.querySelector( '.object-name input' );
     const text = element.querySelector( '.label-text' );
-    if ( !input && !text ) return '';
     return input ? input.value : text.textContent;
   },
 
@@ -70,12 +69,11 @@ export const ValueOps = {
   getKeyValue: element => {
     const input = element.querySelector( '.element-label' );
     const text = element.querySelector( '.label-text' );
-    if ( !input && !text ) return { key: '', value: ValueOps.getValue( element ) };
     return {
       key: input ? input.value : text.textContent,
       value: ValueOps.getValue( element )
     };
-  },
+  }
 };
 
 /**
