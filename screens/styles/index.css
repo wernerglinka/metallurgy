@@ -191,11 +191,20 @@ body {
         display: flex;
         align-items: center;
         text-decoration: none;
-        font-size: 1.6rem;
+      }
+      &.listHeader,
+      &.recent {
+        font-weight: 600;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-color);
+      }
+      &.recent {
+        margin-top: 3rem;
       }
 
-      & a {
-        font-weight: bold;
+      & a strong {
+        padding: 0 0.5rem;
       }
 
       &.recent a {
