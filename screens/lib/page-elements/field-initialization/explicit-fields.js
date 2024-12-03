@@ -19,6 +19,12 @@
  * It also determines add/delete button permissions based on schema settings.
  */
 export const processExplicitField = ( field, explicitSchemaArray ) => {
+
+  // Return unmodified field if no schema array or array is empty
+  if ( !Array.isArray( explicitSchemaArray ) || explicitSchemaArray.length === 0 ) {
+    return { field, permissions: { addDeleteButton: true, addDuplicateButton: true } };
+  }
+
   const explicitFieldObject = explicitSchemaArray.find( schema => schema.name === field.label );
 
   // Get the permits of the add/delete buttons
