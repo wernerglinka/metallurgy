@@ -2,30 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content=" default-src 'self'; script-src 'self';
-        style-src 'self' https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css;
-        font-src 'self'
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff2
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf; connect-src
-          https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic
-          https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff; 
-      "
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content=" default-src 'self'; script-src 'self';
-        style-src 'self' https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css;
-        font-src 'self'
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff2
-          https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf; connect-src
-          https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic
-          https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff; 
-      "
-    />
     <title>Metallurgy</title>
     <link rel="stylesheet" href="./easymde.css" />
     <link rel="stylesheet" href="../styles/index.css" />
@@ -53,6 +29,9 @@
           <ul class="sidebar-pane-selection js-sidebar-pane-selection">
             <li class="select-file">
               <a class="active btn" data-pane="js-select-file">Select File</a>
+            </li>
+            <li class="select-file">
+              <a id="init-new-page" class="btn">Build New Page</a>
             </li>
             <li class="add-field">
               <a class="btn" data-pane="js-add-field">Add Field</a>
@@ -149,11 +128,10 @@
 
           <div id="js-add-template" class="sidebar-pane js-sidebar-pane">
             <div class="sidebar-hint container-background">
-              <p>Build a page from scratch. Drag a tempolate into the editor...</p>
+              <p>Drag a template into the editor...</p>
             </div>
             <div class="js-templates-wrapper container-background">
               <h3>Page Templates</h3>
-              <a id="init-new-page" class="btn">Build New Page</a>
             </div>
           </div>
         </div> <!-- end sidebar panes -->

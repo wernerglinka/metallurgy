@@ -29,10 +29,8 @@ function processSidebarDraggables( e, component ) {
     labelInput.style.display = "none";
   }
 
-  /*
-    Add an eventlistener to the label input to enable the button when the user
-    has added text to the label input and all other label inputs have text
-  */
+  // Add an eventlistener to the label input to enable the button when the user
+  // has added text to the label input and all other label inputs have text
   const newElementLabelInput = newElement.querySelector( '.element-label, .object-name input' );
   newElementLabelInput && newElementLabelInput.addEventListener( 'change', ( e ) => {
     const thisElement = e.target;

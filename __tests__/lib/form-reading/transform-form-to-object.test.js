@@ -6,7 +6,7 @@ import {
   FormStateOps,
   processElement,
   transformFormElementsToObject
-} from '../../screens/lib/transform-form-to-object.js';
+} from '../../../screens/lib/transform-form-to-object.js';
 
 describe( 'PathOps', () => {
   describe( 'push', () => {

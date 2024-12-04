@@ -1,7 +1,7 @@
 // __tests__/lib/frontmatter-to-form.test.js
-import { frontmatterToForm } from '../../screens/lib/form-generation/frontmatter-to-form.js';
-import { StorageOperations } from '../../screens/lib/storage-operations.js';
-import testSchema from './test-schema.json';
+import { frontmatterToForm } from '../../../screens/lib/form-generation/frontmatter-to-form.js';
+import { StorageOperations } from '../../../screens/lib/storage-operations.js';
+import testSchema from '../test-schema.json';
 
 describe( 'frontmatterToForm with Project Schema', () => {
   beforeEach( () => {

@@ -3,6 +3,9 @@
 import { createDomTree } from "../../lib/page-elements/create-dom-tree.js";
 import { addMainForm } from "../../lib/page-elements/add-main-form.js";
 import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
+import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
+import { StorageOperations } from '../../lib/storage-operations.js';
+
 /**
  * @typedef {Object} TemplatesElements
  * @property {HTMLElement} wrapper - Templates wrapper element
@@ -43,10 +46,44 @@ const createTemplatesList = ( templatesData ) => {
  * @param {HTMLElement} button - New page button element
  */
 const setupNewPageHandler = ( button ) => {
-  button.addEventListener( 'click', ( e ) => {
+  button.addEventListener( 'click', async ( e ) => {
     e.preventDefault();
-    const mainForm = addMainForm();
-    updateButtonsStatus();
+
+    try {
+      // Show dialog to get page name
+      const { status, data } = await window.electronAPI.dialog.open( 'showSaveDialog', {
+        title: 'Create New Page',
+        buttonLabel: 'Create Page',
+        defaultPath: `${ StorageOperations.getContentPath() }/new-page.md`,
+        filters: [
+          { name: 'Markdown', extensions: [ 'md' ] }
+        ],
+        properties: [ 'createDirectory', 'showOverwriteConfirmation' ]
+      } );
+
+      // Handle dialog cancellation
+      if ( status === 'failure' || data?.canceled ) {
+        console.log( 'Dialog cancelled or failed' );
+        return;
+      }
+
+      // Clean existing form
+      cleanMainForm();
+
+      // Create new form with empty frontmatter
+      const mainForm = addMainForm();
+      updateButtonsStatus();
+
+      // Update filename display
+      const fileNameElement = document.querySelector( '#file-name span' );
+      if ( fileNameElement && data.filePath ) {
+        const fileName = data.filePath.split( '/' ).pop();
+        fileNameElement.textContent = fileName;
+      }
+
+    } catch ( error ) {
+      console.error( 'Error showing save dialog:', error );
+    }
   } );
 };
 

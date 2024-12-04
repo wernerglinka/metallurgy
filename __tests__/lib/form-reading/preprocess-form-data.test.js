@@ -1,6 +1,6 @@
 // __tests__/lib/preprocess-form-data.test.js
 import { jest } from '@jest/globals';
-import { preprocessFormData } from '../../screens/lib/preprocess-form-data.js';
+import { preprocessFormData } from '../../../screens/lib/preprocess-form-data.js';
 
 describe( 'preprocessFormData', () => {
   beforeEach( () => {

@@ -1,5 +1,5 @@
 // __tests__/lib/page-elements/field-initialization/explicit-fields.test.js
-import { processExplicitField } from '../../screens/lib/page-elements/field-initialization/explicit-fields.js';
+import { processExplicitField } from '../../../screens/lib/page-elements/field-initialization/explicit-fields.js';
 
 describe( 'processExplicitField', () => {
   it( 'returns unmodified field with default permissions when no schema array', () => {
