@@ -1,6 +1,7 @@
 import { createComponent } from "./create-element.js";
 import { updateButtonsStatus } from "./update-buttons-status.js";
 import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
+import { addActionButtons } from '../buttons/form-actions.js';
 
 /**
  * @function processSidebarDraggables
@@ -15,6 +16,13 @@ function processSidebarDraggables( e, component ) {
 
   // Create new element with requested component type
   const newElement = createComponent( component, false );
+
+  // add an ADD and DELETE button to the new element
+  addActionButtons( newElement, { addDeleteButton: true, addDuplicateButton: true } );
+
+
+  console.log( `inserted element:` );
+  console.log( newElement );
 
   // If an object is placed in an array dropzone, hide the label input
   // since the object will not need a name
@@ -41,6 +49,8 @@ function processSidebarDraggables( e, component ) {
       updateButtonsStatus();
       return;
     }
+
+
 
     // remove error message if it exists
     if ( thisElement.classList.contains( 'invalid' ) ) {
@@ -165,6 +175,7 @@ export const dragStart = ( e ) => {
     && !e.target.closest( '.template-selection' ) // for adding templates
   ) return;
 
+  console.log( `Element proxy:` );
   console.log( e.target );
 
   // Set the data type and value of the dragged element
@@ -211,10 +222,10 @@ export const dragOver = ( e ) => {
 
   if ( closest ) {
     if ( position === 'before' ) {
-      closest.style.marginBottom = "2rem";
+      closest.style.marginBottom = "5rem";
     } else {
       if ( closest.nextElementSibling ) {
-        closest.nextElementSibling.style.marginTop = "2rem";
+        closest.nextElementSibling.style.marginTop = "5rem";
       }
     }
   } else {
@@ -281,6 +292,9 @@ export const drop = async ( e ) => {
       new element that represents the component type from the dataTransfer object.
     */
     const component = e.dataTransfer.getData( "text/plain" );
+
+    console.log( `dropped component: ${ component }` );
+
     processSidebarDraggables( e, component );
 
   } else {

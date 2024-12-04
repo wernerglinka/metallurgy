@@ -51,15 +51,22 @@ const setupProjectConfig = async ( projectFolder ) => {
 export const handleOpenProject = async ( e ) => {
   e.preventDefault();
 
+  console.log( `target: ${ e.target }` );
+
   try {
     const targetScreen = e.target.href;
     const projectFolder = await getProjectFromDialog();
+
+    console.log( `Open project folder: ${ projectFolder }` );
 
     if ( !projectFolder ) {
       return;
     }
 
     await setupProjectConfig( projectFolder );
+
+    console.log( `navigating to: ${ targetScreen }` );
+
     navigate( targetScreen );
 
   } catch ( error ) {

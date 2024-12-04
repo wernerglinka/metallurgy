@@ -25,16 +25,16 @@ const cspConfig = {
   'connect-src': [
     "'self'",
     "https://cdn.jsdelivr.net",
-    "https://maxcdn.bootstrapcdn.com"
+    "https://maxcdn.bootstrapcdn.com",
+    "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic",
+    "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff;"
   ],
   'font-src': [
     "'self'",
     "https://maxcdn.bootstrapcdn.com",
     "https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff",
     "https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.woff2",
-    "https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf; connect-src",
-    "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.dic",
-    "https://cdn.jsdelivr.net/codemirror.spell-checker/latest/en_US.aff;"
+    "https://maxcdn.bootstrapcdn.com/font-awesome/latest/fonts/fontawesome-webfont.ttf"
   ],
   'base-uri': [ "'self'" ],
   'form-action': [ "'self'" ],
