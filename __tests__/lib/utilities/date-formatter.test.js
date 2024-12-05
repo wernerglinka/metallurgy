@@ -22,4 +22,9 @@ describe( 'date formatter', () => {
     expect( formatDate( '2024-01-00' ) ).toBe( 'Invalid Date' ); // day 0
     expect( formatDate( '2024-01-32' ) ).toBe( 'Invalid Date' ); // day 32
   } );
+
+  it( 'handles timezone edge cases', () => {
+    const localDate = new Date( '2024-02-15' );
+    expect( formatDate( localDate ) ).toBe( '2024-02-15' );
+  } );
 } );

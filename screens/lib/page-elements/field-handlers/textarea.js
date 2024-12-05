@@ -4,7 +4,7 @@
  */
 import { initializeEditor } from '../../editor/setup.js';
 
-export const updateTextareaField = ( element, field ) => {
+export const updateTextareaField = ( element, field, useEditor = true ) => {
   element.querySelector( '.element-label' ).value = field.label;
 
   const originalValueElement = element.querySelector( '.element-value' );
@@ -20,7 +20,7 @@ export const updateTextareaField = ( element, field ) => {
     originalValueParent.appendChild( tempContainer.firstChild );
   }
 
-  if ( !document.getElementById( 'editorWrapper' ) ) {
+  if ( !document.getElementById( 'editorWrapper' ) && useEditor ) {
     window.mdeditor = initializeEditor();
   }
 

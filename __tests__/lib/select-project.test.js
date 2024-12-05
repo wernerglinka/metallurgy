@@ -1,4 +1,5 @@
 // __tests__/lib/select-project.test.js
+
 import { jest, describe, it, expect } from '@jest/globals';
 import { mocks } from '../setup.js';
 import { selectProject } from '../../screens/lib/select-project.js';

@@ -2,7 +2,7 @@
  * @module field-initialization
  * @description Handles field initialization and explicit field schema handling
  * 
- * An `explicit field` is a field that has a schema definition that is explicitly defined
+ * An `explicit field` is a field that has an explicit schema definition.
  */
 
 /**

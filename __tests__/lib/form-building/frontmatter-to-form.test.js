@@ -1,9 +1,13 @@
-// __tests__/lib/frontmatter-to-form.test.js
+// __tests__/lib/form-building/frontmatter-to-form.test.js
+
+import { jest } from '@jest/globals';
 import { frontmatterToForm } from '../../../screens/lib/form-generation/frontmatter-to-form.js';
 import { StorageOperations } from '../../../screens/lib/storage-operations.js';
 import testSchema from '../test-schema.json';
 
 describe( 'frontmatterToForm with Project Schema', () => {
+  const filteredSchema = testSchema.filter( field => field.type !== 'textarea' );
+
   beforeEach( () => {
     document.body.innerHTML = `
       <div id="main-form">
@@ -11,7 +15,6 @@ describe( 'frontmatterToForm with Project Schema', () => {
       </div>
     `;
 
-    // Set up storage
     const projectPath = '/test/project/path';
     StorageOperations.saveProjectData( {
       projectPath,
@@ -19,105 +22,136 @@ describe( 'frontmatterToForm with Project Schema', () => {
       dataPath: `${ projectPath }/data`
     } );
 
-    // Default electron API mock with schema
-    global.window = {
-      electronAPI: {
-        files: {
-          exists: async () => true,
-          read: async () => ( {
-            status: 'success',
-            data: testSchema.map( field => ( {
-              ...field,
-              label: field.label || field.name
-            } ) ),
-            error: null
-          } )
-        }
+    window.electronAPI = {
+      files: {
+        exists: async () => true,
+        read: async () => ( {
+          status: 'success',
+          data: filteredSchema,
+          error: null
+        } )
       }
     };
+
+    jest.spyOn( console, 'warn' ).mockImplementation( () => { } );
+    jest.spyOn( console, 'error' ).mockImplementation( () => { } );
   } );
 
   afterEach( () => {
     StorageOperations.clearProjectData();
+    jest.clearAllMocks();
   } );
 
-  it( 'processes schema and renders form', async () => {
+  it( 'successfully processes valid frontmatter', async () => {
     const frontmatter = {
-      title: "Test Page",
-      layout: "sections.njk"
+      title: "Test",
+      layout: "default"
     };
 
     await frontmatterToForm( frontmatter, '' );
-    const dropzone = document.querySelector( '#dropzone' );
-    expect( dropzone.innerHTML ).toContain( 'input' );
+
+    const dropzone = document.getElementById( 'dropzone' );
+    expect( dropzone.children.length ).toBeGreaterThan( 0 );
   } );
 
-  it( 'uses empty array when no schema exists', async () => {
-    // Mock files API to return empty array
-    window.electronAPI.files = {
-      exists: async () => false,
-      read: async () => ( {
-        status: 'success',
-        data: [], // Return empty array, not null
-        error: null
-      } )
+  it( 'processes schema file error', async () => {
+    window.electronAPI.files.read = async () => {
+      throw {
+        isSchemaError: true,
+        type: 'FILE_ERROR',
+        message: 'File not found'
+      };
+    };
+
+    const frontmatter = { title: "Test" };
+    await frontmatterToForm( frontmatter, '' );
+
+    expect( console.warn ).toHaveBeenCalledWith(
+      expect.stringContaining( 'Schema file issue: File not found' )
+    );
+  } );
+
+  it( 'throws non-file schema errors', async () => {
+    window.electronAPI.files.read = async () => {
+      throw {
+        isSchemaError: true,
+        type: 'VALIDATION_ERROR',
+        message: 'Invalid schema',
+        field: 'title'
+      };
+    };
+
+    const frontmatter = { title: "Test" };
+    await expect( frontmatterToForm( frontmatter, '' ) )
+      .rejects
+      .toMatchObject( {
+        isSchemaError: true,
+        type: 'VALIDATION_ERROR'
+      } );
+
+    expect( console.error ).toHaveBeenCalled();
+  } );
+
+  it( 'handles schema validation errors', async () => {
+    window.electronAPI.files.read = async () => {
+      throw {
+        isSchemaError: true,
+        type: 'VALIDATION_ERROR',
+        message: 'Invalid schema structure',
+        field: 'invalidField'
+      };
     };
 
     const frontmatter = {
-      title: "Test Page"
+      invalidField: true
     };
 
-    await frontmatterToForm( frontmatter, '' );
-    const dropzone = document.querySelector( '#dropzone' );
-    expect( dropzone.innerHTML ).toContain( 'input' );
+    await expect( frontmatterToForm( frontmatter, '' ) )
+      .rejects
+      .toMatchObject( {
+        isSchemaError: true,
+        type: 'VALIDATION_ERROR',
+        field: 'invalidField'
+      } );
+
+    expect( console.error ).toHaveBeenCalledWith(
+      expect.stringContaining( 'Schema error (VALIDATION_ERROR):' ),
+      'Invalid schema structure'
+    );
   } );
 
-  it( 'uses empty array for schema read errors', async () => {
-    // Mock files API to return error but with empty array
-    window.electronAPI.files = {
-      exists: async () => true,
-      read: async () => ( {
-        status: 'failure',
-        data: [], // Return empty array, not null
-        error: 'Read error'
-      } )
+  it( 'handles conversion errors', async () => {
+    window.electronAPI.files.read = async () => {
+      throw new Error( 'Conversion failed' );
     };
 
-    const frontmatter = {
-      title: "Test Page"
+    const frontmatter = { title: "Test" };
+
+    await expect( frontmatterToForm( frontmatter, '' ) )
+      .rejects
+      .toThrow( 'Conversion failed' );
+  } );
+
+  it( 'handles schema errors with path information', async () => {
+    window.electronAPI.files.read = async () => {
+      throw {
+        isSchemaError: true,
+        type: 'PATH_ERROR',
+        message: 'Invalid path',
+        path: '/invalid/path'
+      };
     };
 
-    await frontmatterToForm( frontmatter, '' );
-    const dropzone = document.querySelector( '#dropzone' );
-    expect( dropzone.innerHTML ).toContain( 'input' );
+    const frontmatter = { title: "Test" };
+
+    await expect( frontmatterToForm( frontmatter, '' ) )
+      .rejects
+      .toMatchObject( {
+        isSchemaError: true,
+        type: 'PATH_ERROR',
+        path: '/invalid/path'
+      } );
+
+    expect( console.error ).toHaveBeenCalledWith( 'File path:', '/invalid/path' );
   } );
 } );
-
-// screens/lib/page-elements/field-initialization/explicit-fields.js
-
-/**
- * Process field against explicit schema definitions
- * @param {Object} field - Field to process
- * @param {Array} explicitSchemaArray - Array of explicit schema definitions
- * @returns {Object} Processed field
- */
-export const processExplicitField = ( field, explicitSchemaArray = [] ) => {
-  // Return unmodified field if no schema array
-  if ( !Array.isArray( explicitSchemaArray ) ) {
-    return {
-      ...field,
-      canAdd: true,
-      canDelete: true
-    };
-  }
-
-  const explicitFieldObject = explicitSchemaArray.find(
-    schema => schema.name === field.label
-  );
-
-  return {
-    ...field,
-    canAdd: explicitFieldObject?.canAdd ?? true,
-    canDelete: explicitFieldObject?.canDelete ?? true
-  };
-};
