@@ -1,23 +1,12 @@
 // screens/edit-project/sections/render-edit-space.js
 
 import { getDirectoryFiles } from "../../lib/file-ops/get-directory-files.js";
-import { addMainForm } from "../../lib/page-elements/add-main-form.js";
-import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
 import { getMarkdownFile } from "../../lib/file-ops/get-markdown-file.js";
 import { frontmatterToForm } from "../../lib/form-generation/frontmatter-to-form.js";
 import { renderJSONFile } from "../../lib/file-ops/render-json-file.js";
-import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
 import { redoUndo } from "../../lib/undo-redo.js";
-import { preprocessFormData } from "../../lib/preprocess-form-data.js";
-
-import { handleFormSubmission } from '../../lib/form-submission/submit-handler.js';
-
-
-/**
- * @typedef {Object} FileData
- * @property {string} frontmatter - YAML frontmatter
- * @property {string} content - File content
- */
+import { initNewPageProcess } from "./init-new-page-process.js";
+import { setupEditForm, setupFormSubmission } from './setup-edit-form.js';
 
 /**
  * Get directory files and render a DOM tree representation
@@ -60,21 +49,6 @@ const updateActiveLinkState = ( activeLink ) => {
 };
 
 /**
- * Sets up edit form for file
- * @param {string} fileName - Name of file being edited
- * @returns {HTMLFormElement} The main form element
- */
-const setupEditForm = async ( fileName ) => {
-  // Clean up the main form and add a new one
-  await cleanMainForm();
-  const mainForm = addMainForm();
-  updateButtonsStatus();
-
-  document.querySelector( '#file-name span' ).textContent = fileName;
-  return mainForm;
-};
-
-/**
  * Handles file content based on type
  * @param {string} filePath - Path to file
  * @param {string} fileType - Type of file (md/json)
@@ -93,51 +67,6 @@ const handleFileContent = async ( filePath, fileType ) => {
     default:
       throw new Error( `Unsupported file type: ${ fileType }` );
   }
-};
-
-/**
- * Sets up form submission handler with YAML conversion
- * @param {HTMLFormElement} form - The form element
- * @param {string} filePath - Path to save the file
- 
-const setupFormSubmission = ( form, filePath ) => {
-  form.addEventListener( 'submit', async ( e ) => {
-    e.preventDefault();
-
-    try {
-      // Keep existing data processing
-      const dropzoneValues = preprocessFormData();
-
-      // Add basic validation before save
-      const requiredFields = form.querySelectorAll( '[required]' );
-      const invalidFields = Array.from( requiredFields )
-        .filter( field => !field.value.trim() );
-
-      if ( invalidFields.length > 0 ) {
-        throw new Error( 'Required fields are missing' );
-      }
-
-      // Keep existing save mechanism
-      await window.electronAPI.files.writeYAML( {
-        obj: dropzoneValues,
-        path: filePath.replace( 'file://', '' )
-      } );
-
-    } catch ( error ) {
-      console.error( 'Form submission failed:', error );
-      // TODO: Show error to user
-    }
-  } );
-};
-*/
-
-const setupFormSubmission = ( form, filePath, schema ) => {
-  form.addEventListener( 'submit', async ( e ) => {
-    e.preventDefault();
-
-    const result = await handleFormSubmission( form, filePath, schema );
-    updateButtonsStatus( result.success ? 'success' : 'error', result.error );
-  } );
 };
 
 /**
@@ -196,6 +125,9 @@ const renderEditSpace = async () => {
       .forEach( link => link.addEventListener( 'click', handleFileSelection ) );
 
     setupTemplateLinks();
+
+    initNewPageProcess();
+
   } catch ( error ) {
     console.error( 'Failed to render edit space:', error );
     throw error;

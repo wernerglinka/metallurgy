@@ -20,10 +20,9 @@ import { StorageOperations } from '../../lib/storage-operations.js';
 const getTemplatesElements = () => {
   const elements = {
     wrapper: document.querySelector( '.js-templates-wrapper' ),
-    newPageButton: document.getElementById( 'init-new-page' )
   };
 
-  if ( !elements.wrapper || !elements.newPageButton ) {
+  if ( !elements.wrapper ) {
     throw new Error( 'Required template elements not found' );
   }
 
@@ -42,48 +41,53 @@ const createTemplatesList = ( templatesData ) => {
 };
 
 /**
- * Sets up new page button handler
- * @param {HTMLElement} button - New page button element
+ * Converts template data to draggable divs
+ * @param {Object|Array} templatesData - Template data 
+ * @param {HTMLElement} wrapper - Container element
  */
-const setupNewPageHandler = ( button ) => {
-  button.addEventListener( 'click', async ( e ) => {
-    e.preventDefault();
+const createTemplateDivs = ( templatesData, wrapper ) => {
+  // Get the first (and only) entry which contains the root path and templates array
+  const [ rootPath, templates ] = Object.entries( templatesData )[ 0 ];
 
-    try {
-      // Show dialog to get page name
-      const { status, data } = await window.electronAPI.dialog.open( 'showSaveDialog', {
-        title: 'Create New Page',
-        buttonLabel: 'Create Page',
-        defaultPath: `${ StorageOperations.getContentPath() }/new-page.md`,
-        filters: [
-          { name: 'Markdown', extensions: [ 'md' ] }
-        ],
-        properties: [ 'createDirectory', 'showOverwriteConfirmation' ]
+  templates.forEach( ( template, index ) => {
+    // Handle sections array specially
+    if ( 'sections' in template ) {
+      // insert header h3 'Sections' before the first section
+      const h3 = document.createElement( 'h3' );
+      h3.textContent = 'Section Templates';
+      h3.className = 'section-header';
+      wrapper.appendChild( h3 );
+
+      template.sections.forEach( ( section, sectionIndex ) => {
+        let [ sectionName, sectionPath ] = Object.entries( section )[ 0 ];
+        const div = document.createElement( 'div' );
+        div.id = `template-section-${ sectionIndex }`;
+        div.className = 'template-selection draggable';
+        div.setAttribute( 'draggable', 'true' );
+        div.setAttribute( 'data-url', sectionPath );
+        sectionName = sectionName
+          .replace( /\.[^/.]+$/, '' ) // Remove file extension
+          .replace( /-/g, ' ' )       // Replace all dashes with spaces
+          .toUpperCase();             // Convert to uppercase
+        div.textContent = sectionName;
+        wrapper.appendChild( div );
       } );
-
-      // Handle dialog cancellation
-      if ( status === 'failure' || data?.canceled ) {
-        console.log( 'Dialog cancelled or failed' );
-        return;
-      }
-
-      // Clean existing form
-      cleanMainForm();
-
-      // Create new form with empty frontmatter
-      const mainForm = addMainForm();
-      updateButtonsStatus();
-
-      // Update filename display
-      const fileNameElement = document.querySelector( '#file-name span' );
-      if ( fileNameElement && data.filePath ) {
-        const fileName = data.filePath.split( '/' ).pop();
-        fileNameElement.textContent = fileName;
-      }
-
-    } catch ( error ) {
-      console.error( 'Error showing save dialog:', error );
+      return;
     }
+
+    // Handle regular templates
+    let [ templateName, templatePath ] = Object.entries( template )[ 0 ];
+    const div = document.createElement( 'div' );
+    div.id = `template-${ index }`;
+    div.className = 'template-selection draggable';
+    div.setAttribute( 'draggable', 'true' );
+    div.setAttribute( 'data-url', templatePath );
+    templateName = templateName
+      .replace( /\.[^/.]+$/, '' ) // Remove file extension
+      .replace( /-/g, ' ' )       // Replace all dashes with spaces
+      .toUpperCase();             // Convert to uppercase
+    div.textContent = templateName;
+    wrapper.appendChild( div );
   } );
 };
 
@@ -103,12 +107,24 @@ const buildTemplatesSelection = async () => {
       throw new Error( 'No templates data received' );
     }
 
+    // Build the template list with placeholder elements like the fields
+    // loop over the templates
+    // key is the template name, value is the template data
+    // if a value is an array, loop over it
+    // The placeholder should have this structure:
+    // <div id="template<loop-iteration>" class="template-selection draggable" draggable="true" data-url="<value>">key of the template
+
+    const templateWrapper = document.createElement( 'div' );
+    templateWrapper.className = 'templates-wrapper';
+    createTemplateDivs( templates.data, templateWrapper );
+    elements.wrapper.appendChild( templateWrapper );
+
+    /*
     // Build and append template list
     const templatesList = createTemplatesList( templates.data );
     elements.wrapper.appendChild( templatesList );
+    */
 
-    // Setup event handlers
-    setupNewPageHandler( elements.newPageButton );
 
   } catch ( error ) {
     console.error( 'Failed to build templates:', error );

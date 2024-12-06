@@ -14,6 +14,8 @@ function processSidebarDraggables( e, component ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
+  console.log( 'processSidebarDraggables' );
+
   // Create new element with requested component type
   const newElement = createComponent( component, false );
 
@@ -199,7 +201,8 @@ export const dragStart = ( e ) => {
   // dragging a template in
   const templateList = e.target.closest( '.js-templates-list' );
   if ( templateList ) {
-    e.dataTransfer.setData( "origin", "templates" );
+    origin = "templates";
+    e.dataTransfer.setData( "templateUrl", e.target.href );
   }
 
   // store the dragged element
@@ -239,6 +242,8 @@ export const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
   e.target.classList.remove( 'dropzone-highlight' );
 
+  if ( !dropzone ) return;
+
   // reset all margins that were caused by elements dragged over
   dropzone.childNodes.forEach( child => {
     child.style.margin = "0.5rem 0";
@@ -261,6 +266,7 @@ export const drop = async ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
+  // clean up a droptarget that we might have dragged over
   // Remove highlight class from the event target, which indicates a valid drop target during the dragover event.
   dropzone.classList.remove( 'dropzone-highlight' );
 
@@ -272,9 +278,19 @@ export const drop = async ( e ) => {
   // get the origin of the dragged element
   const origin = e.dataTransfer.getData( "origin" );
 
+  console.log( e );
+
   /*
     1. Check if we dragged schema files into the dropzone
   */
+  if ( origin === "templates" ) {
+    // get the file url from the links ref attribute
+    const fileUrl = e.dataTransfer.getData( "templateUrl" );
+  }
+
+  console.log( fileUrl );
+
+
   const hasFiles = e.dataTransfer.types.includes( 'Files' );
 
   if ( hasFiles ) {

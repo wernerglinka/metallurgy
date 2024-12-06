@@ -252,6 +252,24 @@ h2 {
   content: url(../icons/folder-open.svg);
 }
 
+.templates-wrapper {
+  & .section-header {
+    padding: 2rem 0 ;
+  }
+
+  & .template-selection {
+  padding: 0.5rem;
+  border: var(--component-border);
+  border-radius: var(--default-radius);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  /* cursor for drag and drop */
+  cursor: move;
+}
+}
+
 /**
  * Edit Container
  * The Edit Container is the main part of the editing screen to the right of the sidebar
