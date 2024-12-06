@@ -1,4 +1,4 @@
-// __tests__/lib/page-elements/field-initialization/explicit-fields.test.js
+// __tests__/lib/field-initialization/explicit-fields.test.js
 import { processExplicitField } from '../../../screens/lib/page-elements/field-initialization/explicit-fields.js';
 
 describe( 'processExplicitField', () => {
@@ -66,5 +66,39 @@ describe( 'processExplicitField', () => {
 
     const result = processExplicitField( field, schema );
     expect( result.field.type ).toBe( 'text' );
+  } );
+
+  it( 'handles empty string values with schema defaults', () => {
+    const field = {
+      type: 'text',
+      label: 'description',
+      value: '' // explicitly empty string
+    };
+
+    const schema = [ {
+      name: 'description',
+      type: 'text',
+      default: 'Default description'
+    } ];
+
+    const result = processExplicitField( field, schema );
+    expect( result.field.value ).toBe( 'Default description' );
+  } );
+
+  it( 'preserves non-empty string values despite schema defaults', () => {
+    const field = {
+      type: 'text',
+      label: 'description',
+      value: 'Existing content'  // non-empty string
+    };
+
+    const schema = [ {
+      name: 'description',
+      type: 'text',
+      default: 'Default description'
+    } ];
+
+    const result = processExplicitField( field, schema );
+    expect( result.field.value ).toBe( 'Existing content' );
   } );
 } );

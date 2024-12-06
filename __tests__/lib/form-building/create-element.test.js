@@ -28,6 +28,112 @@ describe( 'Create Element', () => {
     jest.clearAllMocks();
   } );
 
+  describe( 'Label Input Event Handling', () => {
+    it( 'handles valid label input', () => {
+      const field = {
+        type: 'text',
+        label: 'TestField',
+        value: ''
+      };
+
+      const element = getUpdatedElement( field, [], true );
+      const labelInput = element.querySelector( '.element-label' );
+
+      // Simulate valid input
+      labelInput.value = 'ValidLabel';
+      labelInput.dispatchEvent( new Event( 'change' ) );
+
+      expect( updateButtonsStatus ).toHaveBeenCalled();
+      expect( showErrorMessage ).not.toHaveBeenCalled();
+    } );
+
+    it( 'maintains error state when label remains invalid', () => {
+      const field = {
+        type: 'text',
+        label: 'TestField',
+        value: ''
+      };
+
+      const element = getUpdatedElement( field, [], true );
+      const labelInput = element.querySelector( '.element-label' );
+
+      // Trigger change with invalid input
+      labelInput.value = 'Invalid@Label';
+      labelInput.dispatchEvent( new Event( 'change' ) );
+
+      expect( showErrorMessage ).toHaveBeenCalledWith(
+        labelInput,
+        "Label must only use characters and numbers"
+      );
+      expect( updateButtonsStatus ).toHaveBeenCalled();
+      expect( removeErrorMessage ).not.toHaveBeenCalled();
+    } );
+
+    it( 'handles object name input validation', () => {
+      const field = {
+        type: 'object',
+        label: 'TestObject',
+        value: []
+      };
+
+      const element = getUpdatedElement( field, [], true );
+      const nameInput = element.querySelector( '.object-name input' );
+
+      // First make mock return false for invalid input
+      isValidLabel.mockReturnValueOnce( false );
+
+      // Trigger change with invalid input
+      nameInput.value = 'Invalid@Name';
+      nameInput.dispatchEvent( new Event( 'change' ) );
+
+      expect( showErrorMessage ).toHaveBeenCalled();
+      expect( updateButtonsStatus ).toHaveBeenCalled();
+
+      // Add invalid class to simulate error state
+      nameInput.classList.add( 'invalid' );
+
+      // Now make mock return true for valid input
+      isValidLabel.mockReturnValueOnce( true );
+
+      // Trigger change with valid input
+      nameInput.value = 'ValidName';
+      nameInput.dispatchEvent( new Event( 'change' ) );
+
+      expect( removeErrorMessage ).toHaveBeenCalled();
+      expect( updateButtonsStatus ).toHaveBeenCalledTimes( 2 );
+    } );
+
+    it( 'handles error removal when element has invalid class', () => {
+      const field = {
+        type: 'text',
+        label: 'TestField',
+        value: ''
+      };
+
+      const element = getUpdatedElement( field, [], true );
+      const labelInput = element.querySelector( '.element-label' );
+
+      // Add invalid class and make input valid
+      labelInput.classList.add( 'invalid' );
+      isValidLabel.mockReturnValueOnce( true );
+      labelInput.value = 'ValidLabel';
+      labelInput.dispatchEvent( new Event( 'change' ) );
+
+      expect( removeErrorMessage ).toHaveBeenCalled();
+      expect( updateButtonsStatus ).toHaveBeenCalled();
+    } );
+
+    it( 'handles component types without modifiers', () => {
+      const element = createComponent( 'text', true );
+
+      // Should have form-element class but no modifier classes
+      expect( element.classList.contains( 'form-element' ) ).toBe( true );
+      expect( element.classList.contains( 'is-object' ) ).toBe( false );
+      expect( element.classList.contains( 'is-array' ) ).toBe( false );
+      expect( element.classList.contains( 'is-list' ) ).toBe( false );
+    } );
+  } );
+
   describe( 'createComponent', () => {
     it( 'creates list component', () => {
       const element = createComponent( 'list', true );
@@ -55,110 +161,125 @@ describe( 'Create Element', () => {
       const element = createComponent( 'text', false );
       expect( element.classList.contains( 'label-exists' ) ).toBe( false );
     } );
-  } );
 
-  describe( 'getUpdatedElement', () => {
-    it( 'handles label validation and error display', () => {
-      const field = {
-        type: 'text',
-        label: 'TestField',
-        value: ''
-      };
-      const element = getUpdatedElement( field, [], true );
-      const labelInput = element.querySelector( '.element-label' );
+    it( 'handles falsy elementModifier with undefined type', () => {
+      // Create with undefined type to ensure elementModifier remains null
+      const element = createComponent( undefined, true );
 
-      // Add invalid class to simulate existing error state
-      labelInput.classList.add( 'invalid' );
+      // Should only have base form-element class
+      expect( element.classList.contains( 'form-element' ) ).toBe( true );
+      expect( element.classList.contains( 'is-object' ) ).toBe( false );
+      expect( element.classList.contains( 'is-array' ) ).toBe( false );
+      expect( element.classList.contains( 'is-list' ) ).toBe( false );
 
-      // Test valid input
-      global.isValidLabel.mockReturnValueOnce( true );
-      labelInput.value = 'ValidLabel';
-      labelInput.dispatchEvent( new Event( 'change' ) );
-
-      expect( global.removeErrorMessage ).toHaveBeenCalled();
-      expect( global.updateButtonsStatus ).toHaveBeenCalled();
-    } );
-
-    it( 'handles object name input validation', () => {
-      const field = {
-        type: 'object',
-        label: 'TestObject',
-        value: []
-      };
-      const element = getUpdatedElement( field, [], true );
-      const nameInput = element.querySelector( '.object-name input' );
-
-      global.isValidLabel.mockReturnValueOnce( false );
-      nameInput.value = 'Invalid@Name';
-      nameInput.dispatchEvent( new Event( 'change' ) );
-
-      expect( global.showErrorMessage ).toHaveBeenCalled();
-      expect( global.updateButtonsStatus ).toHaveBeenCalled();
+      // Verify classList modification wasn't attempted with null
+      expect( element.classList.length ).toBe( 2 ); // form-element and label-exists only
     } );
   } );
+} );
 
-  describe( 'updateElement', () => {
-    it( 'processes image field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = '<input class="element-label"><input class="element-value">';
-      const field = { type: 'image', label: 'Test Image' };
+describe( 'getUpdatedElement', () => {
+  it( 'handles label validation and error display', () => {
+    const field = {
+      type: 'text',
+      label: 'TestField',
+      value: ''
+    };
+    const element = getUpdatedElement( field, [], true );
+    const labelInput = element.querySelector( '.element-label' );
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( 'input[type="url"]' );
-      expect( input ).toBeTruthy();
-    } );
+    // Add invalid class to simulate existing error state
+    labelInput.classList.add( 'invalid' );
 
-    it( 'processes text field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = '<input class="element-label"><input class="element-value">';
-      const field = { type: 'text', label: 'Test Text' };
+    // Test valid input
+    global.isValidLabel.mockReturnValueOnce( true );
+    labelInput.value = 'ValidLabel';
+    labelInput.dispatchEvent( new Event( 'change' ) );
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( '.element-value' );
-      expect( input.type ).toBe( 'text' );
-    } );
+    expect( global.removeErrorMessage ).toHaveBeenCalled();
+    expect( global.updateButtonsStatus ).toHaveBeenCalled();
+  } );
 
-    it( 'processes checkbox field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = `
+  it( 'handles object name input validation', () => {
+    const field = {
+      type: 'object',
+      label: 'TestObject',
+      value: []
+    };
+    const element = getUpdatedElement( field, [], true );
+    const nameInput = element.querySelector( '.object-name input' );
+
+    global.isValidLabel.mockReturnValueOnce( false );
+    nameInput.value = 'Invalid@Name';
+    nameInput.dispatchEvent( new Event( 'change' ) );
+
+    expect( global.showErrorMessage ).toHaveBeenCalled();
+    expect( global.updateButtonsStatus ).toHaveBeenCalled();
+  } );
+} );
+
+describe( 'updateElement', () => {
+  it( 'processes image field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = '<input class="element-label"><input class="element-value">';
+    const field = { type: 'image', label: 'Test Image' };
+
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( 'input[type="url"]' );
+    expect( input ).toBeTruthy();
+  } );
+
+  it( 'processes text field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = '<input class="element-label"><input class="element-value">';
+    const field = { type: 'text', label: 'Test Text' };
+
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( '.element-value' );
+    expect( input.type ).toBe( 'text' );
+  } );
+
+  it( 'processes checkbox field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = `
         <label class="element-label">Test Label</label>
         <input type="checkbox" class="element-value">
       `;
-      const field = { type: 'checkbox', label: 'Test Checkbox', value: true };
+    const field = { type: 'checkbox', label: 'Test Checkbox', value: true };
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( '.element-value' );
-      expect( input.type ).toBe( 'checkbox' );
-      expect( input.checked ).toBe( true );
-    } );
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( '.element-value' );
+    expect( input.type ).toBe( 'checkbox' );
+    expect( input.checked ).toBe( true );
+  } );
 
-    it( 'processes date field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = '<input class="element-label"><input class="element-value">';
-      const field = { type: 'date', label: 'Test Date' };
+  it( 'processes date field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = '<input class="element-label"><input class="element-value">';
+    const field = { type: 'date', label: 'Test Date' };
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( '.element-value' );
-      expect( input.type ).toBe( 'date' );
-    } );
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( '.element-value' );
+    expect( input.type ).toBe( 'date' );
+  } );
 
-    it( 'processes number field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = `
+  it( 'processes number field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = `
         <label class="element-label">Test Label</label>
         <input type="number" class="element-value">
       `;
-      const field = { type: 'number', label: 'Test Number', value: 42 };
+    const field = { type: 'number', label: 'Test Number', value: 42 };
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( '.element-value' );
-      expect( input.type ).toBe( 'number' );
-      expect( input.value ).toBe( '42' );
-    } );
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( '.element-value' );
+    expect( input.type ).toBe( 'number' );
+    expect( input.value ).toBe( '42' );
+  } );
 
-    it( 'processes list field', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = `
+  it( 'processes list field', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = `
         <div class="object-name">
           <input type="text" value="">
         </div>
@@ -168,98 +289,98 @@ describe( 'Create Element', () => {
           </li>
         </ul>
       `;
-      const field = { type: 'list', label: 'Test List', value: [ 'item1', 'item2' ] };
+    const field = { type: 'list', label: 'Test List', value: [ 'item1', 'item2' ] };
 
-      const updated = updateElement( element, field, [], true );
-      expect( updated.querySelector( '.object-name input' ).value ).toBe( 'Test List' );
-      expect( updated.querySelectorAll( 'ul li' ).length ).toBe( 2 );
-    } );
+    const updated = updateElement( element, field, [], true );
+    expect( updated.querySelector( '.object-name input' ).value ).toBe( 'Test List' );
+    expect( updated.querySelectorAll( 'ul li' ).length ).toBe( 2 );
+  } );
 
-    it( 'processes url field with validation', () => {
-      const element = document.createElement( 'div' );
-      element.classList.add( 'form-element' );
-      element.innerHTML = `
+  it( 'processes url field with validation', () => {
+    const element = document.createElement( 'div' );
+    element.classList.add( 'form-element' );
+    element.innerHTML = `
         <input class="element-label" value="TestURL">
         <input class="element-value" type="text">
       `;
 
-      const field = {
-        type: 'url',
-        label: 'TestURL',
-        value: 'https://example.com',
-        placeholder: 'Enter URL'
-      };
+    const field = {
+      type: 'url',
+      label: 'TestURL',
+      value: 'https://example.com',
+      placeholder: 'Enter URL'
+    };
 
-      const updated = updateElement( element, field, [], true );
-      const input = updated.querySelector( 'input[type="url"]' );
-      expect( input ).toBeTruthy();
-      expect( input.type ).toBe( 'url' );
-      expect( input.placeholder ).toBe( 'Enter URL' );
+    const updated = updateElement( element, field, [], true );
+    const input = updated.querySelector( 'input[type="url"]' );
+    expect( input ).toBeTruthy();
+    expect( input.type ).toBe( 'url' );
+    expect( input.placeholder ).toBe( 'Enter URL' );
 
-      // Set the value after update since updateUrlField creates a new input
-      input.value = field.value;
-      expect( input.value ).toBe( 'https://example.com' );
-    } );
+    // Set the value after update since updateUrlField creates a new input
+    input.value = field.value;
+    expect( input.value ).toBe( 'https://example.com' );
+  } );
 
-    it( 'processes textarea field with explicit schema', () => {
-      const element = document.createElement( 'div' );
-      element.classList.add( 'form-element' );
-      element.innerHTML = `
+  it( 'processes textarea field with explicit schema', () => {
+    const element = document.createElement( 'div' );
+    element.classList.add( 'form-element' );
+    element.innerHTML = `
         <input class="element-label" value="TestTextarea">
         <input class="element-value" type="text" value="Test content">
       `;
 
-      const field = {
-        type: 'textarea',
-        label: 'TestTextarea',
-        value: 'Test content'
-      };
+    const field = {
+      type: 'textarea',
+      label: 'TestTextarea',
+      value: 'Test content'
+    };
 
-      const explicitSchema = [ {
-        name: 'TestTextarea',
-        type: 'textarea',
-        addDeleteButton: true,
-        addDuplicateButton: true
-      } ];
+    const explicitSchema = [ {
+      name: 'TestTextarea',
+      type: 'textarea',
+      addDeleteButton: true,
+      addDuplicateButton: true
+    } ];
 
-      const updated = updateElement( element, field, explicitSchema, true );
+    const updated = updateElement( element, field, explicitSchema, true );
 
-      // Verify field structure
-      expect( updated.querySelector( '.element-label' ).value ).toBe( 'TestTextarea' );
-      expect( updated.querySelector( '.element-value' ).value ).toBe( 'Test content' );
+    // Verify field structure
+    expect( updated.querySelector( '.element-label' ).value ).toBe( 'TestTextarea' );
+    expect( updated.querySelector( '.element-value' ).value ).toBe( 'Test content' );
 
-      // Verify action buttons were created with proper structure
-      const buttonWrapper = updated.querySelector( '.button-wrapper' );
-      expect( buttonWrapper ).toBeTruthy();
+    // Verify action buttons were created with proper structure
+    const buttonWrapper = updated.querySelector( '.button-wrapper' );
+    expect( buttonWrapper ).toBeTruthy();
 
-      const addButton = buttonWrapper.querySelector( '.add-button' );
-      expect( addButton ).toBeTruthy();
-      expect( addButton.innerHTML ).toBe( ICONS.ADD );
+    const addButton = buttonWrapper.querySelector( '.add-button' );
+    expect( addButton ).toBeTruthy();
+    expect( addButton.innerHTML ).toBe( ICONS.ADD );
 
-      const deleteButton = buttonWrapper.querySelector( '.delete-button' );
-      expect( deleteButton ).toBeTruthy();
-      expect( deleteButton.innerHTML ).toBe( ICONS.DELETE );
-    } );
+    const deleteButton = buttonWrapper.querySelector( '.delete-button' );
+    expect( deleteButton ).toBeTruthy();
+    expect( deleteButton.innerHTML ).toBe( ICONS.DELETE );
+  } );
 
-    it( 'processes array field with nested elements', () => {
-      const element = document.createElement( 'div' );
-      element.innerHTML = `
+  it( 'processes array field with nested elements', () => {
+    const element = document.createElement( 'div' );
+    element.innerHTML = `
           <div class="object-name">
             <input type="text" value="">
           </div>
           <div class="dropzone"></div>
         `;
-      const field = {
-        type: 'array',
-        label: 'TestArray',
-        value: [
-          { type: 'text', label: 'Item1', value: 'Value1' },
-          { type: 'text', label: 'Item2', value: 'Value2' }
-        ]
-      };
+    const field = {
+      type: 'array',
+      label: 'TestArray',
+      value: [
+        { type: 'text', label: 'Item1', value: 'Value1' },
+        { type: 'text', label: 'Item2', value: 'Value2' }
+      ]
+    };
 
-      const updated = updateElement( element, field, [], true );
-      expect( updated.querySelector( '.object-name input' ).value ).toBe( 'TestArray' );
-    } );
+    const updated = updateElement( element, field, [], true );
+    expect( updated.querySelector( '.object-name input' ).value ).toBe( 'TestArray' );
   } );
+
 } );
