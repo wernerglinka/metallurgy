@@ -57,7 +57,7 @@ export const processExplicitField = ( field, explicitSchemaArray ) => {
     }
 
     // Finally, add the placeholder from the explicit field object
-    field.placeholder = explicitFieldObject ? explicitFieldObject.placeholder : field.placeholder;
+    field.placeholder = explicitFieldObject?.placeholder || field.placeholder;
   }
 
   return { field, permissions };

@@ -3,6 +3,7 @@
 import { jest } from '@jest/globals';
 import { createComponent, getUpdatedElement, updateElement } from '../../../screens/lib/page-elements/create-element.js';
 import { ICONS } from '../../../screens/icons/index.js';
+import formComponent from '../../../screens/lib/formComponents/index.js';
 
 // Mock validation functions
 global.isValidLabel = jest.fn( value => /^[a-zA-Z0-9]+$/.test( value ) );
@@ -162,18 +163,17 @@ describe( 'Create Element', () => {
       expect( element.classList.contains( 'label-exists' ) ).toBe( false );
     } );
 
-    it( 'handles falsy elementModifier with undefined type', () => {
-      // Create with undefined type to ensure elementModifier remains null
-      const element = createComponent( undefined, true );
+    it( 'handles falsy elementModifier with image type', () => {
+      const originalImage = formComponent.image;
+      formComponent.image = ( div ) => div;
 
-      // Should only have base form-element class
+      const element = createComponent( 'image', true );
       expect( element.classList.contains( 'form-element' ) ).toBe( true );
-      expect( element.classList.contains( 'is-object' ) ).toBe( false );
-      expect( element.classList.contains( 'is-array' ) ).toBe( false );
-      expect( element.classList.contains( 'is-list' ) ).toBe( false );
+      expect( element.classList.contains( 'label-exists' ) ).toBe( true );
+      expect( element.classList.contains( 'no-drop' ) ).toBe( true );
+      expect( element.classList.length ).toBe( 3 );
 
-      // Verify classList modification wasn't attempted with null
-      expect( element.classList.length ).toBe( 2 ); // form-element and label-exists only
+      formComponent.image = originalImage;
     } );
   } );
 } );

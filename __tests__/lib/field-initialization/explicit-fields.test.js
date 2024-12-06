@@ -101,4 +101,38 @@ describe( 'processExplicitField', () => {
     const result = processExplicitField( field, schema );
     expect( result.field.value ).toBe( 'Existing content' );
   } );
+
+  it( 'preserves field placeholder when no matching schema object exists', () => {
+    const field = {
+      type: 'text',
+      label: 'nonexistent',
+      value: '',
+      placeholder: 'Original placeholder'
+    };
+
+    const schema = [ {
+      name: 'different',
+      type: 'text'
+    } ];
+
+    const result = processExplicitField( field, schema );
+    expect( result.field.placeholder ).toBe( 'Original placeholder' );
+  } );
+
+  it( 'handles undefined schema placeholder while preserving original', () => {
+    const field = {
+      type: 'text',
+      label: 'test',
+      value: '',
+      placeholder: 'Original placeholder'
+    };
+
+    const schema = [ {
+      name: 'test',  // Matching schema object but no placeholder
+      type: 'text'
+    } ];
+
+    const result = processExplicitField( field, schema );
+    expect( result.field.placeholder ).toBe( 'Original placeholder' );
+  } );
 } );
