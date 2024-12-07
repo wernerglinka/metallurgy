@@ -84,6 +84,45 @@ function processSidebarDraggables( e, component ) {
 };
 
 /**
+ * @function processTemplates
+ * @param {*} e 
+ * @param {*} url 
+ * @description This function will process the template draggables
+ */
+function processTemplates( e, url ) {
+  const dropzone = e.target.closest( '.dropzone' );
+  if ( !dropzone ) return;
+
+  console.log( 'processTemplates' );
+
+  // Create new element with requested component type
+  const placeholderDiv = document.createElement( 'div' );
+  placeholderDiv.classList.add( 'template-placeholder' );
+  placeholderDiv.innerHTML = "Loading template...";
+
+  /*
+    To insert the dragged element either before or after an existing element 
+    in the drop container, including the ability to insert before the first 
+    element, we need to determine the relative position of the cursor to the 
+    center of each potential sibling element. This way, we can decide whether 
+    to insert the dragged element before or after each child based on the 
+    cursor's position.
+  */
+  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+  if ( closest ) {
+    if ( position === 'before' ) {
+      dropzone.insertBefore( placeholderDiv, closest );
+    } else {
+      dropzone.insertBefore( placeholderDiv, closest.nextSibling );
+    }
+  } else {
+    dropzone.appendChild( placeholderDiv );
+  }
+
+  updateButtonsStatus();
+};
+
+/**
  * @function getInsertionPoint
  * @param {*} container - The drop container element in which a dragged element is being dropped
  * @param {*} y - The vertical position of the mouse cursor at the time of the drop, typically provided by e.clientY from the drop event.
@@ -156,18 +195,35 @@ function moveElement( e ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
-  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-  if ( closest ) {
-    if ( position === 'before' ) {
-      dropzone.insertBefore( window.draggedElement, closest );
-    } else {
-      dropzone.insertBefore( window.draggedElement, closest.nextElementSibling );
-    }
-  } else {
-    dropzone.appendChild( window.draggedElement );
+  // Validate draggedElement exists and is a valid Node
+  if ( !window.draggedElement || !( window.draggedElement instanceof Node ) ) {
+    console.warn( 'Invalid dragged element:', window.draggedElement );
+    return;
   }
-  window.draggedElement = null; // Clear the reference
-};
+
+  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+
+  try {
+    if ( closest ) {
+      if ( position === 'before' ) {
+        dropzone.insertBefore( window.draggedElement, closest );
+      } else {
+        const nextSibling = closest.nextElementSibling;
+        if ( nextSibling ) {
+          dropzone.insertBefore( window.draggedElement, nextSibling );
+        } else {
+          dropzone.appendChild( window.draggedElement );
+        }
+      }
+    } else {
+      dropzone.appendChild( window.draggedElement );
+    }
+  } catch ( error ) {
+    console.error( 'Error moving element:', error );
+  } finally {
+    window.draggedElement = null; // Clear the reference
+  }
+}
 
 // Add drag and drop functionality to the form
 export const dragStart = ( e ) => {
@@ -176,9 +232,6 @@ export const dragStart = ( e ) => {
     && !e.target.closest( '.component-selection' ) // for adding fields
     && !e.target.closest( '.template-selection' ) // for adding templates
   ) return;
-
-  console.log( `Element proxy:` );
-  console.log( e.target );
 
   // Set the data type and value of the dragged element
   e.dataTransfer.setData( "text/plain", e.target.dataset.component );
@@ -197,16 +250,20 @@ export const dragStart = ( e ) => {
   e.dataTransfer.setData( "origin", origin );
 
 
-  // Find if an ancestor with class 'js-templates-list' exists, then we are 
-  // dragging a template in
-  const templateList = e.target.closest( '.js-templates-list' );
+  // Find if an ancestor with class 'js-templates-wrapper' exists
+  const templateList = e.target.closest( '.js-templates-wrapper' );
   if ( templateList ) {
     origin = "templates";
-    e.dataTransfer.setData( "templateUrl", e.target.href );
+    e.dataTransfer.setData( "origin", origin );
+    e.dataTransfer.setData( "text/plain", e.target.dataset.url );
+    // Don't set window.draggedElement for templates
+    return;
   }
 
-  // store the dragged element
-  window.draggedElement = e.target;
+  // Only store draggedElement for form elements and field proxies
+  if ( origin === "sidebar" || origin === "dropzone" ) {
+    window.draggedElement = e.target;
+  }
 };
 
 /**
@@ -278,31 +335,23 @@ export const drop = async ( e ) => {
   // get the origin of the dragged element
   const origin = e.dataTransfer.getData( "origin" );
 
-  console.log( e );
+  console.log( origin );
 
   /*
     1. Check if we dragged schema files into the dropzone
   */
   if ( origin === "templates" ) {
     // get the file url from the links ref attribute
-    const fileUrl = e.dataTransfer.getData( "templateUrl" );
-  }
+    const fileUrl = e.dataTransfer.getData( "text/plain" );
 
-  console.log( fileUrl );
+    processTemplates( e, fileUrl );
 
-
-  const hasFiles = e.dataTransfer.types.includes( 'Files' );
-
-  if ( hasFiles ) {
-    const files = e.dataTransfer.files;
-    await processSchemaFile( files, dropzone, e );
-    return;
   }
 
   /*
     2. Dragging a new element from the sidebar to the drop zone
   */
-  if ( origin === "sidebar" ) {
+  else if ( origin === "sidebar" ) {
     /*
       After receiving an component token from the sidebar, we need to create a 
       new element that represents the component type from the dataTransfer object.
