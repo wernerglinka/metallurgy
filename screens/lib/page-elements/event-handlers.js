@@ -89,11 +89,17 @@ function processSidebarDraggables( e, component ) {
  * @param {*} url 
  * @description This function will process the template draggables
  */
-function processTemplates( e, url ) {
+const processTemplates = async ( e, url ) => {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
-  console.log( 'processTemplates' );
+  // load the template json from the url with electron ipcRenderer
+  // and create the element from the template
+  const template = await electronAPI.files.read( url );
+
+
+
+  console.log( template );
 
   // Create new element with requested component type
   const placeholderDiv = document.createElement( 'div' );
@@ -308,66 +314,73 @@ export const dragLeave = ( e ) => {
 };
 
 /**
- * @function drop
- * @param {*} event 
- * @description This function will handle the drop event. 
- * There are three scenarios to handle during a drop event:
- *  1. Dragging a schema file into the drop zone
- *  2. Dragging a new element from the sidebar to the drop zone
- *  3. Moving an existing element within or between drop zones
+ * Handles drop events for different drag sources:
+ * - Templates: Adding template components from sidebar
+ * - Sidebar: Adding new form elements
+ * - Dropzone: Moving existing elements
+ * 
+ * @param {DragEvent} e - The drop event object
+ * @returns {Promise<void>}
+ * @throws {Error} If drop processing fails
  */
 export const drop = async ( e ) => {
-  e.preventDefault();
-  e.stopPropagation();
+  try {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) return;
+    // Validate drop target
+    const dropzone = e.target.closest( '.dropzone' );
+    if ( !dropzone ) return;
 
-  // clean up a droptarget that we might have dragged over
-  // Remove highlight class from the event target, which indicates a valid drop target during the dragover event.
+    // Clean up visual drop indicators
+    cleanupDropzone( dropzone );
+
+    // Get drag source and process accordingly
+    const origin = e.dataTransfer.getData( 'origin' );
+
+    switch ( origin ) {
+      case 'templates': {
+        // Handle template drops - creates new component from template
+        const templateUrl = e.dataTransfer.getData( 'text/plain' );
+        await processTemplates( e, templateUrl );
+        break;
+      }
+
+      case 'sidebar': {
+        // Handle new element drops - creates new form field
+        const componentType = e.dataTransfer.getData( 'text/plain' );
+        processSidebarDraggables( e, componentType );
+        break;
+      }
+
+      case 'dropzone': {
+        // Handle existing element moves - repositions form field
+        moveElement( e );
+        break;
+      }
+
+      default:
+        console.warn( `Unknown drag origin: ${ origin }` );
+    }
+
+  } catch ( error ) {
+    console.error( 'Drop processing failed:', error );
+    throw error;
+  }
+};
+
+/**
+ * Cleans up visual indicators after drop
+ * @param {HTMLElement} dropzone - The dropzone element
+ */
+const cleanupDropzone = ( dropzone ) => {
+  // Remove dropzone highlighting
   dropzone.classList.remove( 'dropzone-highlight' );
 
-  // reset all margins that were caused by elements dragged over
+  // Reset spacing on child elements
   dropzone.childNodes.forEach( child => {
-    child.style.margin = "0.5rem 0";
+    child.style.margin = '0.5rem 0';
   } );
-
-  // get the origin of the dragged element
-  const origin = e.dataTransfer.getData( "origin" );
-
-  console.log( origin );
-
-  /*
-    1. Check if we dragged schema files into the dropzone
-  */
-  if ( origin === "templates" ) {
-    // get the file url from the links ref attribute
-    const fileUrl = e.dataTransfer.getData( "text/plain" );
-
-    processTemplates( e, fileUrl );
-
-  }
-
-  /*
-    2. Dragging a new element from the sidebar to the drop zone
-  */
-  else if ( origin === "sidebar" ) {
-    /*
-      After receiving an component token from the sidebar, we need to create a 
-      new element that represents the component type from the dataTransfer object.
-    */
-    const component = e.dataTransfer.getData( "text/plain" );
-
-    console.log( `dropped component: ${ component }` );
-
-    processSidebarDraggables( e, component );
-
-  } else {
-    /*
-      3. Moving an existing element within or between drop zones
-    */
-    moveElement( e );
-  }
 };
 
 export const sectionCollapse = ( e ) => {
