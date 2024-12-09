@@ -1,4 +1,4 @@
-{
+export const audio = {
   "audio": {
     "ogg": "",
     "mpeg": ""
@@ -9,4 +9,4 @@
     "alt": "",
     "caption": ""
   }
-}
+};

@@ -1,6 +1,13 @@
-import { isSimpleList, isDateObject } from '../../utilities/type-validators.js';
+import { isSimpleList, isDateObject, isSectionsArray } from '../../utilities/type-validators.js';
 
-const inferFieldType = ( value ) => {
+/**
+ * Infers the field type from a value and key
+ * @param {*} value - The value to analyze
+ * @param {string} key - The field key
+ * @returns {string} The inferred field type
+ */
+const inferFieldType = ( value, key ) => {
+  if ( key === 'sections' ) return 'sections-array';
   if ( isSimpleList( value ) ) return 'list';
   if ( isDateObject( value ) ) return 'date';
   if ( Array.isArray( value ) ) return 'array';
@@ -13,8 +20,14 @@ const inferFieldType = ( value ) => {
     type === 'number' ? 'number' : 'text';
 };
 
+/**
+ * Creates a field definition from a key-value pair
+ * @param {string} key - The field key
+ * @param {*} value - The field value
+ * @returns {Object} The field definition
+ */
 function createField( key, value ) {
-  const type = inferFieldType( value );
+  const type = inferFieldType( value, key );
   const baseField = {
     label: key,
     type,
@@ -22,17 +35,47 @@ function createField( key, value ) {
     placeholder: `Add ${ key }`
   };
 
+  // Handle sections array specially
+  if ( type === 'sections-array' ) {
+    return {
+      ...baseField,
+      type: 'array',
+      isDropzone: true,
+      dropzoneType: 'sections',
+      value: Array.isArray( value ) ? value.map( ( section, index ) => ( {
+        type: 'object',
+        label: `section${ index + 1 }`,
+        value: Object.entries( section ).map( ( [ sKey, sValue ] ) =>
+          createField( sKey, sValue )
+        )
+      } ) ) : []
+    };
+  }
+
+  // Handle regular arrays
   if ( type === 'array' ) {
-    baseField.value = value.map( ( item, index ) => createField( `${ key }${ index }`, item ) );
-  } else if ( type === 'object' ) {
-    baseField.value = Object.entries( value ).map( ( [ subKey, subValue ] ) => createField( subKey, subValue ) );
+    baseField.value = value.map( ( item, index ) =>
+      createField( `${ key }${ index }`, item )
+    );
+  }
+  // Handle objects
+  else if ( type === 'object' ) {
+    baseField.value = Object.entries( value ).map( ( [ subKey, subValue ] ) =>
+      createField( subKey, subValue )
+    );
     delete baseField.placeholder;
   }
 
   return baseField;
 }
 
+/**
+ * Converts JSON to schema object
+ * @param {Object} json - The JSON to convert
+ * @returns {Object} The schema object
+ */
 export async function convertToSchemaObject( json ) {
-  //console.log( JSON.stringify( json, null, 2 ) );
-  return { fields: Object.entries( json ).map( ( [ key, value ] ) => createField( key, value ) ) };
+  return {
+    fields: Object.entries( json ).map( ( [ key, value ] ) => createField( key, value ) )
+  };
 }

@@ -1,4 +1,4 @@
-{
+export const page = {
   "layout": "blocks.njk",
   "draft": false,
   "navLabel": "",
@@ -9,5 +9,5 @@
     "socialImage": "path to social image",
     "canonicalOverwrite": "use only if you want to overwrite the canonical url"
   },
-  "sections": [{}]
-}
+  "sections": []
+};

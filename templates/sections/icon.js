@@ -1,7 +1,6 @@
-const icon = {
+{
   "icon": {
     "name": "",
-    "caption": "",
+    "caption": ""
   }
 }
-module.exports = icon;

@@ -1,4 +1,4 @@
-const leaflet = {
+{
   "leaflet": {
     "latitute": "",
     "longitude": "",
@@ -18,5 +18,4 @@ const leaflet = {
       }
     ]
   }
-};
-module.exports = leaflet;
+}

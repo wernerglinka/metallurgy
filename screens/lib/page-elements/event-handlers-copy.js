@@ -3,8 +3,6 @@ import { updateButtonsStatus } from "./update-buttons-status.js";
 import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
 import { addActionButtons } from '../buttons/form-actions.js';
 import { frontmatterToFragment } from '../form-generation/frontmatter-to-fragment.js';
-import { ICONS } from '../../icons/index.js';
-import { templates } from '../../../templates/index.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
@@ -92,95 +90,62 @@ async function processTemplate( e, url ) {
   if ( !dropzone ) return;
 
   try {
-    // Import the templates dynamically based on the URL
-    const templateName = url
-      .split( '/' )              // Split on forward slash
-      .pop()                     // Get last segment
-      .replace( '.js', '' );     // Remove .js extension
-    const templateSchema = templates[ templateName ];
+    // Get templates directory path
+    const response = await electronAPI.directories.getTemplates( 'templates' );
+    if ( !response?.data ) {
+      throw new Error( 'No templates data received' );
+    }
 
+    // Get first key from templates data object which is the templates path
+    const [ templatesPath ] = Object.keys( response.data );
+    const templateURL = `${ templatesPath }/${ url }`;
+
+    // get the template json from the url
+    let { data: templateSchema } = await electronAPI.files.read( templateURL );
     if ( !templateSchema ) {
       throw new Error( 'Failed to load template' );
     }
 
-    // check if section template
+    // check if section, then we need to also get the common section fields
     if ( url.includes( 'section' ) ) {
-      // Create section wrapper fragment
-      const wrapperFragment = document.createDocumentFragment();
-      const sectionWrapper = document.createElement( 'div' );
-      sectionWrapper.className = 'label-exists form-element is-object no-drop';
-      sectionWrapper.draggable = true;
+      const { data: commonSectionFields } = await electronAPI.files.read( `${ templatesPath }/section-common-fields.json` );
 
-      // Add section wrapper structure
-      sectionWrapper.innerHTML = `
-       <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
-       <label class="object-name label-wrapper">
-         <span>Object Label<sup>*</sup></span>
-         <span class="hint">Sections Object</span>
-         <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
-         <span class="collapse-icon">
-           ${ ICONS.COLLAPSE }
-           ${ ICONS.COLLAPSED }
-         </span>
-       </label>
-       <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
-       <div class="button-wrapper">
-         <div class="add-button button">${ ICONS.ADD }</div>
-         <div class="delete-button">${ ICONS.DELETE }</div>
-       </div>
-     `;
+      // merge the common section fields with the template schema
+      templateSchema = { ...commonSectionFields, ...templateSchema };
+    }
 
-      // convert the template schema to HTML form fields
-      const formFragment = await frontmatterToFragment( templateSchema );
+    // convert the template schema to HTML  form fields
+    const fragment = await frontmatterToFragment( templateSchema );
 
-      // Add form elements to the inner dropzone
-      sectionWrapper.querySelector( '.object-dropzone' ).appendChild( formFragment );
-      wrapperFragment.appendChild( sectionWrapper );
+    // Validate fragment is a valid Node
+    if ( !( fragment instanceof DocumentFragment ) ) {
+      throw new Error( 'Invalid fragment returned from frontmatterToForm' );
+    }
 
-      // Handle insertion based on position
-      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+    /*
+    To insert the dragged element either before or after an existing element 
+    in the drop container, including the ability to insert before the first 
+    element, we need to determine the relative position of the cursor to the 
+    center of each potential sibling element. This way, we can decide whether 
+    to insert the dragged element before or after each child based on the 
+    cursor's position.
+  */
+    const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+    // Empty container or append at end
+    if ( !closest ) {
+      dropzone.appendChild( fragment );
+      return;
+    }
 
-      if ( !closest ) {
-        dropzone.appendChild( wrapperFragment );
-        return;
-      }
-
-      if ( position === 'before' ) {
-        dropzone.insertBefore( wrapperFragment, closest );
-      } else {
-        const nextSibling = closest.nextElementSibling;
-        if ( nextSibling ) {
-          dropzone.insertBefore( wrapperFragment, nextSibling );
-        } else {
-          dropzone.appendChild( wrapperFragment );
-        }
-      }
+    // Insert at position
+    if ( position === 'before' ) {
+      dropzone.insertBefore( fragment, closest );
     } else {
-      // Handle non-section templates
-      const fragment = await frontmatterToFragment( templateSchema );
-
-      // Validate fragment
-      if ( !( fragment instanceof DocumentFragment ) ) {
-        throw new Error( 'Invalid fragment returned from frontmatterToForm' );
-      }
-
-      // Handle insertion based on position
-      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-
-      if ( !closest ) {
-        dropzone.appendChild( fragment );
-        return;
-      }
-
-      if ( position === 'before' ) {
-        dropzone.insertBefore( fragment, closest );
+      const nextSibling = closest.nextElementSibling;
+      if ( nextSibling ) {
+        dropzone.insertBefore( fragment, nextSibling );
       } else {
-        const nextSibling = closest.nextElementSibling;
-        if ( nextSibling ) {
-          dropzone.insertBefore( fragment, nextSibling );
-        } else {
-          dropzone.appendChild( fragment );
-        }
+        dropzone.appendChild( fragment );
       }
     }
 
@@ -190,7 +155,7 @@ async function processTemplate( e, url ) {
     console.error( 'Template processing failed:', error );
     throw error;
   }
-}
+};
 
 /**
  * @function getInsertionPoint
@@ -252,46 +217,6 @@ function getInsertionPoint( container, y ) {
     before or after the closest child ('before' or 'after').
   */
   return { closest, position: closestDistance < 0 ? 'before' : 'after' };
-}
-
-/**
- * @function isValidDropTarget
- * @param {HTMLElement} dropzone - The target dropzone element
- * @param {string} componentType - The type of component being dragged
- * @param {string} origin - The origin of the drag ('templates', 'sidebar', 'dropzone')
- * @returns {boolean} - Whether the drop is valid for this target
- * @description Validates if a component can be dropped in the target dropzone
- */
-function isValidDropTarget( dropzone, componentType, origin ) {
-  // If we're dragging a section, it must go into an array dropzone
-  if ( componentType === 'section' ||
-    ( origin === 'templates' && componentType.includes( 'section' ) ) ) {
-    return dropzone.dataset.wrapper === 'is-array';
-  }
-
-  // All other components can be dropped anywhere
-  return true;
-}
-
-/**
- * @function validateDrop
- * @param {DragEvent} e - The drop event
- * @returns {Object} - Validation result with dropzone and validity
- * @description Validates a drop event and returns the target dropzone if valid
- */
-function validateDrop( e ) {
-  const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) {
-    return { dropzone: null, isValid: false };
-  }
-
-  const origin = e.dataTransfer.getData( 'origin' );
-  const componentType = e.dataTransfer.getData( 'text/plain' );
-
-  return {
-    dropzone,
-    isValid: isValidDropTarget( dropzone, componentType, origin )
-  };
 }
 
 /**
@@ -391,51 +316,54 @@ export const dragOver = ( e ) => {
   e.preventDefault();
   if ( !e.target.closest( '.dropzone' ) ) return;
 
+  e.target.classList.add( 'dropzone-highlight' );
   const dropzone = e.target.closest( '.dropzone' );
-  dropzone.classList.add( 'dropzone-highlight' );
+
   dropzone.style.paddingTop = "5rem";
   dropzone.style.paddingBottom = "5rem";
 
   const { closest, position } = getInsertionPoint( dropzone, e.clientY );
 
-  // Reset existing margins first
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child.style ) {
-      child.style.margin = "0.5rem 0";
-    }
-  } );
-
   if ( closest ) {
     if ( position === 'before' ) {
-      if ( closest.style ) {
-        closest.style.marginBottom = "5rem";
+      closest.style.marginBottom = "5rem";
+    } else {
+      if ( closest.nextElementSibling ) {
+        closest.nextElementSibling.style.marginTop = "5rem";
       }
-    } else if ( closest.nextElementSibling && closest.nextElementSibling.style ) {
-      closest.nextElementSibling.style.marginTop = "5rem";
     }
+  } else {
+    dropzone.childNodes.forEach( child => {
+      child.style.margin = "0.5rem 0";
+    } );
   }
 };
 
 export const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) return;
 
-  dropzone.classList.remove( 'dropzone-highlight' );
   dropzone.style.paddingTop = "0.5rem";
   dropzone.style.paddingBottom = "0.5rem";
 
-  // Reset margins using children instead of childNodes
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child.style ) {
-      child.style.margin = "0.5rem 0";
-    }
+  e.target.classList.remove( 'dropzone-highlight' );
+
+  if ( !dropzone ) return;
+
+  // reset all margins that were caused by elements dragged over
+  dropzone.childNodes.forEach( child => {
+    child.style.margin = "0.5rem 0";
   } );
 };
 
 /**
- * @function drop
- * Handles drop events for different drag sources
+ * Handles drop events for different drag sources:
+ * - Templates: Adding template components from sidebar
+ * - Sidebar: Adding new form elements
+ * - Dropzone: Moving existing elements
+ * 
  * @param {DragEvent} e - The drop event object
+ * @returns {Promise<void>}
+ * @throws {Error} If drop processing fails
  */
 export const drop = async ( e ) => {
   try {
@@ -454,18 +382,24 @@ export const drop = async ( e ) => {
 
     switch ( origin ) {
       case 'templates': {
+        console.log( 'doing templates' );
+        // Handle template drops - creates new component from template
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
         await processTemplate( e, templateUrl );
         break;
       }
 
       case 'sidebar': {
+        console.log( 'doing sidebar' );
+        // Handle new element drops - creates new form field
         const componentType = e.dataTransfer.getData( 'text/plain' );
         processSidebarDraggables( e, componentType );
         break;
       }
 
       case 'dropzone': {
+        console.log( 'doing dropzone' );
+        // Handle existing element moves - repositions form field
         moveElement( e );
         break;
       }
@@ -484,24 +418,15 @@ export const drop = async ( e ) => {
  * Cleans up visual indicators after drop
  * @param {HTMLElement} dropzone - The dropzone element
  */
-/**
- * Cleans up visual indicators after drop
- * @param {HTMLElement} dropzone - The dropzone element
- */
 const cleanupDropzone = ( dropzone ) => {
-  if ( !dropzone ) return;
-
   // Remove dropzone highlighting
   dropzone.classList.remove( 'dropzone-highlight' );
 
   // Reset spacing on child elements
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child && child.style ) {
-      child.style.margin = '0.5rem 0';
-    }
+  dropzone.childNodes.forEach( child => {
+    child.style.margin = '0.5rem 0';
   } );
 };
-
 
 export const sectionCollapse = ( e ) => {
   const collapseIcon = e.target.closest( '.collapse-icon' );

@@ -60,40 +60,46 @@ const createTemplateDivs = ( templatesData, wrapper ) => {
 
       template.sections.forEach( ( section, sectionIndex ) => {
         let [ sectionName, sectionPath ] = Object.entries( section )[ 0 ];
-        // calculate relative section path with respect to rootpath
-        sectionPath = sectionPath.replace( rootPath, '' );
 
-        const div = document.createElement( 'div' );
-        div.id = `template-section-${ sectionIndex }`;
-        div.className = 'template-selection draggable';
-        div.setAttribute( 'draggable', 'true' );
-        div.setAttribute( 'data-url', sectionPath );
-        sectionName = sectionName
-          .replace( /\.[^/.]+$/, '' ) // Remove file extension
-          .replace( /-/g, ' ' )       // Replace all dashes with spaces
-          .toUpperCase();             // Convert to uppercase
-        div.textContent = sectionName;
-        wrapper.appendChild( div );
+        if ( sectionName !== 'index.js' ) {
+          // calculate relative section path with respect to rootpath
+          sectionPath = sectionPath.replace( rootPath, '' );
+
+          const div = document.createElement( 'div' );
+          div.id = `template-section-${ sectionIndex }`;
+          div.className = 'template-selection draggable';
+          div.setAttribute( 'draggable', 'true' );
+          div.setAttribute( 'data-url', sectionPath );
+          sectionName = sectionName
+            .replace( /\.[^/.]+$/, '' ) // Remove file extension
+            .replace( /-/g, ' ' )       // Replace all dashes with spaces
+            .toUpperCase();             // Convert to uppercase
+          div.textContent = sectionName;
+          wrapper.appendChild( div );
+        }
       } );
       return;
     }
 
     // Handle regular templates
     let [ templateName, templatePath ] = Object.entries( template )[ 0 ];
-    // calculate relative section path with respect to rootpath
-    templatePath = templatePath.replace( rootPath, '' );
 
-    const div = document.createElement( 'div' );
-    div.id = `template-${ index }`;
-    div.className = 'template-selection draggable';
-    div.setAttribute( 'draggable', 'true' );
-    div.setAttribute( 'data-url', templatePath );
-    templateName = templateName
-      .replace( /\.[^/.]+$/, '' ) // Remove file extension
-      .replace( /-/g, ' ' )       // Replace all dashes with spaces
-      .toUpperCase();             // Convert to uppercase
-    div.textContent = templateName;
-    wrapper.appendChild( div );
+    if ( templateName !== 'index.js' && templateName !== 'common-fields.js' ) {
+      // calculate relative section path with respect to rootpath
+      templatePath = templatePath.replace( rootPath, '' );
+
+      const div = document.createElement( 'div' );
+      div.id = `template-${ index }`;
+      div.className = 'template-selection draggable';
+      div.setAttribute( 'draggable', 'true' );
+      div.setAttribute( 'data-url', templatePath );
+      templateName = templateName
+        .replace( /\.[^/.]+$/, '' ) // Remove file extension
+        .replace( /-/g, ' ' )       // Replace all dashes with spaces
+        .toUpperCase();             // Convert to uppercase
+      div.textContent = templateName;
+      wrapper.appendChild( div );
+    }
   } );
 };
 
@@ -114,9 +120,7 @@ const buildTemplatesSelection = async () => {
     }
 
     // Build the template list with placeholder elements like the fields
-    // loop over the templates
-    // key is the template name, value is the template data
-    // if a value is an array, loop over it
+    // loop over the templates, key is the template name, value is the template data
     // The placeholder should have this structure:
     // <div id="template<loop-iteration>" class="template-selection draggable" draggable="true" data-url="<value>">key of the template
 
@@ -124,13 +128,6 @@ const buildTemplatesSelection = async () => {
     templateWrapper.className = 'templates-wrapper';
     createTemplateDivs( templates.data, templateWrapper );
     elements.wrapper.appendChild( templateWrapper );
-
-    /*
-    // Build and append template list
-    const templatesList = createTemplatesList( templates.data );
-    elements.wrapper.appendChild( templatesList );
-    */
-
 
   } catch ( error ) {
     console.error( 'Failed to build templates:', error );

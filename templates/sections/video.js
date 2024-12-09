@@ -1,4 +1,4 @@
-const video = {
+export const video = {
   "video": {
     "title": "",
     "inline": false,
@@ -8,5 +8,4 @@ const video = {
     "start": "",
     "end": "",
   }
-}
-module.exports = video;
+};

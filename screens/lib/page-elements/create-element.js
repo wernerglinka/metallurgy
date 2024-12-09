@@ -16,12 +16,85 @@ import { updateObjectField } from './field-handlers/object.js';
 import { processExplicitField } from './field-initialization/explicit-fields.js';
 
 /**
+ * @function isArrayType
+ * @param {string} type - The field type to check
+ * @returns {boolean} Whether this is an array type
+ */
+function isArrayType( type ) {
+  return type === 'array' || type === 'sections-array';
+}
+
+/**
+ * @function getArrayType
+ * @param {Object} field - The field definition
+ * @returns {string} The specific array type
+ */
+function getArrayType( field ) {
+  if ( field.type === 'array' && field.label === 'sections' ) {
+    return 'sections-array';
+  }
+  return field.type;
+}
+
+/**
+ * @function createArrayElement
+ * @param {string} componentType - The type of array component to create
+ * @returns {HTMLElement} The created array element
+ */
+function createArrayElement( componentType ) {
+  const element = document.createElement( 'div' );
+  element.className = 'label-exists form-element is-array no-drop';
+  element.draggable = true;
+
+  element.innerHTML = `
+    <span class="sort-handle">
+      <svg viewBox="0 0 14 22" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+          <g stroke="#FFFFFF" stroke-width="2">
+            <circle cx="4" cy="11" r="1"></circle>
+            <circle cx="4" cy="4" r="1"></circle>
+            <circle cx="4" cy="18" r="1"></circle>
+            <circle cx="10" cy="11" r="1"></circle>
+            <circle cx="10" cy="4" r="1"></circle>
+            <circle cx="10" cy="18" r="1"></circle>
+          </g>
+        </g>
+      </svg>
+    </span>
+    <label class="object-name label-wrapper">
+      <span>Array Label<sup>*</sup></span>
+      <input type="text" class="element-label" placeholder="Array Name" readonly>
+      <span class="collapse-icon">
+        <svg class="open" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <!-- Your existing collapse icon SVG -->
+        </svg>
+        <svg class="collapsed" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <!-- Your existing collapsed icon SVG -->
+        </svg>
+      </span>
+    </label>
+    <div class="${ componentType === 'sections-array' ? 'array-dropzone' : 'array-list' } dropzone js-dropzone" 
+         ${ componentType === 'sections-array' ? 'data-wrapper="is-array"' : '' }>
+    </div>
+    <div class="button-wrapper"></div>`;
+
+  return element;
+}
+
+/**
  * @function createComponent
  * @param {string} type - text, checkbox, array, object, etc.
  * @param {boolean} labelsExist - if false, return the raw component with the label as an input field
- * @returns a form element
+ * @returns {HTMLElement} a form element
  */
-export const createComponent = ( type, labelsExist ) => {
+export function createComponent( type, labelsExist ) {
+  const componentType = type.toLowerCase();
+
+  // Handle array types
+  if ( componentType === 'array' || componentType === 'sections-array' ) {
+    return createArrayElement( componentType );
+  }
+
   // create a div to hold the form element
   let div = document.createElement( 'div' );
 
@@ -40,9 +113,6 @@ export const createComponent = ( type, labelsExist ) => {
   // Make element draggable but nothing can be dropped into it
   div.setAttribute( 'draggable', true );
   div.classList.add( 'no-drop' );
-  // we add the dragstart event listener to the form element
-  // and then delegate it to this form-element
-  // div.addEventListener( 'dragstart', dragStart );
 
   // Temp element storage so I know what type of element I'm dragging
   window.draggedElement = null;
@@ -54,146 +124,116 @@ export const createComponent = ( type, labelsExist ) => {
   div = formComponent[ type ]( div, labelsExist );
 
   return div;
-};
+}
 
 /**
- * @function getUpdatedElement()
- * @param {object} mdField 
- * @returns updatedElement
- * @description This function will first create a new element and then updates
- *   element based on the original mdField values
+ * @function updateArrayElement
+ * @param {HTMLElement} element - The element to update
+ * @param {Object} field - The field data
+ * @returns {HTMLElement} The updated element
  */
-export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExist ) => {
-  // Build the new element as inferred from the json shape...
-  const newElement = createComponent( mdField.type, labelsExist );
+function updateArrayElement( element, field ) {
+  const labelInput = element.querySelector( '.element-label' );
+  if ( labelInput ) {
+    labelInput.value = field.label;
+  }
 
-  // ...and update it with the field data and if the field is 'explicitly defined
-  // add structure of the element, for example text to 'select' or 'text area'.
-  const updatedElement = updateElement( newElement, mdField, explicitSchemaArray, labelsExist );
+  const dropzone = element.querySelector( '.dropzone' );
+  if ( dropzone && field.label === 'sections' ) {
+    dropzone.dataset.wrapper = 'is-array';
+  }
 
-  /*
-    Add an eventlistener to the label input to enable the submit button when the 
-    user has added text to the label input and all other label inputs have text
-  */
-  const newElementLabelInput = newElement.querySelector( '.element-label, .object-name input' );
-  newElementLabelInput && newElementLabelInput.addEventListener( 'change', ( e ) => {
-    const thisElement = e.target;
-
-    // check if the input is valid, if not valid, show error message and disable the button
-    if ( !isValidLabel( thisElement.value ) ) {
-      showErrorMessage( thisElement, "Label must only use characters and numbers" );
-      updateButtonsStatus();
-      return;
-    }
-
-    // remove error message if it exists
-    if ( thisElement.classList.contains( 'invalid' ) ) {
-      removeErrorMessage( thisElement );
-    }
-
-    updateButtonsStatus();
-  } );
-
-  return updatedElement;
-};
+  return element;
+}
 
 /**
  * @function updateElement
- * @param {element} - a raw DOM element, both label and value are empty
- * @param {field} - a field object
- * @param 
- * @returns DOM element that has been updated with field data and structure
- * @description This function will update the element based on field object values
- *  and if the field schema is explicitly defined, change the structure of the element, 
- *  for example 'text' -> 'select' or 'text' -> 'text area'.
- *  Based on the labelsExist parameter, the function will either render the element with the
- *  label as an input field or as a label.
+ * @param {HTMLElement} element - a raw DOM element
+ * @param {Object} field - a field object
+ * @param {Array} explicitSchemaArray - array of explicit field definitions
+ * @param {boolean} labelsExist - whether labels exist
+ * @returns {HTMLElement} Updated DOM element
  */
 export const updateElement = ( element, field, explicitSchemaArray, labelsExist ) => {
   // Process explicit field schema and get updated field data and permissions
   const { field: processedField, permissions } = processExplicitField( field, explicitSchemaArray );
   const { addDeleteButton, addDuplicateButton } = permissions;
 
-  /*
-   * SELECT field
-   * The markdown file presents this as a text field. We'll delete the text field
-   * and replace it with a select element.
-   */
+  // Handle array types first
+  if ( isArrayType( field.type ) ) {
+    return updateArrayElement( element, field );
+  }
+
+  // Your existing field type handling
   if ( field.type === "select" ) {
     element = updateSelectField( element, field );
-  }
-
-  /*
-   * CHECKBOX field
-   * The markdown file presents this properly as a checkbox, but we need to
-   * update the label and value.
-   */
-  if ( field.type === "checkbox" ) {
+  } else if ( field.type === "checkbox" ) {
     element = updateCheckboxField( element, field );
-  }
-
-  /*
-   * DATE field
-   * The markdown file presents this as a text field. We'll delete the text field
-   * and replace it with a date input.
-   */
-  if ( field.type === "date" ) {
+  } else if ( field.type === "date" ) {
     element = updateDateField( element, field );
-  }
-
-  /**
-   * IMAGE and URL fields
-   * The markdown file presents this as a text field. We'll delete the text field
-   * and replace it with a url input.
-   */
-  if ( field.type === "image" || field.type === "url" ) {
+  } else if ( field.type === "image" || field.type === "url" ) {
     element = updateUrlField( element, field );
-  }
-
-  /**
-   * TEXT field
-   */
-  if ( field.type === "text" ) {
+  } else if ( field.type === "text" ) {
     element = updateTextField( element, field );
-  }
-
-  /*
-   * TEXTAREA field
-   * The markdown file presents this as a text field. We'll delete the text field
-   * and replace it with a textarea.
-   */
-  if ( field.type === "textarea" ) {
+  } else if ( field.type === "textarea" ) {
     element = updateTextareaField( element, field );
-  }
-
-  /**
-   * SIMPLE LIST field
-   */
-  if ( field.type === "list" ) {
+  } else if ( field.type === "list" ) {
     element = updateListField( element, field );
-  }
-
-  /**
-   * NUMBER field
-   * The markdown file presents this as a text field. We'll delete the text field
-   * and replace it with a number input.
-   */
-  if ( field.type === "number" ) {
+  } else if ( field.type === "number" ) {
     element = updateNumberField( element, field );
-  }
-
-  if ( field.type === "object" || field.type === "array" ) {
+  } else if ( field.type === "object" ) {
     element = updateObjectField( element, field, explicitSchemaArray, labelsExist );
   }
 
-  /*
-   * Add the add/delete buttons
-   * Add/Delete buttons are enabled in the explicit field schema.
-   * Buttons are defined in the context of a page. E.g. a page must have
-   * a layout, but that field can not be duplicated. A simple list item
-   * can be duplicated or deleted.
-  */
+  // Add action buttons
   addActionButtons( element, { addDeleteButton, addDuplicateButton } );
 
   return element;
+};
+
+/**
+ * @function getUpdatedElement
+ * @param {Object} mdField - The markdown field definition
+ * @param {Array} explicitSchemaArray - Array of explicit schema definitions
+ * @param {boolean} labelsExist - Whether labels exist
+ * @returns {HTMLElement} The updated element
+ */
+export const getUpdatedElement = ( mdField, explicitSchemaArray = [], labelsExist ) => {
+  // Get the actual type including sections-array
+  const arrayType = getArrayType( mdField );
+
+  // Store the original type before creating component
+  const originalType = mdField.type;
+  mdField.type = arrayType;  // Temporarily set the type to match what we detected
+
+  // Build the new element with the correct type
+  const newElement = createComponent( arrayType, labelsExist );
+
+  // Update it with the field data
+  const updatedElement = updateElement( newElement, mdField, explicitSchemaArray, labelsExist );
+
+  // Restore original type
+  mdField.type = originalType;
+
+  // Add label input event listener
+  const newElementLabelInput = newElement.querySelector( '.element-label, .object-name input' );
+  if ( newElementLabelInput ) {
+    newElementLabelInput.addEventListener( 'change', ( e ) => {
+      const thisElement = e.target;
+
+      if ( !isValidLabel( thisElement.value ) ) {
+        showErrorMessage( thisElement, "Label must only use characters and numbers" );
+        updateButtonsStatus();
+        return;
+      }
+
+      if ( thisElement.classList.contains( 'invalid' ) ) {
+        removeErrorMessage( thisElement );
+      }
+
+      updateButtonsStatus();
+    } );
+  }
+
+  return updatedElement;
 };

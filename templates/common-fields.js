@@ -1,4 +1,4 @@
-{
+export const commonSectionFields = {
   "container": "section",
   "name": "",
   "containerFields": {
@@ -14,4 +14,4 @@
       "isDark": false
     }
   }
-}
+};

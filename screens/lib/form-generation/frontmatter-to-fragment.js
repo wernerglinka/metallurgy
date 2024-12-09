@@ -8,8 +8,6 @@ import { getExplicitSchema } from './schema/schema-handler.js';
 import { validateSchema } from './schema/validate-schema.js';
 import { createFormFragment, renderToDropzone } from './form/form-builder.js';
 
-import { logFragment } from '../utilities/fragment-debug-helper.js';
-
 /**
  * Renders a markdown file's frontmatter as form elements
  * @param {Object} frontmatter - The frontmatter object from the markdown file
@@ -21,8 +19,6 @@ export const frontmatterToFragment = async ( frontmatter, content ) => {
     // Convert frontmatter to schema
     const schema = await convertToSchemaObject( frontmatter );
     validateSchema( schema );
-
-    console.log( schema );
 
     // Get explicit field schemas - continue without if not found
     let explicitSchemaArray = null;

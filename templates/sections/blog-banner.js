@@ -1,4 +1,4 @@
-const blogHeader = {
+{
   "text": {
     "prefix": "",
     "title": "",
@@ -6,6 +6,4 @@ const blogHeader = {
     "subtitle": "",
     "prose": ""
   }
-};
-
-module.exports = blogHeader;
+}

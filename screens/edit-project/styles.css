@@ -763,6 +763,7 @@ fieldset {
     border-radius: var(--default-radius);
     padding: 0.5rem;
     opacity: 1;
+    transition: all 0.5s ease-in-out;
 
     &.is-collapsed {
       max-height: 0 !important;
