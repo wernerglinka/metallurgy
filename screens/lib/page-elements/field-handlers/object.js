@@ -15,5 +15,10 @@ export const updateObjectField = ( element, field, explicitSchemaArray, labelsEx
     } );
   }
 
+  // if a field sectionDescription exists, find the element with class 'hint' and update the text
+  if ( field.sectionDescription ) {
+    element.querySelector( '.hint' ).textContent = field.sectionDescription;
+  }
+
   return element;
 };

@@ -442,15 +442,15 @@ fieldset {
   align-items: center;
   border: 1px dotted var(--border-color);
   border-radius: var(--default-radius);
-  padding: 0.5rem 6rem 0.5rem 3rem;
+  padding: 0.5rem 6rem 0.5rem 2rem;
   margin-bottom: 0.5rem;
   font-size: 0.8rem;
-  transition: all 0.5s ease-in-out;
+  transition: all 0.2s ease-in-out;
 
   .sort-handle {
     position: absolute;
     top: 50%;
-    left: 0.5rem;
+    left: 0;
     width: 2rem;
     height: 2rem;
     transform: translateY(-50%);
@@ -511,8 +511,8 @@ fieldset {
   }
 
   &:hover {
-    .sort-handle,
-    .button-wrapper {
+    > .sort-handle,
+    > .button-wrapper {
       opacity: 1;
     }
   }
@@ -741,7 +741,7 @@ fieldset {
     }
 
     /* Special label for the object in an array */
-    /* We need to hide the regular input as it results from a valid JSON to schema conversion */
+    /* We need to hide the regular input as it results from a valid JSON to schema conversion
     & .array-dropzone > .form-element > .object-name {
       & span:first-child, & input {
         display: none;
@@ -755,6 +755,7 @@ fieldset {
         top: 0.7rem;
       }
     }
+    */
   }
 
   & .object-dropzone, & .array-dropzone {
@@ -763,7 +764,7 @@ fieldset {
     border-radius: var(--default-radius);
     padding: 0.5rem;
     opacity: 1;
-    transition: all 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
 
     &.is-collapsed {
       max-height: 0 !important;

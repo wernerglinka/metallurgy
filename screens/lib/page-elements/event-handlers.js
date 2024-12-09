@@ -92,11 +92,7 @@ async function processTemplate( e, url ) {
   if ( !dropzone ) return;
 
   try {
-    // Import the templates dynamically based on the URL
-    const templateName = url
-      .split( '/' )              // Split on forward slash
-      .pop()                     // Get last segment
-      .replace( '.js', '' );     // Remove .js extension
+    const templateName = url.replace( '.json', '' );
     const templateSchema = templates[ templateName ];
 
     if ( !templateSchema ) {
@@ -110,28 +106,32 @@ async function processTemplate( e, url ) {
       const sectionWrapper = document.createElement( 'div' );
       sectionWrapper.className = 'label-exists form-element is-object no-drop';
       sectionWrapper.draggable = true;
+      sectionWrapper.setAttribute( 'data-path', templateName );
 
       // Add section wrapper structure
       sectionWrapper.innerHTML = `
-       <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
-       <label class="object-name label-wrapper">
-         <span>Object Label<sup>*</sup></span>
-         <span class="hint">Sections Object</span>
-         <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
-         <span class="collapse-icon">
-           ${ ICONS.COLLAPSE }
-           ${ ICONS.COLLAPSED }
-         </span>
-       </label>
-       <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
-       <div class="button-wrapper">
-         <div class="add-button button">${ ICONS.ADD }</div>
-         <div class="delete-button">${ ICONS.DELETE }</div>
-       </div>
-     `;
+        <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
+        <label class="object-name label-wrapper">
+          <span>Object Label<sup>*</sup></span>
+          <span class="hint">Sections Object</span>
+          <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
+          <span class="collapse-icon">
+            ${ ICONS.COLLAPSE }
+            ${ ICONS.COLLAPSED }
+          </span>
+        </label>
+        <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
+        <div class="button-wrapper">
+          <div class="add-button button">${ ICONS.ADD }</div>
+          <div class="delete-button">${ ICONS.DELETE }</div>
+        </div>
+      `;
 
-      // convert the template schema to HTML form fields
-      const formFragment = await frontmatterToFragment( templateSchema );
+      // convert the template schema to HTML form fields starting with root path
+      const formFragment = await frontmatterToFragment( templateSchema, templateName );
+
+      // Process any arrays found in the converted form
+      processArraysInFragment( formFragment, templateSchema );
 
       // Add form elements to the inner dropzone
       sectionWrapper.querySelector( '.object-dropzone' ).appendChild( formFragment );
@@ -190,6 +190,52 @@ async function processTemplate( e, url ) {
     console.error( 'Template processing failed:', error );
     throw error;
   }
+}
+
+// Helper function to process arrays within a fragment
+function processArraysInFragment( fragment, schema ) {
+  const arrayElements = fragment.querySelectorAll( '.is-array' );
+
+  arrayElements.forEach( arrayElement => {
+    const arrayPath = arrayElement.getAttribute( 'data-path' );
+    const arrayData = getArrayDataFromSchema( schema, arrayPath );
+    const arrayDropzone = arrayElement.querySelector( '.array-list.dropzone' );
+
+    if ( arrayDropzone && arrayData.length ) {
+      arrayData.forEach( ( item, index ) => {
+        const itemWrapper = document.createElement( 'div' );
+        itemWrapper.className = 'label-exists form-element is-object no-drop';
+        itemWrapper.draggable = true;
+        itemWrapper.setAttribute( 'data-path', `${ arrayPath }[${ index }]` );
+
+        itemWrapper.innerHTML = `
+          <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
+          <label class="object-name label-wrapper">
+            <span>Array Item<sup>*</sup></span>
+            <input type="text" class="element-label" placeholder="Item Name" readonly="">
+            <span class="collapse-icon">
+              ${ ICONS.COLLAPSE }
+              ${ ICONS.COLLAPSED }
+            </span>
+          </label>
+          <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
+          <div class="button-wrapper">
+            <div class="add-button button">${ ICONS.ADD }</div>
+            <div class="delete-button">${ ICONS.DELETE }</div>
+          </div>
+        `;
+
+        // Process the item's content with proper path
+        const itemFragment = frontmatterToFragment( item, `${ arrayPath }[${ index }]` );
+
+        // Add to item's dropzone
+        itemWrapper.querySelector( '.object-dropzone' ).appendChild( itemFragment );
+
+        // Add completed item to array dropzone
+        arrayDropzone.appendChild( itemWrapper );
+      } );
+    }
+  } );
 }
 
 /**
@@ -493,6 +539,8 @@ const cleanupDropzone = ( dropzone ) => {
 
   // Remove dropzone highlighting
   dropzone.classList.remove( 'dropzone-highlight' );
+  dropzone.style.paddingTop = "0.5rem";
+  dropzone.style.paddingBottom = "0.5rem";
 
   // Reset spacing on child elements
   Array.from( dropzone.children ).forEach( child => {
