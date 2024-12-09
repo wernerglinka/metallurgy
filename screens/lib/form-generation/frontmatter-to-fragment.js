@@ -1,5 +1,5 @@
 /**
- * @module form-generation/frontmatter-to-form
+ * @module form-generation/frontmatter-to-fragment
  * @description Converts frontmatter to form elements
  */
 
@@ -16,7 +16,7 @@ import { logFragment } from '../utilities/fragment-debug-helper.js';
  * @param {string} content - The content of the markdown file
  * @throws {Error|Object} Standard error or schema error object
  */
-export const frontmatterToForm = async ( frontmatter, content ) => {
+export const frontmatterToFragment = async ( frontmatter, content ) => {
   try {
     // Convert frontmatter to schema
     const schema = await convertToSchemaObject( frontmatter );
@@ -38,7 +38,8 @@ export const frontmatterToForm = async ( frontmatter, content ) => {
 
     // Create and render form elements
     const fragment = createFormFragment( schema.fields, explicitSchemaArray );
-    renderToDropzone( fragment );
+
+    return fragment;
 
   } catch ( error ) {
     // Handle schema errors

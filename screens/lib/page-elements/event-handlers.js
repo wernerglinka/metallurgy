@@ -2,6 +2,9 @@ import { createComponent } from "./create-element.js";
 import { updateButtonsStatus } from "./update-buttons-status.js";
 import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
 import { addActionButtons } from '../buttons/form-actions.js';
+import { frontmatterToFragment } from '../form-generation/frontmatter-to-fragment.js';
+
+import { logFragment } from '../utilities/fragment-debug-helper.js';
 
 /**
  * @function processSidebarDraggables
@@ -14,17 +17,11 @@ function processSidebarDraggables( e, component ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
-  console.log( 'processSidebarDraggables' );
-
   // Create new element with requested component type
   const newElement = createComponent( component, false );
 
   // add an ADD and DELETE button to the new element
   addActionButtons( newElement, { addDeleteButton: true, addDuplicateButton: true } );
-
-
-  console.log( `inserted element:` );
-  console.log( newElement );
 
   // If an object is placed in an array dropzone, hide the label input
   // since the object will not need a name
@@ -51,8 +48,6 @@ function processSidebarDraggables( e, component ) {
       updateButtonsStatus();
       return;
     }
-
-
 
     // remove error message if it exists
     if ( thisElement.classList.contains( 'invalid' ) ) {
@@ -84,29 +79,52 @@ function processSidebarDraggables( e, component ) {
 };
 
 /**
- * @function processTemplates
+ * @function processTemplate
  * @param {*} e 
  * @param {*} url 
  * @description This function will process the template draggables
  */
-const processTemplates = async ( e, url ) => {
+// processTemplate function update
+async function processTemplate( e, url ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
-  // load the template json from the url with electron ipcRenderer
-  // and create the element from the template
-  const template = await electronAPI.files.read( url );
+  try {
+    // Get templates directory path
+    const response = await electronAPI.directories.getTemplates( 'templates' );
+    if ( !response?.data ) {
+      throw new Error( 'No templates data received' );
+    }
 
+    // Get first key from templates data object which is the templates path
+    const [ templatesPath ] = Object.keys( response.data );
+    const templateURL = `${ templatesPath }/${ url }`;
 
+    // get the template json from the url
+    let { data: templateSchema } = await electronAPI.files.read( templateURL );
+    if ( !templateSchema ) {
+      throw new Error( 'Failed to load template' );
+    }
 
-  console.log( template );
+    // check if section, then we need to also get the common section fields
+    if ( url.includes( 'section' ) ) {
+      const { data: commonSectionFields } = await electronAPI.files.read( `${ templatesPath }/section-common-fields.json` );
 
-  // Create new element with requested component type
-  const placeholderDiv = document.createElement( 'div' );
-  placeholderDiv.classList.add( 'template-placeholder' );
-  placeholderDiv.innerHTML = "Loading template...";
+      // merge the common section fields with the template schema
+      templateSchema = { ...commonSectionFields, ...templateSchema };
+    }
 
-  /*
+    // convert the template schema to HTML  form fields
+    const fragment = await frontmatterToFragment( templateSchema );
+
+    logFragment( fragment );
+
+    // Validate fragment is a valid Node
+    if ( !( fragment instanceof DocumentFragment ) ) {
+      throw new Error( 'Invalid fragment returned from frontmatterToForm' );
+    }
+
+    /*
     To insert the dragged element either before or after an existing element 
     in the drop container, including the ability to insert before the first 
     element, we need to determine the relative position of the cursor to the 
@@ -114,18 +132,31 @@ const processTemplates = async ( e, url ) => {
     to insert the dragged element before or after each child based on the 
     cursor's position.
   */
-  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-  if ( closest ) {
-    if ( position === 'before' ) {
-      dropzone.insertBefore( placeholderDiv, closest );
-    } else {
-      dropzone.insertBefore( placeholderDiv, closest.nextSibling );
+    const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+    // Empty container or append at end
+    if ( !closest ) {
+      dropzone.appendChild( fragment );
+      return;
     }
-  } else {
-    dropzone.appendChild( placeholderDiv );
-  }
 
-  updateButtonsStatus();
+    // Insert at position
+    if ( position === 'before' ) {
+      dropzone.insertBefore( fragment, closest );
+    } else {
+      const nextSibling = closest.nextElementSibling;
+      if ( nextSibling ) {
+        dropzone.insertBefore( fragment, nextSibling );
+      } else {
+        dropzone.appendChild( fragment );
+      }
+    }
+
+    updateButtonsStatus();
+
+  } catch ( error ) {
+    console.error( 'Template processing failed:', error );
+    throw error;
+  }
 };
 
 /**
@@ -138,6 +169,11 @@ const processTemplates = async ( e, url ) => {
  * to the cursor's position. The position is either before or after the element.
  */
 function getInsertionPoint( container, y ) {
+  // Handle empty container
+  if ( !container.children.length ) {
+    return { closest: null, position: 'after' };
+  }
+
   // 'closest' will hold a reference to the closest child element to the drop point
   let closest = null;
   // 'closestDistance' will hold the distance from the drop point to the closest child element
@@ -340,13 +376,15 @@ export const drop = async ( e ) => {
 
     switch ( origin ) {
       case 'templates': {
+        console.log( 'doing templates' );
         // Handle template drops - creates new component from template
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
-        await processTemplates( e, templateUrl );
+        await processTemplate( e, templateUrl );
         break;
       }
 
       case 'sidebar': {
+        console.log( 'doing sidebar' );
         // Handle new element drops - creates new form field
         const componentType = e.dataTransfer.getData( 'text/plain' );
         processSidebarDraggables( e, componentType );
@@ -354,6 +392,7 @@ export const drop = async ( e ) => {
       }
 
       case 'dropzone': {
+        console.log( 'doing dropzone' );
         // Handle existing element moves - repositions form field
         moveElement( e );
         break;

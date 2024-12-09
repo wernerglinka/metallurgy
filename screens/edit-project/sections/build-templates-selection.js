@@ -60,6 +60,9 @@ const createTemplateDivs = ( templatesData, wrapper ) => {
 
       template.sections.forEach( ( section, sectionIndex ) => {
         let [ sectionName, sectionPath ] = Object.entries( section )[ 0 ];
+        // calculate relative section path with respect to rootpath
+        sectionPath = sectionPath.replace( rootPath, '' );
+
         const div = document.createElement( 'div' );
         div.id = `template-section-${ sectionIndex }`;
         div.className = 'template-selection draggable';
@@ -77,6 +80,9 @@ const createTemplateDivs = ( templatesData, wrapper ) => {
 
     // Handle regular templates
     let [ templateName, templatePath ] = Object.entries( template )[ 0 ];
+    // calculate relative section path with respect to rootpath
+    templatePath = templatePath.replace( rootPath, '' );
+
     const div = document.createElement( 'div' );
     div.id = `template-${ index }`;
     div.className = 'template-selection draggable';

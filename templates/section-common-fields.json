@@ -1,4 +1,4 @@
-module.exports = {
+{
   "container": "section",
   "name": "",
   "containerFields": {
@@ -14,4 +14,4 @@ module.exports = {
       "isDark": false
     }
   }
-};
+}

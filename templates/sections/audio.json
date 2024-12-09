@@ -1,4 +1,4 @@
-const audio = {
+{
   "audio": {
     "ogg": "",
     "mpeg": ""
@@ -7,7 +7,6 @@ const audio = {
   "image": {
     "src": "",
     "alt": "",
-    "caption": "",
-  },
+    "caption": ""
+  }
 }
-module.exports = audio;
