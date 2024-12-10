@@ -1,4 +1,5 @@
-{
+export const leaflet = {
+  sectionDescription: "Leaflet map section with optional markers",
   "leaflet": {
     "latitute": "",
     "longitude": "",
@@ -6,7 +7,7 @@
     "containerId": "",
     "containerHeight": "",
     "markers": [
-      { 
+      {
         "title": "",
         "latitute": "",
         "longitude": "",
@@ -18,4 +19,4 @@
       }
     ]
   }
-}
+};

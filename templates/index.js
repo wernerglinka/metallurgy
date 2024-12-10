@@ -4,6 +4,7 @@ import * as sections from './sections/index.js';
 
 export const templates = {
   'page': page,
+  'flex': { ...commonSectionFields, ...sections.flex },
   'audio': { ...commonSectionFields, ...sections.audio },
   'video': { ...commonSectionFields, ...sections.video },
   // ... other templates

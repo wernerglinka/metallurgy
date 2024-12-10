@@ -134,7 +134,7 @@ export function createComponent( type, labelsExist ) {
  * @param {Object} field - The field data
  * @returns {HTMLElement} The updated element
  */
-function updateArrayElement( element, field ) {
+export function updateArrayElement( element, field ) {
   const labelInput = element.querySelector( '.element-label' );
   if ( labelInput ) {
     labelInput.value = field.label || 'columns';

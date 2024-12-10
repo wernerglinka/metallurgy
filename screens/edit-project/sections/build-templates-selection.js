@@ -30,17 +30,6 @@ const getTemplatesElements = () => {
 };
 
 /**
- * Creates template list DOM structure
- * @param {Object} templatesData - Template data from API
- * @returns {HTMLElement} Template list element
- */
-const createTemplatesList = ( templatesData ) => {
-  const list = createDomTree( templatesData, '.js', true );
-  list.classList.add( 'dom-tree', 'js-dom-tree', 'js-templates-list' );
-  return list;
-};
-
-/**
  * Converts template data to draggable divs
  * @param {Object|Array} templatesData - Template data 
  * @param {HTMLElement} wrapper - Container element
