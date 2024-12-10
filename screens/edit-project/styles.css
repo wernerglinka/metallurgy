@@ -617,6 +617,12 @@ fieldset {
       }
     }
 
+    &.object-name > input {
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-style: italic;
+    }
+
     & textarea {
       height: 29px;
       max-height: 10rem;
@@ -697,6 +703,16 @@ fieldset {
 
       &.object-name {
         min-height: 3rem;
+
+        & .section-description {
+          font-size: 1.5rem;
+          font-weight: 600;
+          font-style: italic;
+
+          & + .element-label {
+            display: none;
+          }
+        }
       }
 
       & .collapse-icon {

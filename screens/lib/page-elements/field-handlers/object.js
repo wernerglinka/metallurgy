@@ -15,9 +15,27 @@ export const updateObjectField = ( element, field, explicitSchemaArray, labelsEx
     } );
   }
 
-  // if a field sectionDescription exists, find the element with class 'hint' and update the text
-  if ( field.sectionDescription ) {
-    element.querySelector( '.hint' ).textContent = field.sectionDescription;
+  /*
+   * If there is a `sectionDescription` field in the object we will use it to add a description
+   * to the section. This is useful when a section is collapsed and the description is the only
+   * info available to the user. The alternative is to open any section to find out what it is.
+   */
+  // Check if the field is an object and has a value array
+  if ( field.type === 'object' && Array.isArray( field.value ) ) {
+    // Find the sub-field with label 'sectionDescription'
+    const descriptionField = field.value.find( subField => subField.label === 'sectionDescription' );
+
+    // If the description field exists, update the hint text
+    if ( descriptionField && descriptionField.value ) {
+      // Create a new span element
+      const descriptionSpan = document.createElement( 'span' );
+      descriptionSpan.classList.add( 'section-description' );
+      descriptionSpan.textContent = descriptionField.value;
+
+      // Insert the span after the .hint element
+      const hintElement = element.querySelector( '.hint' );
+      hintElement.insertAdjacentElement( 'afterend', descriptionSpan );
+    }
   }
 
   return element;
