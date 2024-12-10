@@ -15,6 +15,8 @@ import { updateObjectField } from './field-handlers/object.js';
 
 import { processExplicitField } from './field-initialization/explicit-fields.js';
 
+import { ICONS } from '../../icons/index.js';
+
 /**
  * @function isArrayType
  * @param {string} type - The field type to check
@@ -135,11 +137,72 @@ export function createComponent( type, labelsExist ) {
 function updateArrayElement( element, field ) {
   const labelInput = element.querySelector( '.element-label' );
   if ( labelInput ) {
-    labelInput.value = field.label;
+    labelInput.value = field.label || 'columns';
   }
 
   const dropzone = element.querySelector( '.dropzone' );
-  if ( dropzone && field.label === 'sections' ) {
+
+  // Add special handling for columns array
+  if ( dropzone && field.label === 'columns' && Array.isArray( field.value ) ) {
+    field.value.forEach( ( columnItem, index ) => {
+      // Create container for column
+      const columnContainer = document.createElement( 'div' );
+      columnContainer.className = 'array-item label-exists form-element is-object no-drop';
+      columnContainer.draggable = true;
+
+      // Add sort handle
+      const sortHandle = document.createElement( 'span' );
+      sortHandle.className = 'sort-handle';
+      sortHandle.innerHTML = ICONS.DRAG_HANDLE;
+      columnContainer.appendChild( sortHandle );
+
+      // Add label with collapse icon
+      const labelWrapper = document.createElement( 'label' );
+      labelWrapper.className = 'object-name label-wrapper';
+      labelWrapper.innerHTML = `
+        <span>Column ${ index + 1 }<sup>*</sup></span>
+        <input type="text" class="element-label" value="column" readonly>
+        <span class="collapse-icon">
+          <svg class="open" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            ${ ICONS.COLLAPSE }
+          </svg>
+          <svg class="collapsed" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            ${ ICONS.COLLAPSED }
+          </svg>
+        </span>
+      `;
+      columnContainer.appendChild( labelWrapper );
+
+      // Create and add object dropzone
+      const objectDropzone = document.createElement( 'div' );
+      objectDropzone.className = 'object-dropzone dropzone js-dropzone';
+      objectDropzone.dataset.wrapper = 'is-object';
+
+      // Process column content
+      if ( Array.isArray( columnItem.value ) ) {
+        const blocksField = columnItem.value.find( item => item.label === 'blocks' );
+        if ( blocksField && Array.isArray( blocksField.value ) ) {
+          blocksField.value.forEach( block => {
+            const blockElement = getUpdatedElement( {
+              type: 'object',
+              label: block.label,
+              value: block.value
+            }, [], true );
+            objectDropzone.appendChild( blockElement );
+          } );
+        }
+      }
+
+      columnContainer.appendChild( objectDropzone );
+
+      // Add button wrapper
+      const buttonWrapper = document.createElement( 'div' );
+      buttonWrapper.className = 'button-wrapper';
+      columnContainer.appendChild( buttonWrapper );
+
+      dropzone.appendChild( columnContainer );
+    } );
+  } else if ( dropzone && field.label === 'sections' ) {
     dropzone.dataset.wrapper = 'is-array';
   }
 
