@@ -1,4 +1,4 @@
-export const list = {
+export const listSection = {
   sectionDescription: "List section",
   list: {
     source: "",

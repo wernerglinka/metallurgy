@@ -1,5 +1,4 @@
-export const video = {
-  "sectionDescription": "Video section with optional thumbnail, modal or inline ",
+export const videoBlock = {
   "video": {
     "title": "",
     "inline": false,

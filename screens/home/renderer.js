@@ -11,6 +11,7 @@ const SELECTORS = {
 };
 
 const initialize = () => {
+
   const handlers = {
     [ SELECTORS.newProject ]: handleNewProject,
     [ SELECTORS.deleteProject ]: handleDeleteProject,

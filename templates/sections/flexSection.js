@@ -1,5 +1,6 @@
 // sections/flex.js
-export const flex = {
+export const flexSection = {
+  sectionDescription: "Flex section with columns",
   columns: [
     {
       column: {

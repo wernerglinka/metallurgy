@@ -382,7 +382,6 @@ export const drop = async ( e ) => {
 
     switch ( origin ) {
       case 'templates': {
-        console.log( 'doing templates' );
         // Handle template drops - creates new component from template
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
         await processTemplate( e, templateUrl );
@@ -390,7 +389,6 @@ export const drop = async ( e ) => {
       }
 
       case 'sidebar': {
-        console.log( 'doing sidebar' );
         // Handle new element drops - creates new form field
         const componentType = e.dataTransfer.getData( 'text/plain' );
         processSidebarDraggables( e, componentType );
@@ -398,7 +396,6 @@ export const drop = async ( e ) => {
       }
 
       case 'dropzone': {
-        console.log( 'doing dropzone' );
         // Handle existing element moves - repositions form field
         moveElement( e );
         break;
@@ -485,7 +482,6 @@ export const showEditor = ( e ) => {
 
   window.textareaInput = e.target;
 
-  console.log( window.mdeditor.value() );
   // add value from the textarea to the editor
   window.mdeditor.value( e.target.value );
 

@@ -49,30 +49,13 @@ function createArrayElement( componentType ) {
   element.draggable = true;
 
   element.innerHTML = `
-    <span class="sort-handle">
-      <svg viewBox="0 0 14 22" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-          <g stroke="#FFFFFF" stroke-width="2">
-            <circle cx="4" cy="11" r="1"></circle>
-            <circle cx="4" cy="4" r="1"></circle>
-            <circle cx="4" cy="18" r="1"></circle>
-            <circle cx="10" cy="11" r="1"></circle>
-            <circle cx="10" cy="4" r="1"></circle>
-            <circle cx="10" cy="18" r="1"></circle>
-          </g>
-        </g>
-      </svg>
-    </span>
+    <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
     <label class="object-name label-wrapper">
       <span>Array Label<sup>*</sup></span>
       <input type="text" class="element-label" placeholder="Array Name" readonly>
       <span class="collapse-icon">
-        <svg class="open" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <!-- Your existing collapse icon SVG -->
-        </svg>
-        <svg class="collapsed" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-          <!-- Your existing collapsed icon SVG -->
-        </svg>
+        ${ ICONS.COLLAPSE }
+        ${ ICONS.COLLAPSED }
       </span>
     </label>
     <div class="${ componentType === 'sections-array' ? 'array-dropzone' : 'array-list' } dropzone js-dropzone" 
@@ -163,12 +146,8 @@ export function updateArrayElement( element, field ) {
         <span>Column ${ index + 1 }<sup>*</sup></span>
         <input type="text" class="element-label" value="column" readonly>
         <span class="collapse-icon">
-          <svg class="open" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            ${ ICONS.COLLAPSE }
-          </svg>
-          <svg class="collapsed" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            ${ ICONS.COLLAPSED }
-          </svg>
+          ${ ICONS.COLLAPSE }
+          ${ ICONS.COLLAPSED }
         </span>
       `;
       columnContainer.appendChild( labelWrapper );
@@ -192,13 +171,10 @@ export function updateArrayElement( element, field ) {
           } );
         }
       }
-
       columnContainer.appendChild( objectDropzone );
 
-      // Add button wrapper
-      const buttonWrapper = document.createElement( 'div' );
-      buttonWrapper.className = 'button-wrapper';
-      columnContainer.appendChild( buttonWrapper );
+      // Add action buttons
+      addActionButtons( columnContainer, { addDeleteButton: true, addDuplicateButton: true } );
 
       dropzone.appendChild( columnContainer );
     } );

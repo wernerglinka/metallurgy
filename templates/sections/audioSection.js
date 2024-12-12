@@ -1,4 +1,4 @@
-export const audio = {
+export const audioSection = {
   sectionDescription: "Audio section with optional image",
   audio: {
     ogg: "",

@@ -1,4 +1,4 @@
-export const icon = {
+export const iconSection = {
   sectionDescription: "Icon element",
   icon: {
     name: "",

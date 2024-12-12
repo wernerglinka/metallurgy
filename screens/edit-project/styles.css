@@ -257,7 +257,8 @@ h2 {
     padding: 2rem 0 ;
   }
 
-  & .template-selection {
+  & .template-selection,
+  & .template-block {
   padding: 0.5rem;
   border: var(--component-border);
   border-radius: var(--default-radius);
@@ -785,7 +786,7 @@ fieldset {
     &.is-collapsed {
       max-height: 0 !important;
       min-height: 0;
-      padding: 0;
+      padding: 0 !important;
       overflow: hidden;
       opacity: 0;
     }

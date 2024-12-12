@@ -5,6 +5,7 @@
 
 import { getUpdatedElement } from '../../page-elements/create-element.js';
 
+import { logFragment } from '../../utilities/fragment-debug-helper.js';
 /**
  * Creates form fragment from schema fields
  * @param {Array} fields - Schema fields to convert to form elements

@@ -1,6 +1,5 @@
-export const ctas = [
+export const ctasBlock = [
   {
-    sectionDescription: "Call to Action element",
     "url": "",
     "label": "",
     "isExternal": false,

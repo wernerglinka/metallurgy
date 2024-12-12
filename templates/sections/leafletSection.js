@@ -1,4 +1,4 @@
-export const leaflet = {
+export const leafletSection = {
   sectionDescription: "Leaflet map section with optional markers",
   "leaflet": {
     "latitute": "",

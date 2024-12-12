@@ -1,4 +1,4 @@
-export const page = {
+export const pageSections = {
   "layout": "blocks.njk",
   "draft": false,
   "navLabel": "",

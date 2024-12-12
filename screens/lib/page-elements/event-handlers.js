@@ -102,21 +102,25 @@ async function processTemplate( e, url ) {
       throw new Error( 'Failed to load template' );
     }
 
-    // check if section template
-    if ( url.includes( 'section' ) ) {
-      // Create section wrapper fragment
+    // check if section or block template
+    if ( url.includes( 'section' ) || url.includes( 'blocks' ) ) {
+      // Create wrapper fragment
       const wrapperFragment = document.createDocumentFragment();
-      const sectionWrapper = document.createElement( 'div' );
-      sectionWrapper.className = 'label-exists form-element is-object no-drop';
-      sectionWrapper.draggable = true;
-      sectionWrapper.setAttribute( 'data-path', templateName );
+      const wrapper = document.createElement( 'div' );
+      wrapper.className = 'label-exists form-element is-object no-drop';
+      wrapper.draggable = true;
+      wrapper.setAttribute( 'data-path', templateName );
 
-      // Add section wrapper structure
-      sectionWrapper.innerHTML = `
+      const isSection = url.includes( 'section' );
+      const hintText = isSection ? 'Sections Object' : 'Block Object';
+      const description = isSection ? templateSchema.sectionDescription : templateSchema.blockDescription;
+
+      // Add wrapper structure
+      wrapper.innerHTML = `
         <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
         <label class="object-name label-wrapper">
-          <span>Object Label<sup>*</sup></span>
-          <span class="hint">Sections Object</span>
+          <span>${ isSection ? 'Object Label' : templateName + ' Block' }<sup>*</sup></span>
+          <span class="hint">${ hintText }</span>
           <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
           <span class="collapse-icon">
             ${ ICONS.COLLAPSE }
@@ -124,21 +128,35 @@ async function processTemplate( e, url ) {
           </span>
         </label>
         <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
-        <div class="button-wrapper">
-          <div class="add-button button">${ ICONS.ADD }</div>
-          <div class="delete-button">${ ICONS.DELETE }</div>
-        </div>
       `;
 
-      // convert the template schema to HTML form fields starting with root path
+      // Add appropriate buttons based on type
+      addActionButtons( wrapper, {
+        addDeleteButton: true,
+        addDuplicateButton: isSection
+      } );
+
+      // Add description if it exists
+      if ( description && description !== '' ) {
+        const descriptionSpan = document.createElement( 'span' );
+        descriptionSpan.classList.add( isSection ? 'section-description' : 'block-description' );
+        descriptionSpan.textContent = description;
+
+        const hintElement = wrapper.querySelector( '.hint' );
+        hintElement.insertAdjacentElement( 'afterend', descriptionSpan );
+      }
+
+      // convert the template schema to HTML form fields
       const formFragment = await frontmatterToFragment( templateSchema, templateName );
 
-      // Process any arrays found in the converted form
-      processArraysInFragment( formFragment, templateSchema );
+      // Process any arrays if it's a section
+      if ( isSection ) {
+        processArraysInFragment( formFragment, templateSchema );
+      }
 
       // Add form elements to the inner dropzone
-      sectionWrapper.querySelector( '.object-dropzone' ).appendChild( formFragment );
-      wrapperFragment.appendChild( sectionWrapper );
+      wrapper.querySelector( '.object-dropzone' ).appendChild( formFragment );
+      wrapperFragment.appendChild( wrapper );
 
       // Handle insertion based on position
       const { closest, position } = getInsertionPoint( dropzone, e.clientY );
@@ -159,7 +177,7 @@ async function processTemplate( e, url ) {
         }
       }
     } else {
-      // Handle non-section templates
+      // Handle other templates
       const fragment = await frontmatterToFragment( templateSchema );
 
       // Validate fragment
@@ -204,57 +222,49 @@ function processArraysInFragment( fragment, schema ) {
     const labelInput = arrayElement.querySelector( '.element-label' );
     const dropzone = arrayElement.querySelector( '.dropzone' );
 
-    // If this is a columns array, use updateArrayElement
-    if ( labelInput && labelInput.value === 'columns' && dropzone ) {
-      // Create field object matching the structure expected by updateArrayElement
-      const field = {
-        type: 'array',
-        label: 'columns',
-        value: schema.columns || [] // Get columns from schema
-      };
+    if ( labelInput && labelInput.value === 'columns' ) {
+      // Columns are already handled by updateArrayElement during initial creation
+      return;
+    }
 
-      // Use yesterday's array handling
-      updateArrayElement( arrayElement, field );
-    } else {
-      // Handle other arrays as before...
-      const arrayPath = arrayElement.getAttribute( 'data-path' );
-      const arrayData = schema[ arrayPath ] || [];
-      const arrayDropzone = arrayElement.querySelector( '.array-list.dropzone' );
+    // Handle other arrays as before...
+    const arrayPath = arrayElement.getAttribute( 'data-path' );
+    const arrayData = schema[ arrayPath ] || [];
+    const arrayDropzone = arrayElement.querySelector( '.array-list.dropzone' );
 
-      if ( arrayDropzone && arrayData.length ) {
-        arrayData.forEach( ( item, index ) => {
-          const itemWrapper = document.createElement( 'div' );
-          itemWrapper.className = 'label-exists form-element is-object no-drop';
-          itemWrapper.draggable = true;
-          itemWrapper.setAttribute( 'data-path', `${ arrayPath }[${ index }]` );
+    if ( arrayDropzone && arrayData.length ) {
+      arrayData.forEach( ( item, index ) => {
+        const itemWrapper = document.createElement( 'div' );
+        itemWrapper.className = 'label-exists form-element is-object no-drop';
+        itemWrapper.draggable = true;
+        itemWrapper.setAttribute( 'data-path', `${ arrayPath }[${ index }]` );
 
-          itemWrapper.innerHTML = `
-            <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
-            <label class="object-name label-wrapper">
-              <span>Array Item<sup>*</sup></span>
-              <input type="text" class="element-label" placeholder="Item Name" readonly="">
-              <span class="collapse-icon">
-                ${ ICONS.COLLAPSE }
-                ${ ICONS.COLLAPSED }
-              </span>
-            </label>
-            <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
-            <div class="button-wrapper">
-              <div class="add-button button">${ ICONS.ADD }</div>
-              <div class="delete-button">${ ICONS.DELETE }</div>
-            </div>
-          `;
+        itemWrapper.innerHTML = `
+         <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
+         <label class="object-name label-wrapper">
+           <span>Array Item<sup>*</sup></span>
+           <input type="text" class="element-label" placeholder="Item Name" readonly="">
+           <span class="collapse-icon">
+             ${ ICONS.COLLAPSE }
+             ${ ICONS.COLLAPSED }
+           </span>
+         </label>
+         <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
+         <div class="button-wrapper">
+           <div class="add-button button">${ ICONS.ADD }</div>
+           <div class="delete-button">${ ICONS.DELETE }</div>
+         </div>
+       `;
 
-          // Process the item's content with proper path
-          const itemFragment = frontmatterToFragment( item, `${ arrayPath }[${ index }]` );
+        // Process the item's content with proper path
+        const itemFragment = frontmatterToFragment( item, `${ arrayPath }[${ index }]` );
 
-          // Add to item's dropzone
-          itemWrapper.querySelector( '.object-dropzone' ).appendChild( itemFragment );
+        // Add to item's dropzone
+        itemWrapper.querySelector( '.object-dropzone' ).appendChild( itemFragment );
 
-          // Add completed item to array dropzone
-          arrayDropzone.appendChild( itemWrapper );
-        } );
-      }
+        // Add completed item to array dropzone
+        arrayDropzone.appendChild( itemWrapper );
+      } );
     }
   } );
 }
@@ -522,6 +532,24 @@ export const drop = async ( e ) => {
     switch ( origin ) {
       case 'templates': {
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
+        const isBlock = templateUrl.includes( '/blocks/' );
+        const isColumnDropzone = dropzone.matches( '.object-dropzone[data-wrapper="is-object"]' );
+
+        // Only allow sections in main dropzone and blocks in column dropzones
+        if ( isBlock ) {
+          // Blocks can only be dropped in column dropzones
+          if ( !isColumnDropzone ) {
+            console.warn( 'Blocks can only be dropped into columns' );
+            return;
+          }
+        } else {
+          // Sections can only be dropped in main dropzone
+          if ( isColumnDropzone ) {
+            console.warn( 'Sections cannot be dropped into columns' );
+            return;
+          }
+        }
+
         await processTemplate( e, templateUrl );
         break;
       }
@@ -629,7 +657,6 @@ export const showEditor = ( e ) => {
 
   window.textareaInput = e.target;
 
-  console.log( window.mdeditor.value() );
   // add value from the textarea to the editor
   window.mdeditor.value( e.target.value );
 

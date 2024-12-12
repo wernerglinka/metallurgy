@@ -20,7 +20,6 @@ const renderer = ( () => {
     const exists = await electronAPI.files.exists( configFilePath );
 
     if ( exists ) {
-      console.log( "config file exists" );
       // Get the content and data folder from the config file
       const fileContentsRaw = await window.electronAPI.files.read( configFilePath );
       const fileContents = JSON.parse( fileContentsRaw.data );

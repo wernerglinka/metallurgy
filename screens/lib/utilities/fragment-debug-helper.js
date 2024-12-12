@@ -15,6 +15,4 @@ export const logFragment = ( fragment ) => {
       value: attr.value
     } ) )
   } ) );
-
-  console.log( 'Fragment contents:', JSON.stringify( fragmentStructure, null, 2 ) );
 };

@@ -1,4 +1,4 @@
-export const lottie = {
+export const lottieSection = {
   sectionDescription: "Animated lottie element",
   lottie: {
     src: "",

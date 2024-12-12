@@ -24,8 +24,6 @@ export const setupFormSubmission = ( form, filePath, schema ) => {
 
     const result = await handleFormSubmission( form, filePath, schema );
 
-    console.log( "result", result );
-
     updateButtonsStatus( result.success ? 'success' : 'error', result.error );
   } );
 };
