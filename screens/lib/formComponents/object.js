@@ -12,21 +12,16 @@ const object = ( div, labelExists ) => {
         ${ ICONS.COLLAPSED }
       </span>
     </label>
+    <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
   `;
 
   // Append children of tempContainer to the div
+  // this way we preserves existing DOM structure and maintain event listeners
   while ( tempContainer.firstChild ) {
     div.appendChild( tempContainer.firstChild );
   }
 
-  // create a dropzone for the object properties
-  const objectDropzone = document.createElement( 'div' );
-  objectDropzone.classList.add( 'object-dropzone', 'dropzone', 'js-dropzone' );
-  objectDropzone.dataset.wrapper = "is-object";
-  div.appendChild( objectDropzone );
-
   return div;
-
 };
 
 export default object;

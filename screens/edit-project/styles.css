@@ -807,6 +807,42 @@ fieldset {
   font-style: italic;
 }
 
+.dropzone {
+  position: relative;
+  min-height: 2rem; /* Ensure dropzone always has height */
+  padding: 0.5rem;
+  /* Add a small buffer zone */
+  margin: 0.25rem 0;
+}
+
+
+
+
+
+
+.form-element.no-drop {
+  /* Prevent any drag effects on the non-dropzone parts */
+  pointer-events: none;
+}
+
+.form-element.no-drop .dropzone,
+.form-element.no-drop .sort-handle,
+.form-element.no-drop .button-wrapper {
+  /* Re-enable pointer events for interactive elements */
+  pointer-events: all;
+}
+
+.drop-ghost {
+  height: 4rem;
+  position: relative;
+  z-index: 1;
+  margin: 0.5rem 0;
+  border: 2px dashed #666;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
 /**
  * EasyMD Editor styles
  */

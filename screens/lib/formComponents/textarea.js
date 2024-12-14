@@ -16,6 +16,7 @@ const textarea = ( div, labelExists ) => {
   `;
 
   // Append children of tempContainer to the div
+  // this way we preserves existing DOM structure and maintain event listeners
   while ( tempContainer.firstChild ) {
     div.appendChild( tempContainer.firstChild );
   }

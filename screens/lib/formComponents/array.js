@@ -11,18 +11,14 @@ const array = ( div, labelExists ) => {
         ${ ICONS.COLLAPSED }
       </span>
     </label>
+    <div class="array-dropzone dropzone js-dropzone" data-wrapper="is-array"></div>
   `;
 
   // Append children of tempContainer to the div
+  // this way we preserves existing DOM structure and maintain event listeners
   while ( tempContainer.firstChild ) {
     div.appendChild( tempContainer.firstChild );
   }
-
-  // create a dropzone for the array members
-  const arrayDropzone = document.createElement( 'div' );
-  arrayDropzone.classList.add( 'array-dropzone', 'dropzone', 'js-dropzone' );
-  arrayDropzone.dataset.wrapper = "is-array";
-  div.appendChild( arrayDropzone );
 
   return div;
 };

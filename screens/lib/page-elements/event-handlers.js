@@ -279,56 +279,29 @@ function processArraysInFragment( fragment, schema ) {
  * to the cursor's position. The position is either before or after the element.
  */
 function getInsertionPoint( container, y ) {
-  // Handle empty container
+  // Simplified to just focus on the key logic
   if ( !container.children.length ) {
     return { closest: null, position: 'after' };
   }
 
-  // 'closest' will hold a reference to the closest child element to the drop point
   let closest = null;
-  // 'closestDistance' will hold the distance from the drop point to the closest child element
   let closestDistance = Infinity;
 
-  //  Iterate over each child element of the container 
   Array.from( container.children ).forEach( child => {
-    // Get the position and size of the child element
     const box = child.getBoundingClientRect();
-    /*
-      Calculate the vertical offset between the center of the child element 
-      and the drop point. E.g., difference between the drop point and the 
-      vertical midpoint of the child element (box.top + box.height / 2).
-    */
-    const offset = y - box.top - ( box.height / 2 );
+    const midpoint = box.top + ( box.height / 2 );
+    const distance = Math.abs( y - midpoint );
 
-    /* 
-      Check if the absolute value of the offset for the current child element 
-      is less than the closestDistance. If it is, this child element is closer 
-      to the drop point than any previously checked elements. Then update 
-      closest to reference this child element and closestDistance to the new 
-      offset value.
-    */
-    if ( Math.abs( offset ) < Math.abs( closestDistance ) ) {
-      closestDistance = offset;
+    if ( distance < closestDistance ) {
+      closestDistance = distance;
       closest = child;
     }
   } );
 
-  /*
-     Along with finding the closest child, we also determine whether the dragged
-     element should be inserted before or after this child. This is decided 
-     based on whether the offset is negative or positive, indicating the cursor's 
-     position relative to the vertical center of the closest child.
-     If offset is negative, the cursor is above the center, set position to 'before'.
-     If offset is positive, the cursor is below the center, set position to 'after'.
-  */
-
-  /*
-    Return an object containing:
-    'closest': The closest child element to the drop point.
-    'position': A string indicating whether the dragged element should be inserted 
-    before or after the closest child ('before' or 'after').
-  */
-  return { closest, position: closestDistance < 0 ? 'before' : 'after' };
+  return {
+    closest,
+    position: closest ? ( y < closest.getBoundingClientRect().top + ( closest.getBoundingClientRect().height / 2 ) ? 'before' : 'after' ) : 'after'
+  };
 }
 
 /**
@@ -417,6 +390,52 @@ function moveElement( e ) {
   }
 }
 
+// Keep track of the current drag state
+let dragState = {
+  currentDropzone: null,
+  ghostElement: null,
+  lastPosition: null,
+  isDragging: false,
+  elementPositions: new Map(),
+  lastUpdate: 0, // Add timestamp tracking
+  isUpdating: false // Add flag to prevent concurrent updates
+};
+
+const recordElementPositions = ( dropzone ) => {
+  const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
+  dragState.elementPositions.clear();
+
+  elements.forEach( element => {
+    dragState.elementPositions.set( element, element.getBoundingClientRect() );
+  } );
+};
+
+const animateElements = ( dropzone ) => {
+  const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
+
+  // Get the new positions
+  elements.forEach( element => {
+    const oldRect = dragState.elementPositions.get( element );
+    if ( !oldRect ) return;
+
+    const newRect = element.getBoundingClientRect();
+    const deltaY = oldRect.top - newRect.top;
+
+    // Immediately move back to original position
+    element.style.transition = 'none';
+    element.style.transform = `translateY(${ deltaY }px)`;
+  } );
+
+  // Force reflow
+  dropzone.offsetHeight;
+
+  // Animate to new positions
+  elements.forEach( element => {
+    element.style.transition = 'transform 0.2s ease-out';
+    element.style.transform = 'translateY(0)';
+  } );
+};
+
 // Add drag and drop functionality to the form
 export const dragStart = ( e ) => {
   // dragstart is delegated from the form element's event listener
@@ -456,57 +475,156 @@ export const dragStart = ( e ) => {
   if ( origin === "sidebar" || origin === "dropzone" ) {
     window.draggedElement = e.target;
   }
+
+  dragState.isDragging = true;
 };
 
-/**
- * @function dragOver(e)
- * @param {event object} e 
- * @description This function will handle the dragover event. It will indicate
- *   drop space by inserting a drop-indicator temporarily
- */
+export const dragEnd = ( e ) => {
+  cleanupDragState();
+};
+
+const cleanupDragState = () => {
+  if ( dragState.currentDropzone ) {
+    dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
+    dragState.currentDropzone.querySelectorAll( '.form-element' ).forEach( el => {
+      el.style.transition = '';
+      el.style.transform = '';
+    } );
+  }
+  if ( dragState.ghostElement?.parentNode ) {
+    dragState.ghostElement.remove();
+  }
+  dragState = {
+    currentDropzone: null,
+    ghostElement: null,
+    lastPosition: null,
+    isDragging: false,
+    elementPositions: new Map()
+  };
+};
+
+const createGhostElement = () => {
+  const ghost = document.createElement( 'div' );
+  ghost.className = 'drop-ghost';
+  ghost.style.height = '4rem';
+  ghost.style.border = '2px dashed #666';
+  ghost.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+  ghost.style.margin = '0.5rem 0';
+  ghost.style.borderRadius = '4px';
+  ghost.style.pointerEvents = 'none'; // Prevent ghost from interfering with drag events
+  return ghost;
+};
+
 export const dragOver = ( e ) => {
   e.preventDefault();
-  if ( !e.target.closest( '.dropzone' ) ) return;
 
   const dropzone = e.target.closest( '.dropzone' );
-  dropzone.classList.add( 'dropzone-highlight' );
-  dropzone.style.paddingTop = "5rem";
-  dropzone.style.paddingBottom = "5rem";
+  if ( !dropzone || !dragState.isDragging || dragState.isUpdating ) return;
 
-  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+  const now = Date.now();
+  // Only process updates every 100ms
+  if ( now - dragState.lastUpdate < 100 ) return;
 
-  // Reset existing margins first
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child.style ) {
-      child.style.margin = "0.5rem 0";
-    }
-  } );
+  dragState.isUpdating = true;
 
-  if ( closest ) {
-    if ( position === 'before' ) {
-      if ( closest.style ) {
-        closest.style.marginBottom = "5rem";
+  try {
+    if ( dragState.currentDropzone === dropzone ) {
+      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+      const newPosition = closest ? `${ closest.id }-${ position }` : 'empty';
+
+      if ( dragState.lastPosition !== newPosition ) {
+        dragState.lastPosition = newPosition;
+        updateGhostPosition( dropzone, closest, position );
+        dragState.lastUpdate = now;
       }
-    } else if ( closest.nextElementSibling && closest.nextElementSibling.style ) {
-      closest.nextElementSibling.style.marginTop = "5rem";
+    } else {
+      if ( dragState.currentDropzone ) {
+        dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
+      }
+
+      dragState.currentDropzone = dropzone;
+      dropzone.classList.add( 'dropzone-highlight' );
+
+      if ( !dragState.ghostElement ) {
+        dragState.ghostElement = createGhostElement();
+      }
+
+      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+      updateGhostPosition( dropzone, closest, position );
+      dragState.lastUpdate = now;
+    }
+  } finally {
+    dragState.isUpdating = false;
+  }
+};
+
+
+const updateGhostPosition = ( dropzone, closest, position ) => {
+  const ghost = dragState.ghostElement;
+  if ( !ghost || !dropzone ) return;
+
+  // Record positions before making changes
+  recordElementPositions( dropzone );
+
+  // Remove ghost from current position
+  if ( ghost.parentNode ) {
+    ghost.remove();
+  }
+
+  try {
+    if ( closest ) {
+      if ( position === 'before' ) {
+        closest.parentNode?.insertBefore( ghost, closest );
+      } else {
+        const nextSibling = closest.nextElementSibling;
+        if ( nextSibling ) {
+          closest.parentNode?.insertBefore( ghost, nextSibling );
+        } else {
+          closest.parentNode?.appendChild( ghost );
+        }
+      }
+    } else {
+      dropzone.appendChild( ghost );
+    }
+
+    // Animate elements to their new positions
+    animateElements( dropzone );
+
+  } catch ( error ) {
+    console.warn( 'Failed to update ghost position:', error );
+    if ( ghost.parentNode ) {
+      ghost.remove();
     }
   }
 };
 
 export const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) return;
-
-  dropzone.classList.remove( 'dropzone-highlight' );
-  dropzone.style.paddingTop = "0.5rem";
-  dropzone.style.paddingBottom = "0.5rem";
-
-  // Reset margins using children instead of childNodes
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child.style ) {
-      child.style.margin = "0.5rem 0";
+  if ( !dropzone ) {
+    // Clean up if leaving dropzone area
+    if ( dragState.ghostElement?.parentNode ) {
+      dragState.ghostElement.remove();
+      dragState.ghostElement = null;
     }
-  } );
+    return;
+  }
+
+  // Check if we're actually leaving the dropzone
+  const relatedTarget = e.relatedTarget;
+  if ( !dropzone.contains( relatedTarget ) && !relatedTarget?.closest( '.dropzone' ) ) {
+    dropzone.classList.remove( 'dropzone-highlight' );
+    if ( dragState.ghostElement?.parentNode ) {
+      dragState.ghostElement.remove();
+      dragState.ghostElement = null;
+    }
+    dragState.currentDropzone = null;
+    dragState.lastPosition = null;
+  }
+};
+
+const cleanupDropzone = ( dropzone ) => {
+  if ( !dropzone ) return;
+  cleanupDragState();
 };
 
 /**
@@ -573,30 +691,6 @@ export const drop = async ( e ) => {
     console.error( 'Drop processing failed:', error );
     throw error;
   }
-};
-
-/**
- * Cleans up visual indicators after drop
- * @param {HTMLElement} dropzone - The dropzone element
- */
-/**
- * Cleans up visual indicators after drop
- * @param {HTMLElement} dropzone - The dropzone element
- */
-const cleanupDropzone = ( dropzone ) => {
-  if ( !dropzone ) return;
-
-  // Remove dropzone highlighting
-  dropzone.classList.remove( 'dropzone-highlight' );
-  dropzone.style.paddingTop = "0.5rem";
-  dropzone.style.paddingBottom = "0.5rem";
-
-  // Reset spacing on child elements
-  Array.from( dropzone.children ).forEach( child => {
-    if ( child && child.style ) {
-      child.style.margin = '0.5rem 0';
-    }
-  } );
 };
 
 
