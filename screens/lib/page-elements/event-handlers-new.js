@@ -109,7 +109,7 @@ async function processTemplate( e, url ) {
       const wrapper = document.createElement( 'div' );
       wrapper.className = 'label-exists form-element is-object no-drop';
       wrapper.draggable = true;
-      //wrapper.setAttribute( 'data-path', templateName );
+      wrapper.setAttribute( 'data-path', templateName );
 
       const isSection = url.includes( 'section' );
       const hintText = isSection ? 'Sections Object' : 'Block Object';
@@ -127,7 +127,7 @@ async function processTemplate( e, url ) {
             ${ ICONS.COLLAPSED }
           </span>
         </label>
-        <div class="object-dropzone dropzone js-dropzone"></div>
+        <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object"></div>
       `;
 
       // Add appropriate buttons based on type
