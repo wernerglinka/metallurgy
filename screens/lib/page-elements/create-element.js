@@ -43,16 +43,16 @@ function getArrayType( field ) {
  * @param {string} componentType - The type of array component to create
  * @returns {HTMLElement} The created array element
  */
-function createArrayElement( componentType ) {
+function createArrayElement( componentType, labelsExists ) {
   const element = document.createElement( 'div' );
-  element.className = 'label-exists form-element is-array no-drop';
+  element.className = `form-element is-array no-drop ${ labelsExists ? "label-exists" : "" }`;
   element.draggable = true;
 
   element.innerHTML = `
     <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
     <label class="object-name label-wrapper">
       <span>Array Label<sup>*</sup></span>
-      <input type="text" class="element-label" placeholder="Array Name" readonly>
+      <input type="text" class="element-label" placeholder="Array Name" ${ labelsExists ? 'readonly' : '' }>
       <span class="collapse-icon">
         ${ ICONS.COLLAPSE }
         ${ ICONS.COLLAPSED }
@@ -77,7 +77,7 @@ export function createComponent( type, labelsExist ) {
 
   // Handle array types
   if ( componentType === 'array' || componentType === 'sections-array' ) {
-    return createArrayElement( componentType );
+    return createArrayElement( componentType, labelsExist );
   }
 
   // create a div to hold the form element
@@ -117,7 +117,7 @@ export function createComponent( type, labelsExist ) {
  * @param {Object} field - The field data
  * @returns {HTMLElement} The updated element
  */
-export function updateArrayElement( element, field ) {
+export function updateArrayElement( element, field, labelsExist ) {
   const labelInput = element.querySelector( '.element-label' );
   if ( labelInput ) {
     labelInput.value = field.label || 'columns';
@@ -180,6 +180,57 @@ export function updateArrayElement( element, field ) {
     } );
   } else if ( dropzone && field.label === 'sections' ) {
     dropzone.dataset.wrapper = 'is-array';
+  } else if ( dropzone && Array.isArray( field.value ) ) {
+    // Handle regular arrays
+    field.value.forEach( ( item ) => {
+      // Create array item element
+      const itemElement = document.createElement( 'div' );
+      itemElement.className = `form-element no-drop ${ labelsExist ? "label-exists" : "" }`;
+      itemElement.draggable = true;
+
+      // Add sort handle
+      const sortHandle = document.createElement( 'span' );
+      sortHandle.className = 'sort-handle';
+      sortHandle.innerHTML = ICONS.DRAG_HANDLE;
+      itemElement.appendChild( sortHandle );
+
+      // Add label wrapper
+      const labelWrapper = document.createElement( 'label' );
+      labelWrapper.className = 'label-wrapper';
+
+      // Get the key-value pair from the item
+      const [ entry ] = item.value;
+      const key = entry.label;
+      const value = entry.value;
+
+      labelWrapper.innerHTML = `
+        <span>Text Label<sup>*</sup></span>
+        <div>
+          <input type="text" class="element-label" value="${ key }" placeholder="Label Placeholder" readonly>
+        </div>
+      `;
+      itemElement.appendChild( labelWrapper );
+
+      // Add content wrapper
+      const contentWrapper = document.createElement( 'label' );
+      contentWrapper.className = 'content-wrapper';
+      contentWrapper.innerHTML = `
+        <span class="hint">Text for Text element</span>
+        <div>
+          <input type="text" class="element-value" value="${ value }" placeholder="Text Placeholder">
+        </div>
+      `;
+      itemElement.appendChild( contentWrapper );
+
+      // Add button wrapper
+      const buttonWrapper = document.createElement( 'div' );
+      buttonWrapper.className = 'button-wrapper';
+
+      // Add action buttons
+      addActionButtons( itemElement, { addDeleteButton: true, addDuplicateButton: true } );
+
+      dropzone.appendChild( itemElement );
+    } );
   }
 
   return element;
@@ -200,7 +251,7 @@ export const updateElement = ( element, field, explicitSchemaArray, labelsExist 
 
   // Handle array types first
   if ( isArrayType( field.type ) ) {
-    return updateArrayElement( element, field );
+    return updateArrayElement( element, field, labelsExist );
   }
 
   // Your existing field type handling

@@ -20,8 +20,12 @@ function processSidebarDraggables( e, component ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
+  console.log( component );
+
   // Create new element with requested component type
   const newElement = createComponent( component, false );
+
+  console.log( newElement );
 
   // add an ADD and DELETE button to the new element
   addActionButtons( newElement, { addDeleteButton: true, addDuplicateButton: true } );
@@ -269,240 +273,104 @@ function processArraysInFragment( fragment, schema ) {
   } );
 }
 
-/**
- * @function getInsertionPoint
- * @param {*} container - The drop container element in which a dragged element is being dropped
- * @param {*} y - The vertical position of the mouse cursor at the time of the drop, typically provided by e.clientY from the drop event.
- * @returns The closest insertion point based on the cursor's position
- * @description This function will get the closest insertion point based on the cursor's position
- * during a drag/drop operation. The insertion point is the element that is closest
- * to the cursor's position. The position is either before or after the element.
- */
-function getInsertionPoint( container, y ) {
-  // Simplified to just focus on the key logic
-  if ( !container.children.length ) {
-    return { closest: null, position: 'after' };
-  }
-
-  let closest = null;
-  let closestDistance = Infinity;
-
-  Array.from( container.children ).forEach( child => {
-    const box = child.getBoundingClientRect();
-    const midpoint = box.top + ( box.height / 2 );
-    const distance = Math.abs( y - midpoint );
-
-    if ( distance < closestDistance ) {
-      closestDistance = distance;
-      closest = child;
-    }
-  } );
-
-  return {
-    closest,
-    position: closest ? ( y < closest.getBoundingClientRect().top + ( closest.getBoundingClientRect().height / 2 ) ? 'before' : 'after' ) : 'after'
-  };
-}
 
 /**
- * @function isValidDropTarget
- * @param {HTMLElement} dropzone - The target dropzone element
- * @param {string} componentType - The type of component being dragged
- * @param {string} origin - The origin of the drag ('templates', 'sidebar', 'dropzone')
- * @returns {boolean} - Whether the drop is valid for this target
- * @description Validates if a component can be dropped in the target dropzone
+ * Global drag state 
  */
-function isValidDropTarget( dropzone, componentType, origin ) {
-  // If we're dragging a section, it must go into an array dropzone
-  if ( componentType === 'section' ||
-    ( origin === 'templates' && componentType.includes( 'section' ) ) ) {
-    return dropzone.dataset.wrapper === 'is-array';
-  }
-
-  // All other components can be dropped anywhere
-  return true;
-}
-
-/**
- * @function validateDrop
- * @param {DragEvent} e - The drop event
- * @returns {Object} - Validation result with dropzone and validity
- * @description Validates a drop event and returns the target dropzone if valid
- */
-function validateDrop( e ) {
-  const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) {
-    return { dropzone: null, isValid: false };
-  }
-
-  const origin = e.dataTransfer.getData( 'origin' );
-  const componentType = e.dataTransfer.getData( 'text/plain' );
-
-  return {
-    dropzone,
-    isValid: isValidDropTarget( dropzone, componentType, origin )
-  };
-}
-
-/**
- * @function moveElement
- * @param {*} e 
- * @param {*} dropzone 
- * @description This function will move an existing element within or between drop zones
- *   To insert the dragged element either before or after an existing element 
- *   in the drop container, including the ability to insert before the first 
- *   element, we need to determine the relative position of the cursor to the 
- *   center of each potential sibling element. This way, we can decide whether 
- *   to insert the dragged element before or after each child based on the 
- *   cursor's position.
- */
-function moveElement( e ) {
-  const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone ) return;
-
-  // Validate draggedElement exists and is a valid Node
-  if ( !window.draggedElement || !( window.draggedElement instanceof Node ) ) {
-    console.warn( 'Invalid dragged element:', window.draggedElement );
-    return;
-  }
-
-  const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-
-  try {
-    if ( closest ) {
-      if ( position === 'before' ) {
-        dropzone.insertBefore( window.draggedElement, closest );
-      } else {
-        const nextSibling = closest.nextElementSibling;
-        if ( nextSibling ) {
-          dropzone.insertBefore( window.draggedElement, nextSibling );
-        } else {
-          dropzone.appendChild( window.draggedElement );
-        }
-      }
-    } else {
-      dropzone.appendChild( window.draggedElement );
-    }
-  } catch ( error ) {
-    console.error( 'Error moving element:', error );
-  } finally {
-    window.draggedElement = null; // Clear the reference
-  }
-}
-
-// Keep track of the current drag state
 let dragState = {
   currentDropzone: null,
   ghostElement: null,
   lastPosition: null,
   isDragging: false,
   elementPositions: new Map(),
-  lastUpdate: 0, // Add timestamp tracking
-  isUpdating: false // Add flag to prevent concurrent updates
+  lastUpdate: 0,
+  isUpdating: false,
+  draggedElement: null,
+  pendingFrame: null
 };
 
+const THROTTLE_DELAY = 100; // Minimum delay between updates
+
+/**
+ * @function getInsertionPoint
+ * @param {*} dropzone 
+ * @param {*} y 
+ * @returns
+ * @description This function enables precise placement of dragged elements by calculating whether to insert before or after existing elements based on the mouse position.
+ */
+function getInsertionPoint( dropzone, y ) {
+  const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
+  let closest = null;
+  let position = 'after';
+
+  for ( const element of elements ) {
+    const rect = element.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    if ( y < midpoint ) {
+      closest = element;
+      position = 'before';
+      break;
+    }
+  }
+
+  return { closest, position };
+}
+
+/**
+ * @function recordElementPositions
+ * @param {*} dropzone
+ * @description This function records the positions of all elements in a dropzone 
+ * before they are moved. This is used to calculate the final position of elements 
+ * after a drag operation.
+ */
 const recordElementPositions = ( dropzone ) => {
   const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
   dragState.elementPositions.clear();
-
   elements.forEach( element => {
     dragState.elementPositions.set( element, element.getBoundingClientRect() );
   } );
 };
 
+
+/**
+ * @function animateElements
+ * @param {*} dropzone 
+ * @description This function animates elements to their new positions after a 
+ * drag operation.
+ */
 const animateElements = ( dropzone ) => {
   const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
 
-  // Get the new positions
+  elements.forEach( element => element.classList.remove( 'draggable-transition' ) );
+
+  const newPositions = new Map();
+  elements.forEach( element => {
+    newPositions.set( element, element.getBoundingClientRect() );
+  } );
+
+  // Invert elements back to their old positions
   elements.forEach( element => {
     const oldRect = dragState.elementPositions.get( element );
-    if ( !oldRect ) return;
+    const newRect = newPositions.get( element );
+    if ( !oldRect || !newRect ) return;
 
-    const newRect = element.getBoundingClientRect();
     const deltaY = oldRect.top - newRect.top;
-
-    // Immediately move back to original position
-    element.style.transition = 'none';
     element.style.transform = `translateY(${ deltaY }px)`;
   } );
 
   // Force reflow
-  dropzone.offsetHeight;
+  if ( dropzone ) dropzone.offsetHeight;
 
-  // Animate to new positions
   elements.forEach( element => {
-    element.style.transition = 'transform 0.2s ease-out';
-    element.style.transform = 'translateY(0)';
+    element.classList.add( 'draggable-transition' );
+    element.style.transform = `translateY(0)`;
   } );
 };
 
-// Add drag and drop functionality to the form
-export const dragStart = ( e ) => {
-  // dragstart is delegated from the form element's event listener
-  if ( !e.target.closest( '.form-element' ) // for dragging/sorting existing elements
-    && !e.target.closest( '.component-selection' ) // for adding fields
-    && !e.target.closest( '.template-selection' ) // for adding templates
-  ) return;
-
-  // Set the data type and value of the dragged element
-  e.dataTransfer.setData( "text/plain", e.target.dataset.component );
-  /* 
-    Add the drag origin to the dragged element
-    We may drag a new element token from the 'sidebar' to add an element to the form, OR
-    we may drag an element in the 'dropzone' to a different dropzone location
-  */
-  let origin = "sidebar";
-
-  // Find if an ancestor with id 'dropzone' exists, then we just move the
-  // element inside the dropzone
-  const dropzone = e.target.closest( '.dropzone' );
-  origin = dropzone ? "dropzone" : origin;
-  // Set the origin
-  e.dataTransfer.setData( "origin", origin );
-
-
-  // Find if an ancestor with class 'js-templates-wrapper' exists
-  const templateList = e.target.closest( '.js-templates-wrapper' );
-  if ( templateList ) {
-    origin = "templates";
-    e.dataTransfer.setData( "origin", origin );
-    e.dataTransfer.setData( "text/plain", e.target.dataset.url );
-    // Don't set window.draggedElement for templates
-    return;
-  }
-
-  // Only store draggedElement for form elements and field proxies
-  if ( origin === "sidebar" || origin === "dropzone" ) {
-    window.draggedElement = e.target;
-  }
-
-  dragState.isDragging = true;
-};
-
-export const dragEnd = ( e ) => {
-  cleanupDragState();
-};
-
-const cleanupDragState = () => {
-  if ( dragState.currentDropzone ) {
-    dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
-    dragState.currentDropzone.querySelectorAll( '.form-element' ).forEach( el => {
-      el.style.transition = '';
-      el.style.transform = '';
-    } );
-  }
-  if ( dragState.ghostElement?.parentNode ) {
-    dragState.ghostElement.remove();
-  }
-  dragState = {
-    currentDropzone: null,
-    ghostElement: null,
-    lastPosition: null,
-    isDragging: false,
-    elementPositions: new Map()
-  };
-};
-
+/**
+ * @function createGhostElement
+ * @returns The ghost element
+ */
 const createGhostElement = () => {
   const ghost = document.createElement( 'div' );
   ghost.className = 'drop-ghost';
@@ -511,66 +379,77 @@ const createGhostElement = () => {
   ghost.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
   ghost.style.margin = '0.5rem 0';
   ghost.style.borderRadius = '4px';
-  ghost.style.pointerEvents = 'none'; // Prevent ghost from interfering with drag events
+  ghost.style.pointerEvents = 'none';
   return ghost;
 };
 
-export const dragOver = ( e ) => {
-  e.preventDefault();
+/**
+ * @function cleanupDragState
+ * @description This function cleans up the drag state after a drag operation 
+ * is completed.
+ */
+const cleanupDragState = () => {
+  if ( dragState.currentDropzone ) {
+    dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
+    dragState.currentDropzone.querySelectorAll( '.form-element' ).forEach( el => {
+      el.classList.remove( 'draggable-transition' );
+      el.style.transform = '';
+    } );
+  }
+  if ( dragState.ghostElement?.parentNode ) {
+    dragState.ghostElement.remove();
+  }
 
-  const dropzone = e.target.closest( '.dropzone' );
-  if ( !dropzone || !dragState.isDragging || dragState.isUpdating ) return;
+  dragState.currentDropzone = null;
+  dragState.ghostElement = null;
+  dragState.lastPosition = null;
+  dragState.isDragging = false;
+  dragState.elementPositions.clear();
+  dragState.lastUpdate = 0;
+  dragState.isUpdating = false;
+  dragState.draggedElement = null;
 
-  const now = Date.now();
-  // Only process updates every 100ms
-  if ( now - dragState.lastUpdate < 100 ) return;
-
-  dragState.isUpdating = true;
-
-  try {
-    if ( dragState.currentDropzone === dropzone ) {
-      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-      const newPosition = closest ? `${ closest.id }-${ position }` : 'empty';
-
-      if ( dragState.lastPosition !== newPosition ) {
-        dragState.lastPosition = newPosition;
-        updateGhostPosition( dropzone, closest, position );
-        dragState.lastUpdate = now;
-      }
-    } else {
-      if ( dragState.currentDropzone ) {
-        dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
-      }
-
-      dragState.currentDropzone = dropzone;
-      dropzone.classList.add( 'dropzone-highlight' );
-
-      if ( !dragState.ghostElement ) {
-        dragState.ghostElement = createGhostElement();
-      }
-
-      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-      updateGhostPosition( dropzone, closest, position );
-      dragState.lastUpdate = now;
-    }
-  } finally {
-    dragState.isUpdating = false;
+  if ( dragState.pendingFrame ) {
+    cancelAnimationFrame( dragState.pendingFrame );
+    dragState.pendingFrame = null;
   }
 };
 
+/**
+ * @function scheduleUpdate
+ * @param {*} fn 
+ * @returns 
+ * @description This function schedules an update to the drag state using
+ * requestAnimationFrame.
+ */
+const scheduleUpdate = ( fn ) => {
+  if ( dragState.pendingFrame ) return;
+  dragState.pendingFrame = requestAnimationFrame( () => {
+    dragState.pendingFrame = null;
+    fn();
+  } );
+};
 
+/**
+ * @function updateGhostPosition
+ * @param {*} dropzone 
+ * @param {*} closest 
+ * @param {*} position 
+ * @returns void
+ * @description This function updates the position of the ghost element based on
+ * the current dropzone and the closest element to the cursor.
+ */
 const updateGhostPosition = ( dropzone, closest, position ) => {
   const ghost = dragState.ghostElement;
   if ( !ghost || !dropzone ) return;
 
-  // Record positions before making changes
+  // Record current positions before DOM changes
   recordElementPositions( dropzone );
 
-  // Remove ghost from current position
-  if ( ghost.parentNode ) {
-    ghost.remove();
-  }
+  // Remove ghost if present
+  if ( ghost.parentNode ) ghost.remove();
 
+  // Insert ghost in the new position
   try {
     if ( closest ) {
       if ( position === 'before' ) {
@@ -587,7 +466,7 @@ const updateGhostPosition = ( dropzone, closest, position ) => {
       dropzone.appendChild( ghost );
     }
 
-    // Animate elements to their new positions
+    // Animate elements to their new positions (FLIP)
     animateElements( dropzone );
 
   } catch ( error ) {
@@ -598,10 +477,160 @@ const updateGhostPosition = ( dropzone, closest, position ) => {
   }
 };
 
+/**
+ * @function moveElement
+ * @param {*} e 
+ * @param {*} dropzone 
+ * @description This function will move an existing element within or between drop zones
+ */
+function moveElement() {
+  const dropzone = dragState.currentDropzone;
+  if ( !dropzone ) return;
+
+  const ghost = dragState.ghostElement;
+  if ( ghost && ghost.parentNode ) {
+    // Insert the dragged element where the ghost currently is
+    ghost.parentNode.insertBefore( dragState.draggedElement, ghost );
+    // Remove the ghost
+    ghost.remove();
+  } else {
+    // If there's no ghost, just append at the end of the dropzone
+    dropzone.appendChild( dragState.draggedElement );
+  }
+
+  dragState.draggedElement = null;
+}
+
+/**
+ * Event handlers
+ */
+
+
+/**
+ * @function dragStart
+ * @param {*} e
+ * @returns void
+ * @description This function handles the drag start event for different drag sources
+ * and origins.
+ */
+export const dragStart = ( e ) => {
+  // There are three possible drag events:
+  // 1. Dragging an existing form element from inside a dropzone
+  // 2. Dragging a new component from the sidebar
+  // 3. Dragging a template from the template selection
+  const existingElement = e.target.closest( '.form-element' );
+  const sidebarComponent = e.target.closest( '.component-selection' );
+  const template = e.target.closest( '.template-selection' );
+
+  // return if we are not dragging any of the above
+  if ( !existingElement && !sidebarComponent && !template ) return;
+
+  // There are three possible drag origins, with "sidebar" being the default:
+  // 1. Dragging from the sidebar
+  // 2. Dragging from inside a dropzone
+  // 3. Dragging from the template selection
+  const dropzone = e.target.closest( '.dropzone' );
+  const templates = e.target.closest( '.template-selection' );
+
+  // determine the origin of the drag
+  let origin = dropzone ? "dropzone" : templates ? "templates" : "sidebar";
+
+  if ( origin === "sidebar" ) {
+    // Just set component name, no element yet
+    const component = e.target.closest( '.component-selection' );
+    if ( component ) {
+      e.dataTransfer.setData( "text/plain", component.dataset.component );
+    }
+  }
+
+  if ( origin === "dropzone" ) {
+    // For internal moves, we have a real element
+    const formElement = e.target.closest( '.form-element' );
+    if ( formElement ) {
+      dragState.draggedElement = formElement;
+    }
+  }
+
+  if ( origin === "templates" ) {
+    // Just set URL data, no element yet
+    e.dataTransfer.setData( "text/plain", e.target.dataset.url );
+  }
+
+  e.dataTransfer.setData( "origin", origin );
+  dragState.isDragging = true;
+};
+
+/**
+ * @function dragEnd
+ * @param {*} e
+ * @returns void
+ * @description This function handles the drag end event for different drag sources
+ */
+export const dragEnd = ( e ) => {
+  cleanupDragState();
+};
+
+/**
+ * @function dragEnter
+ * @param {*} e
+ * @returns void
+ * @description This function handles the drag enter event for different drag sources
+ * and origins.
+ */
+export const dragOver = ( e ) => {
+  e.preventDefault();
+  if ( !dragState.isDragging || dragState.isUpdating ) return;
+
+  const dropzone = e.target.closest( '.dropzone' );
+  if ( !dropzone ) return;
+
+  const now = Date.now();
+  if ( now - dragState.lastUpdate < THROTTLE_DELAY ) return;
+
+  dragState.isUpdating = true;
+
+  scheduleUpdate( () => {
+    try {
+      if ( dragState.currentDropzone === dropzone ) {
+        const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+        const newPosition = closest ? `${ closest.id }-${ position }` : 'empty';
+
+        if ( dragState.lastPosition !== newPosition ) {
+          dragState.lastPosition = newPosition;
+          updateGhostPosition( dropzone, closest, position );
+          dragState.lastUpdate = now;
+        }
+      } else {
+        if ( dragState.currentDropzone ) {
+          dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
+        }
+
+        dragState.currentDropzone = dropzone;
+        dropzone.classList.add( 'dropzone-highlight' );
+
+        if ( !dragState.ghostElement ) {
+          dragState.ghostElement = createGhostElement();
+        }
+
+        const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+        updateGhostPosition( dropzone, closest, position );
+        dragState.lastUpdate = now;
+      }
+    } finally {
+      dragState.isUpdating = false;
+    }
+  } );
+};
+
+/**
+ * @function dragLeave
+ * @param {*} e
+ * @returns void
+ * @description This function handles the drag leave event for different drag sources
+ */
 export const dragLeave = ( e ) => {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) {
-    // Clean up if leaving dropzone area
     if ( dragState.ghostElement?.parentNode ) {
       dragState.ghostElement.remove();
       dragState.ghostElement = null;
@@ -609,7 +638,6 @@ export const dragLeave = ( e ) => {
     return;
   }
 
-  // Check if we're actually leaving the dropzone
   const relatedTarget = e.relatedTarget;
   if ( !dropzone.contains( relatedTarget ) && !relatedTarget?.closest( '.dropzone' ) ) {
     dropzone.classList.remove( 'dropzone-highlight' );
@@ -622,29 +650,21 @@ export const dragLeave = ( e ) => {
   }
 };
 
-const cleanupDropzone = ( dropzone ) => {
-  if ( !dropzone ) return;
-  cleanupDragState();
-};
-
 /**
  * @function drop
- * Handles drop events for different drag sources
  * @param {DragEvent} e - The drop event object
+ * @returns {Promise<void>}
+ * @description This function handles the drop event for different drag sources
+ * and origins.
  */
 export const drop = async ( e ) => {
-  try {
-    e.preventDefault();
-    e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
 
-    // Validate drop target
+  try {
     const dropzone = e.target.closest( '.dropzone' );
     if ( !dropzone ) return;
 
-    // Clean up visual drop indicators
-    cleanupDropzone( dropzone );
-
-    // Get drag source and process accordingly
     const origin = e.dataTransfer.getData( 'origin' );
 
     switch ( origin ) {
@@ -653,33 +673,30 @@ export const drop = async ( e ) => {
         const isBlock = templateUrl.includes( '/blocks/' );
         const isColumnDropzone = dropzone.matches( '.object-dropzone[data-wrapper="is-object"]' );
 
-        // Only allow sections in main dropzone and blocks in column dropzones
-        if ( isBlock ) {
-          // Blocks can only be dropped in column dropzones
-          if ( !isColumnDropzone ) {
-            console.warn( 'Blocks can only be dropped into columns' );
-            return;
-          }
-        } else {
-          // Sections can only be dropped in main dropzone
-          if ( isColumnDropzone ) {
-            console.warn( 'Sections cannot be dropped into columns' );
-            return;
-          }
+        // Validate allowed drop conditions
+        if ( isBlock && !isColumnDropzone ) {
+          console.warn( 'Blocks can only be dropped into columns' );
+          return;
+        } else if ( !isBlock && isColumnDropzone ) {
+          console.warn( 'Sections cannot be dropped into columns' );
+          return;
         }
 
+        // generate the HTML from the template URL and place it at the ghost position
         await processTemplate( e, templateUrl );
         break;
       }
 
       case 'sidebar': {
         const componentType = e.dataTransfer.getData( 'text/plain' );
+        // generate the HTML from the component type and place it at the ghost position
         processSidebarDraggables( e, componentType );
         break;
       }
 
       case 'dropzone': {
-        moveElement( e );
+        // Place the dragged element at the ghost position
+        moveElement();
         break;
       }
 
@@ -687,11 +704,16 @@ export const drop = async ( e ) => {
         console.warn( `Unknown drag origin: ${ origin }` );
     }
 
+    // Now that the element is placed, clean up the drag state
+    cleanupDragState();
+
   } catch ( error ) {
     console.error( 'Drop processing failed:', error );
     throw error;
   }
 };
+
+
 
 
 export const sectionCollapse = ( e ) => {

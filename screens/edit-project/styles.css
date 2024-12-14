@@ -637,10 +637,13 @@ fieldset {
   }
 
   &.label-exists {
-    & .label-wrapper span:first-child {
+    & > .label-wrapper span:first-child {
       display: none !important;
     }
-    & .hint {
+    & > .content-wrapper .hint {
+      display: none !important;
+    }
+    & > .label-wrapper .hint {
       display: none !important;
     }
   }
@@ -816,19 +819,19 @@ fieldset {
 }
 
 
+.form-element.draggable-transition {
+  transition: transform 0.2s ease-out;
+}
 
 
-
-
+/*
 .form-element.no-drop {
-  /* Prevent any drag effects on the non-dropzone parts */
   pointer-events: none;
 }
 
 .form-element.no-drop .dropzone,
 .form-element.no-drop .sort-handle,
 .form-element.no-drop .button-wrapper {
-  /* Re-enable pointer events for interactive elements */
   pointer-events: all;
 }
 
@@ -842,6 +845,8 @@ fieldset {
   border-radius: 4px;
   pointer-events: none;
 }
+
+*/
 
 /**
  * EasyMD Editor styles

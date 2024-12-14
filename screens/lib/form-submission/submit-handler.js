@@ -19,6 +19,8 @@ export const handleFormSubmission = async ( form, filePath, schema ) => {
     // Process form data
     const formData = preprocessFormData();
 
+    console.log( `Form data: ${ JSON.stringify( formData, null, 2 ) }` );
+
     // Validate processed data
     const validationErrors = validateSubmission( formData, schema );
     if ( validationErrors.length ) {

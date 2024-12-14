@@ -3,7 +3,7 @@ import { ICONS } from '../../icons/index.js';
 const object = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );
   tempContainer.innerHTML = `
-    <label class="object-name label-wrapper">
+    <label class="object-name label-wrapper ${ labelExists ? "label-exists" : "" }">
       <span>Object Label<sup>*</sup></span>
       <span class="hint">Sections Object</span>
       <input type="text" class="element-label" placeholder="Label Placeholder" ${ labelExists ? "readonly" : "" }>

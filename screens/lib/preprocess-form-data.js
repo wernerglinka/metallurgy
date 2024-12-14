@@ -44,8 +44,21 @@ export const preprocessFormData = () => {
   const mainForm = document.getElementById( 'main-form' );
   const allFormElements = mainForm.querySelectorAll( '.form-element' );
 
+  // loop over allFormElements, find arrays and the add `is-last` to the last element of the array
+  allFormElements.forEach( element => {
+    if ( element.classList.contains( 'is-array' ) ) {
+      const thisDropzone = element.querySelector( '.dropzone' );
+      const lastElement = thisDropzone.lastElementChild;
+      lastElement.classList.add( 'array-last' );
+    }
+  } );
+
+  console.log( 'All form elements:', allFormElements );
+
   // Transform to object structure
   const dropzoneValues = transformFormElementsToObject( allFormElements );
+
+  console.log( 'Dropzone values:', dropzoneValues );
 
   // Cleanup temporary markers
   const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
