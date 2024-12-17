@@ -29,7 +29,7 @@ export const updateObjectField = ( element, field, explicitSchemaArray, labelsEx
     if ( descriptionField && descriptionField.value ) {
       // Create a new span element
       const descriptionSpan = document.createElement( 'span' );
-      descriptionSpan.classList.add( 'section-description' );
+      descriptionSpan.className = 'section-description';
       descriptionSpan.textContent = descriptionField.value;
 
       // Insert the span after the .hint element

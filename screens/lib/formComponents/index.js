@@ -1,4 +1,5 @@
 import array from "./array.js";
+import sectionsArray from "./sections-array.js";
 import checkbox from "./checkbox.js";
 import date from "./date.js";
 import number from "./number.js";
@@ -9,6 +10,7 @@ import textarea from "./textarea.js";
 
 const formComponent = {
   array,
+  sectionsArray,
   checkbox,
   date,
   number,

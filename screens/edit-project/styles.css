@@ -669,6 +669,10 @@ fieldset {
         position: static;
         margin-top: 0.5rem;
       }
+
+      &:hover .button-wrapper{
+        opacity: 1;
+      }
     }
 
     & input {

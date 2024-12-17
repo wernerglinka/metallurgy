@@ -11,7 +11,7 @@ export const updateSelectField = ( element, field ) => {
   originalValueElement.remove();
 
   const selectElement = document.createElement( 'select' );
-  selectElement.classList.add( 'element-value' );
+  selectElement.className = 'element-value';
 
   field.options.forEach( option => {
     const optionElement = document.createElement( 'option' );

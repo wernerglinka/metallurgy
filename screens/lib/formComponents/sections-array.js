@@ -14,7 +14,7 @@ const array = ( div, labelExists ) => {
         ${ ICONS.COLLAPSED }
       </span>
     </label>
-    <div class="array-list dropzone js-dropzone"></div>
+    <div class="array-dropzone dropzone js-dropzone" data-wrapper="is-array"></div>
     <div class="button-wrapper"></div>
   `;
 

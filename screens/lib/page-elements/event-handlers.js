@@ -5,7 +5,7 @@ import { addActionButtons } from '../buttons/form-actions.js';
 import { frontmatterToFragment } from '../form-generation/frontmatter-to-fragment.js';
 import { ICONS } from '../../icons/index.js';
 import { templates } from '../../../templates/index.js';
-import { updateArrayElement } from './create-element.js';
+import { updateArrayElement } from './field-handlers/array.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
