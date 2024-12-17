@@ -8,7 +8,7 @@ import list from "./list.js";
 import text from "./text.js";
 import textarea from "./textarea.js";
 
-const formComponent = {
+const baseFields = {
   array,
   sectionsArray,
   checkbox,
@@ -20,4 +20,4 @@ const formComponent = {
   textarea
 };
 
-export default formComponent;
+export default baseFields;

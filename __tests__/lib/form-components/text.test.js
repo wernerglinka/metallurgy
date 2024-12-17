@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/text.test.js
-import text from '../../../screens/lib/formComponents/text.js';
+// __tests__/lib/baseFields/text.test.js
+import text from '../../../screens/lib/baseFields/text.js';
 
 describe( 'text component', () => {
   let container;

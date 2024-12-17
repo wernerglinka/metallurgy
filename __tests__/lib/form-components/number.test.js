@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/number.test.js
-import number from '../../../screens/lib/formComponents/number.js';
+// __tests__/lib/baseFields/number.test.js
+import number from '../../../screens/lib/baseFields/number.js';
 
 describe( 'number component', () => {
   let container;

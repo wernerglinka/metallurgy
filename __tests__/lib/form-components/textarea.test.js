@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/textarea.test.js
-import textarea from '../../../screens/lib/formComponents/textarea.js';
+// __tests__/lib/baseFields/textarea.test.js
+import textarea from '../../../screens/lib/baseFields/textarea.js';
 
 describe( 'textarea component', () => {
   let container;

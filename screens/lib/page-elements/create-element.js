@@ -1,6 +1,6 @@
 import { addDragHandle } from '../drag/handle.js';
 import { addActionButtons } from '../buttons/form-actions.js';
-import formComponent from '../formComponents/index.js';
+import baseField from '../baseFields/index.js';
 
 // get all the field handlers
 import { updateArrayElement } from './field-handlers/array.js';
@@ -53,8 +53,8 @@ export function createComponent( type, labelsExist ) {
   // Add a drag handle
   addDragHandle( div );
 
-  // Call the form component function to create the element
-  div = formComponent[ type ]( div, labelsExist );
+  // Call the form component function to create the base element
+  div = baseField[ type ]( div, labelsExist );
 
   return div;
 }

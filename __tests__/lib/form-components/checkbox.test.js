@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/checkbox.test.js
-import checkbox from '../../../screens/lib/formComponents/checkbox.js';
+// __tests__/lib/baseFields/checkbox.test.js
+import checkbox from '../../../screens/lib/baseFields/checkbox.js';
 
 describe( 'checkbox component', () => {
   let container;

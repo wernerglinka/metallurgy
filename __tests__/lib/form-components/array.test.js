@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/array.test.js
-import array from '../../../screens/lib/formComponents/array.js';
+// __tests__/lib/baseFields/array.test.js
+import array from '../../../screens/lib/baseFields/array.js';
 import { ICONS } from '../../../screens/icons/index.js';
 
 describe( 'array component', () => {

@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/list.test.js
-import list from '../../../screens/lib/formComponents/list.js';
+// __tests__/lib/baseFields/list.test.js
+import list from '../../../screens/lib/baseFields/list.js';
 import { ICONS } from '../../../screens/icons/index.js';
 
 describe( 'list component', () => {

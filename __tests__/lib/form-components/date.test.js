@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/date.test.js
-import date from '../../../screens/lib/formComponents/date.js';
+// __tests__/lib/baseFields/date.test.js
+import date from '../../../screens/lib/baseFields/date.js';
 
 describe( 'date component', () => {
   let container;

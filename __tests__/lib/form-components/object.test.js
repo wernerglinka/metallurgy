@@ -1,5 +1,5 @@
-// __tests__/lib/formComponents/object.test.js
-import object from '../../../screens/lib/formComponents/object.js';
+// __tests__/lib/baseFields/object.test.js
+import object from '../../../screens/lib/baseFields/object.js';
 import { ICONS } from '../../../screens/icons/index.js';
 
 describe( 'object component', () => {

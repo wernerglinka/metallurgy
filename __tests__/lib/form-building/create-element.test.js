@@ -3,7 +3,7 @@
 import { jest } from '@jest/globals';
 import { createComponent, getUpdatedElement, updateElement } from '../../../screens/lib/page-elements/create-element.js';
 import { ICONS } from '../../../screens/icons/index.js';
-import formComponent from '../../../screens/lib/formComponents/index.js';
+import formComponent from '../../../screens/lib/baseFields/index.js';
 
 // Mock validation functions
 global.isValidLabel = jest.fn( value => /^[a-zA-Z0-9]+$/.test( value ) );
