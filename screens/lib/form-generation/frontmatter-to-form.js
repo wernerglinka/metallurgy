@@ -18,31 +18,21 @@ export const frontmatterToForm = async ( frontmatter, content ) => {
   try {
     const { schema, explicitSchemaArray } = await processFrontmatter( frontmatter );
 
-    console.log( "Schema:" );
-    console.log( JSON.stringify( schema, null, 2 ) );
-    console.log( "Explicit schema:" );
-    console.log( JSON.stringify( explicitSchemaArray, null, 2 ) );
-
-    /*
-    // Create and render form elements
-    const fragment = createFormFragment( schema.fields, explicitSchemaArray );
-    
-    */
-
+    // Create form elements from schema fields
     const formHTML = buildForm( schema, explicitSchemaArray );
-    //const mainForm = document.getElementById( 'main-form' );
-    //mainForm.innerHTML = formHTML;
 
-    const fragment = document.createDocumentFragment();
-    const temp = document.createElement( 'div' );
-    temp.innerHTML = formHTML;
-    while ( temp.firstChild ) {
-      fragment.appendChild( temp.firstChild );
+    // Create and populate template
+    const template = document.createElement( 'template' );
+    template.innerHTML = formHTML;
+
+    // Get dropzone
+    const dropzone = document.getElementById( 'dropzone' );
+    if ( !dropzone ) {
+      throw new Error( 'Dropzone element not found' );
     }
 
-    renderToDropzone( fragment );
-
-
+    // Clone and append template content
+    dropzone.appendChild( template.content.cloneNode( true ) );
 
   } catch ( error ) {
     // Handle schema errors
