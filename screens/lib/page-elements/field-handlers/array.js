@@ -98,5 +98,6 @@ export function updateArrayElement( element, field, labelsExist ) {
     } );
   }
 
+
   return element;
 }

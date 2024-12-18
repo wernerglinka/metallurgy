@@ -7,7 +7,7 @@ import { isSimpleList, isDateObject, isSectionsArray } from '../../utilities/typ
  * @returns {string} The inferred field type
  */
 const inferFieldType = ( value, key ) => {
-  if ( key === 'sections' ) return 'sections-array';
+  if ( isSectionsArray( value, key ) ) return 'sections-array';
   if ( isSimpleList( value ) ) return 'list';
   if ( isDateObject( value ) ) return 'date';
   if ( Array.isArray( value ) ) return 'array';
@@ -54,9 +54,19 @@ function createField( key, value ) {
 
   // Handle regular arrays
   if ( type === 'array' ) {
-    baseField.value = value.map( ( item, index ) =>
-      createField( `${ key }${ index }`, item )
-    );
+    return {
+      ...baseField,
+      type: 'array',
+      isDropzone: true,
+      dropzoneType: 'sections',
+      value: Array.isArray( value ) ? value.map( ( arrayItem, index ) => ( {
+        type: 'object',
+        label: `Item ${ index + 1 }`,
+        value: Object.entries( arrayItem ).map( ( [ key, val ] ) =>
+          createField( key, val )
+        )
+      } ) ) : []
+    };
   }
   // Handle objects
   else if ( type === 'object' ) {
