@@ -3,8 +3,8 @@
  * @description Converts frontmatter to form elements
  */
 import { processFrontmatter } from './process-frontmatter.js';
-import { createFormFragment, renderToDropzone } from './form/form-builder.js';
-import { buildForm } from '../form-builder/index.js';
+import { getExplicitSchema } from './schema/schema-handler.js';
+import { buildForm } from './form-builder/index.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
@@ -16,7 +16,8 @@ import { logFragment } from '../utilities/fragment-debug-helper.js';
  */
 export const frontmatterToForm = async ( frontmatter, content ) => {
   try {
-    const { schema, explicitSchemaArray } = await processFrontmatter( frontmatter );
+    const schema = await processFrontmatter( frontmatter );
+    const explicitSchemaArray = await getExplicitSchema();
 
     // Create form elements from schema fields
     const formHTML = buildForm( schema, explicitSchemaArray );

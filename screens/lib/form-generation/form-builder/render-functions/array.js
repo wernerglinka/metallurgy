@@ -11,7 +11,8 @@ import renderFunctions from './index.js';
 export function renderArray( field, implicitDef, implicitSchema ) {
   // Arrays are similar to objects, but represent an ordered collection of objects.
   // Typically you'll have multiple object-like items inside `field.value`.
-  const label = helpers.getLabel( field );
+  // Convert the label to a pretty title case
+  const label = helpers.toTitleCase( helpers.getLabel( field ) );
   const requiredSup = helpers.getRequiredSup( implicitDef );
   const hint = ( implicitDef && implicitDef.label ) ? `${ implicitDef.label } Array` : 'Sections Array';
 

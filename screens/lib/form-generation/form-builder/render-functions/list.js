@@ -3,14 +3,15 @@ import renderFunctions from './index.js';
 
 /**
  * @function renderList
+ * @description Renders a list field, basically an array with string items
  * @param {*} field 
  * @param {*} implicitDef 
  * @returns The HTML string for a list field
  */
 
 export function renderList( field, implicitDef ) {
-  // Lists are basically arrays of simple values (strings)
-  const label = helpers.getLabel( field );
+  // Convert the label to a pretty title case
+  const label = helpers.toTitleCase( helpers.getLabel( field ) );
   const requiredSup = helpers.getRequiredSup( implicitDef );
   const items = field.value || [];
   const itemsHTML = items.map( itemValue => {

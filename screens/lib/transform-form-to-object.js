@@ -1,5 +1,6 @@
 // lib/transform-form-to-object.js
 import { processList } from './process-list.js';
+import helpers from './form-generation/form-builder/helpers/index.js';
 
 /**
  * Pure functions for path operations
@@ -48,7 +49,10 @@ export const ValueOps = {
     const input = element.querySelector( '.object-name input' );
     const text = element.querySelector( '.label-text' );
     if ( !input && !text ) return '';
-    return input ? input.value : text.textContent;
+
+    // convert the pretty label to camelCase as that is what the YAML frontmatter expects
+    // e.g. `helpers.toCamelCase( input.value )` rather than `input.value`
+    return input ? helpers.toCamelCase( input.value ) : text.textContent;
   },
 
   // Converts form values to appropriate types based on input type
@@ -70,9 +74,13 @@ export const ValueOps = {
   getKeyValue: element => {
     const input = element.querySelector( '.element-label' );
     const text = element.querySelector( '.label-text' );
+
     if ( !input && !text ) return { key: '', value: ValueOps.getValue( element ) };
+
+    // convert the pretty label to camelCase as that is what the YAML frontmatter expects
+    // e.g. `helpers.toCamelCase( input.value )` rather than `input.value`
     return {
-      key: input ? input.value : text.textContent,
+      key: input ? helpers.toCamelCase( input.value ) : text.textContent,
       value: ValueOps.getValue( element )
     };
   },

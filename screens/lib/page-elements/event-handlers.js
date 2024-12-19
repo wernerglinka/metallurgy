@@ -670,6 +670,10 @@ export const drop = async ( e ) => {
     switch ( origin ) {
       case 'templates': {
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
+
+        console.log( templateUrl );
+
+        /*
         const isBlock = templateUrl.includes( '/blocks/' );
         const isColumnDropzone = dropzone.matches( '.object-dropzone[data-wrapper="is-object"]' );
 
@@ -681,6 +685,7 @@ export const drop = async ( e ) => {
           console.warn( 'Sections cannot be dropped into columns' );
           return;
         }
+        */
 
         // generate the HTML from the template URL and place it at the ghost position
         await processTemplate( e, templateUrl );

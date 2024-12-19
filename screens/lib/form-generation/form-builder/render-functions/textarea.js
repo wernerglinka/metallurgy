@@ -2,19 +2,20 @@ import helpers from '../helpers/index.js';
 import renderFunctions from './index.js';
 
 /**
- * @function renderCheckbox
+ * @function renderTextarea
  * @param {*} field 
  * @param {*} implicitDef 
- * @returns The HTML string for a checkbox field
+ * @returns The HTML string for a textarea field
  */
-
-export function renderCheckbox( field, implicitDef ) {
-  const label = helpers.getLabel( field );
+export function renderTextarea( field, implicitDef ) {
+  // Convert the label to a pretty title case
+  const label = helpers.toTitleCase( helpers.getLabel( field ) );
+  const placeholder = helpers.getPlaceholder( implicitDef, field.placeholder );
   const requiredSup = helpers.getRequiredSup( implicitDef );
-  const hint = 'Initial state of checkbox';
-  const value = field.value === true ? 'true' : 'false';
-  const placeholder = field.placeholder || 'Text Placeholder';
+  const hint = 'Text for Text element';
+  const value = field.value || '';
 
+  // According to the example, textarea might have class "is-editor"
   return `<div class="form-element null label-exists no-drop" draggable="true">
       ${ renderFunctions.renderSortHandleHTML() }
       <label class="label-wrapper">
@@ -26,7 +27,7 @@ export function renderCheckbox( field, implicitDef ) {
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <input type="checkbox" role="switch" class="element-value" value="${ value }" placeholder="${ placeholder }" ${ field.value ? 'checked' : '' }>
+          <textarea class="element-value is-editor" placeholder="Click to open editor">${ value }</textarea>
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

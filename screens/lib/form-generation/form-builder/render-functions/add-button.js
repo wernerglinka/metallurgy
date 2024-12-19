@@ -1,4 +1,4 @@
-import { ICONS } from '../../../icons/index.js';
+import { ICONS } from '../../../../icons/index.js';
 
 /**
  * @function renderAddButtonHTML

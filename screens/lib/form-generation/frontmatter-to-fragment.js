@@ -2,9 +2,10 @@
  * @module form-generation/frontmatter-to-fragment
  * @description Converts frontmatter to form elements
  */
-
 import { processFrontmatter } from './process-frontmatter.js';
-import { createFormFragment, renderToDropzone } from './form/form-builder.js';
+import { getExplicitSchema } from './schema/schema-handler.js';
+import { buildForm } from './form-builder/index.js';
+
 
 /**
  * Renders a markdown file's frontmatter as form elements
@@ -14,12 +15,17 @@ import { createFormFragment, renderToDropzone } from './form/form-builder.js';
  */
 export const frontmatterToFragment = async ( frontmatter, path = '' ) => {
   try {
-    const { schema, explicitSchemaArray } = await processFrontmatter( frontmatter );
+    const schema = await processFrontmatter( frontmatter );
+    const explicitSchemaArray = await getExplicitSchema();
 
-    // Create form elements fragment
-    const fragment = createFormFragment( schema.fields, explicitSchemaArray, path );
+    // Create form elements from schema fields
+    const formHTML = buildForm( schema, explicitSchemaArray );
 
-    return fragment;
+    // Create and populate template
+    const template = document.createElement( 'template' );
+    template.innerHTML = formHTML;
+
+    return template.content;
 
   } catch ( error ) {
     // Handle schema errors

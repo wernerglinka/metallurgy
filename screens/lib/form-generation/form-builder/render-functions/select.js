@@ -2,32 +2,37 @@ import helpers from '../helpers/index.js';
 import renderFunctions from './index.js';
 
 /**
- * @function renderText
+ * @function renderSelect
  * @param {*} field 
  * @param {*} implicitDef 
- * @returns The HTML string for a text field
+ * @returns The HTML string for a select field
  */
-export function renderText( field, implicitDef ) {
-  const label = helpers.getLabel( field );
-  const placeholder = helpers.getPlaceholder( implicitDef, field.placeholder );
+
+export function renderSelect( field, implicitDef ) {
+  // Convert the label to a pretty title case
+  const label = helpers.toTitleCase( helpers.getLabel( field ) );
   const requiredSup = helpers.getRequiredSup( implicitDef );
   const hint = ( implicitDef && implicitDef.label ) ? `Text for ${ implicitDef.label } element` : 'Text for Text element';
-  const value = field.value || '';
+  const options = ( implicitDef && implicitDef.options ) || [];
+  const currentValue = field.value || implicitDef.default || '';
 
-  console.log( field );
+  const optionsHTML = options.map( opt => {
+    const selected = ( opt.value === currentValue ) ? 'selected' : '';
+    return `<option value="${ opt.value }" ${ selected }>${ opt.label }</option>`;
+  } ).join( '' );
 
   return `<div class="form-element null label-exists no-drop" draggable="true">
       ${ renderFunctions.renderSortHandleHTML() }
       <label class="label-wrapper">
         <span>${ label }${ requiredSup }</span>
         <div>
-          <input type="text" class="element-label" placeholder="Label Placeholder" value="${ label }" readonly>
+          <input type="text" class="element-label" placeholder="Label Placeholder" value="${ label }"  readonly>
         </div>
       </label>
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <input type="${ ( implicitDef && implicitDef.type ) || 'text' }" class="element-value" placeholder="${ placeholder }" value="${ value }">
+          <select class="element-value">${ optionsHTML }</select>
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }
