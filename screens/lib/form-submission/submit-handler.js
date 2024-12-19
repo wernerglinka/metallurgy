@@ -1,7 +1,7 @@
 // lib/form-submission/submit-handler.js
 import { validateSubmission } from './validate.js';
 import { handleFileOperations } from './file-operations.js';
-import { preprocessFormData } from '../preprocess-form-data.js';
+import { preprocessFormData } from './preprocess-form-data.js';
 
 /**
  * Main form submission handler
@@ -13,13 +13,9 @@ export const handleFormSubmission = async ( form, filePath, schema ) => {
   const submitButton = form.querySelector( 'button[type="submit"]' );
   submitButton.disabled = true;
 
-  console.log( form );
-
   try {
     // Process form data
     const formData = preprocessFormData();
-
-    console.log( `Form data: ${ JSON.stringify( formData, null, 2 ) }` );
 
     // Validate processed data
     const validationErrors = validateSubmission( formData, schema );

@@ -1,4 +1,4 @@
-import { addMainForm } from "../../lib/page-elements/add-main-form.js";
+import { addMainForm } from "../../lib/form-generation/add-main-form.js";
 import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
 import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
 import { handleFormSubmission } from '../../lib/form-submission/submit-handler.js';
@@ -12,7 +12,8 @@ export const setupEditForm = async ( fileName ) => {
   // Clean up the main form and add a new one
   await cleanMainForm();
   const mainForm = addMainForm();
-  updateButtonsStatus();
+  const newForm = true;
+  updateButtonsStatus( newForm );
 
   document.querySelector( '#file-name span' ).textContent = fileName;
   return mainForm;

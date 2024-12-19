@@ -1,6 +1,6 @@
 // lib/transform-form-to-object.js
 import { processList } from './process-list.js';
-import helpers from './form-generation/form-builder/helpers/index.js';
+import helpers from '../form-generation/form-builder/helpers/index.js';
 
 /**
  * Pure functions for path operations

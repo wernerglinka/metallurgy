@@ -1,4 +1,4 @@
-import { ICONS } from '../../icons/index.js';
+import { ICONS } from '../../../icons/index.js';
 
 const array = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );
@@ -14,7 +14,7 @@ const array = ( div, labelExists ) => {
         ${ ICONS.COLLAPSED }
       </span>
     </label>
-    <div class="array-dropzone dropzone js-dropzone" data-wrapper="is-array"></div>
+    <div class="array-list dropzone js-dropzone"></div>
     <div class="button-wrapper"></div>
   `;
 

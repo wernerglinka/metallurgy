@@ -8,12 +8,19 @@ function isValidLabel( label ) {
   return /^[A-Za-z0-9]+$/.test( label );
 }
 
-export const updateButtonsStatus = () => {
+export const updateButtonsStatus = ( newForm = false ) => {
+  console.log( "enter updateButtonsStatus" );
+  console.log( `newForm: ${ newForm }` );
   // update SUBMIT button status
   // SUBMIT button is disabled by default. It will be enabled when schema fields
   // exist, the user has added valid text to a label input in the dropzone and all 
   // other label inputs have valid text.
   const submitButton = document.getElementById( 'submit-primary' );
+
+  if ( newForm ) {
+    submitButton.disabled = true;
+    return;
+  }
 
   // loop over all label inputs in the dropzone and check if they have valid text.
   // If all have valid text, enable the SUBMIT button

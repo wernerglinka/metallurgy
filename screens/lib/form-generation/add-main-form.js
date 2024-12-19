@@ -1,5 +1,5 @@
-import { updateButtonsStatus } from './update-buttons-status.js';
-import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons, showEditor } from './event-handlers.js';
+import { updateButtonsStatus } from '../page-elements/update-buttons-status.js';
+import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons, showEditor } from '../page-elements/event-handlers.js';
 
 /**
  * @function mainForm

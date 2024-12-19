@@ -1,4 +1,4 @@
-import { ICONS } from '../../icons/index.js';
+import { ICONS } from '../../../icons/index.js';
 
 const list = ( div, labelExists ) => {
   const tempContainer = document.createElement( 'div' );

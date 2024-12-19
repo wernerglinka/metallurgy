@@ -1,31 +1,26 @@
-import { createComponent } from "./create-element.js";
+import { createComponent } from "../create-new-form-element/create-new-element.js";
 import { updateButtonsStatus } from "./update-buttons-status.js";
 import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
 import { addActionButtons } from '../buttons/form-actions.js';
 import { frontmatterToFragment } from '../form-generation/frontmatter-to-fragment.js';
 import { ICONS } from '../../icons/index.js';
 import { templates } from '../../../templates/index.js';
-import { updateArrayElement } from './field-handlers/array.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
 /**
- * @function processSidebarDraggables
+ * @function processNewField
  * @param {*} e 
  * @param {*} component 
  * @param {*} dropzone
  * @description This function will process the sidebar draggables
  */
-function processSidebarDraggables( e, component ) {
+function processNewField( e, component ) {
   const dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
-  console.log( component );
-
   // Create new element with requested component type
   const newElement = createComponent( component, false );
-
-  console.log( newElement );
 
   // add an ADD and DELETE button to the new element
   addActionButtons( newElement, { addDeleteButton: true, addDuplicateButton: true } );
@@ -99,8 +94,6 @@ async function processTemplate( e, url ) {
   try {
     const templateName = url.split( '/' ).pop().replace( '.js', '' );
     const templateSchema = templates[ templateName ];
-
-    console.log( templateName );
 
     if ( !templateSchema ) {
       throw new Error( 'Failed to load template' );
@@ -671,8 +664,6 @@ export const drop = async ( e ) => {
       case 'templates': {
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
 
-        console.log( templateUrl );
-
         /*
         const isBlock = templateUrl.includes( '/blocks/' );
         const isColumnDropzone = dropzone.matches( '.object-dropzone[data-wrapper="is-object"]' );
@@ -695,7 +686,7 @@ export const drop = async ( e ) => {
       case 'sidebar': {
         const componentType = e.dataTransfer.getData( 'text/plain' );
         // generate the HTML from the component type and place it at the ghost position
-        processSidebarDraggables( e, componentType );
+        processNewField( e, componentType );
         break;
       }
 

@@ -1,6 +1,6 @@
 // screens/edit-project/preview/manage-preview.js
 
-import { preprocessFormData } from "../../lib/preprocess-form-data.js";
+import { preprocessFormData } from "../../lib/form-submission/preprocess-form-data.js";
 /**
  * @typedef {Object} PreviewElements
  * @property {HTMLElement} editPane - Main edit pane

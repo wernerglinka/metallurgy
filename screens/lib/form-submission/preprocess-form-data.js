@@ -53,12 +53,8 @@ export const preprocessFormData = () => {
     }
   } );
 
-  console.log( 'All form elements:', allFormElements );
-
   // Transform to object structure
   const dropzoneValues = transformFormElementsToObject( allFormElements );
-
-  console.log( 'Dropzone values:', dropzoneValues );
 
   // Cleanup temporary markers
   const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );

@@ -1,4 +1,5 @@
 const text = ( div, labelExists ) => {
+  console.log( 'basefield for text' );
   const tempContainer = document.createElement( 'div' );
   tempContainer.innerHTML = `
     <label class="label-wrapper">

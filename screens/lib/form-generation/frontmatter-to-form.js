@@ -5,6 +5,7 @@
 import { processFrontmatter } from './process-frontmatter.js';
 import { getExplicitSchema } from './schema/schema-handler.js';
 import { buildForm } from './form-builder/index.js';
+import { initializeEditor } from '../editor/setup.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
@@ -34,6 +35,10 @@ export const frontmatterToForm = async ( frontmatter, content ) => {
 
     // Clone and append template content
     dropzone.appendChild( template.content.cloneNode( true ) );
+
+    if ( !document.getElementById( 'editorWrapper' ) ) {
+      window.mdeditor = initializeEditor();
+    }
 
   } catch ( error ) {
     // Handle schema errors
