@@ -8,7 +8,6 @@ import { ICONS } from '../../../screens/icons/index.js';
 global.isValidLabel = jest.fn( value => /^[a-zA-Z0-9]+$/.test( value ) );
 global.showErrorMessage = jest.fn();
 global.removeErrorMessage = jest.fn();
-global.updateButtonsStatus = jest.fn();
 
 // Mock EasyMDE with proper toolbar setup
 global.EasyMDE = jest.fn().mockImplementation( () => ( {

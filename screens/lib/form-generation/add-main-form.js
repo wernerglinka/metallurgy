@@ -1,4 +1,3 @@
-import { updateButtonsStatus } from '../page-elements/update-buttons-status.js';
 import { dragStart, dragOver, dragLeave, drop, sectionCollapse, addDeleteButtons, showEditor } from '../page-elements/event-handlers.js';
 
 /**

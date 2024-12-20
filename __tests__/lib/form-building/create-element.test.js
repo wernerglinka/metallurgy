@@ -9,7 +9,6 @@ import formComponent from '../../../screens/lib/baseFields/index.js';
 global.isValidLabel = jest.fn( value => /^[a-zA-Z0-9]+$/.test( value ) );
 global.showErrorMessage = jest.fn();
 global.removeErrorMessage = jest.fn();
-global.updateButtonsStatus = jest.fn();
 
 // Mock EasyMDE with proper toolbar setup
 global.EasyMDE = jest.fn().mockImplementation( () => ( {
@@ -44,7 +43,6 @@ describe( 'Create Element', () => {
       labelInput.value = 'ValidLabel';
       labelInput.dispatchEvent( new Event( 'change' ) );
 
-      expect( updateButtonsStatus ).toHaveBeenCalled();
       expect( showErrorMessage ).not.toHaveBeenCalled();
     } );
 
@@ -66,7 +64,6 @@ describe( 'Create Element', () => {
         labelInput,
         "Label must only use characters and numbers"
       );
-      expect( updateButtonsStatus ).toHaveBeenCalled();
       expect( removeErrorMessage ).not.toHaveBeenCalled();
     } );
 
@@ -88,7 +85,6 @@ describe( 'Create Element', () => {
       nameInput.dispatchEvent( new Event( 'change' ) );
 
       expect( showErrorMessage ).toHaveBeenCalled();
-      expect( updateButtonsStatus ).toHaveBeenCalled();
 
       // Add invalid class to simulate error state
       nameInput.classList.add( 'invalid' );
@@ -101,7 +97,6 @@ describe( 'Create Element', () => {
       nameInput.dispatchEvent( new Event( 'change' ) );
 
       expect( removeErrorMessage ).toHaveBeenCalled();
-      expect( updateButtonsStatus ).toHaveBeenCalledTimes( 2 );
     } );
 
     it( 'handles error removal when element has invalid class', () => {
@@ -121,7 +116,6 @@ describe( 'Create Element', () => {
       labelInput.dispatchEvent( new Event( 'change' ) );
 
       expect( removeErrorMessage ).toHaveBeenCalled();
-      expect( updateButtonsStatus ).toHaveBeenCalled();
     } );
 
     it( 'handles component types without modifiers', () => {
@@ -197,7 +191,6 @@ describe( 'getUpdatedElement', () => {
     labelInput.dispatchEvent( new Event( 'change' ) );
 
     expect( global.removeErrorMessage ).toHaveBeenCalled();
-    expect( global.updateButtonsStatus ).toHaveBeenCalled();
   } );
 
   it( 'handles object name input validation', () => {
@@ -214,7 +207,6 @@ describe( 'getUpdatedElement', () => {
     nameInput.dispatchEvent( new Event( 'change' ) );
 
     expect( global.showErrorMessage ).toHaveBeenCalled();
-    expect( global.updateButtonsStatus ).toHaveBeenCalled();
   } );
 } );
 

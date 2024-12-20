@@ -1,6 +1,5 @@
 import { addMainForm } from "../../lib/form-generation/add-main-form.js";
 import { cleanMainForm } from "../../lib/utilities/clean-main-form.js";
-import { updateButtonsStatus } from "../../lib/page-elements/update-buttons-status.js";
 import { handleFormSubmission } from '../../lib/form-submission/submit-handler.js';
 import { initFormManager } from "../../lib/form-generation/manage-form-state.js";
 
@@ -24,7 +23,5 @@ export const setupFormSubmission = ( form, filePath, schema ) => {
     e.preventDefault();
 
     const result = await handleFormSubmission( form, filePath, schema );
-
-    updateButtonsStatus( result.success ? 'success' : 'error', result.error );
   } );
 };

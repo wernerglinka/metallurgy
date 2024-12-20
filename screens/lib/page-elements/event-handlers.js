@@ -1,5 +1,4 @@
 import { createComponent } from "../create-new-form-element/create-new-element.js";
-import { updateButtonsStatus } from "./update-buttons-status.js";
 import { isValidLabel, showErrorMessage, removeErrorMessage } from '../utilities/form-field-validations.js';
 import { addActionButtons } from '../buttons/form-actions.js';
 import { frontmatterToFragment } from '../form-generation/frontmatter-to-fragment.js';
@@ -47,7 +46,6 @@ function processNewField( e, component ) {
     // check if the input is valid, if not valid, show error message and disable the button
     if ( !isValidLabel( thisElement.value ) ) {
       showErrorMessage( thisElement, "Label must only use characters and numbers" );
-      updateButtonsStatus();
       return;
     }
 
@@ -55,7 +53,6 @@ function processNewField( e, component ) {
     if ( thisElement.classList.contains( 'invalid' ) ) {
       removeErrorMessage( thisElement );
     }
-    updateButtonsStatus();
   } );
 
   /*
@@ -76,8 +73,6 @@ function processNewField( e, component ) {
   } else {
     dropzone.appendChild( newElement );
   }
-
-  updateButtonsStatus();
 };
 
 /**
@@ -201,9 +196,6 @@ async function processTemplate( e, url ) {
         }
       }
     }
-
-    updateButtonsStatus();
-
   } catch ( error ) {
     console.error( 'Template processing failed:', error );
     throw error;
