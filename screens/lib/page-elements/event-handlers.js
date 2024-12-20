@@ -266,7 +266,6 @@ function processArraysInFragment( fragment, schema ) {
   } );
 }
 
-
 /**
  * Global drag state 
  */
@@ -507,6 +506,12 @@ function moveElement() {
  * and origins.
  */
 export const dragStart = ( e ) => {
+  // If Ctrl (Windows) or Cmd (Mac) is pressed, prevent dragging
+  if ( e.ctrlKey || e.metaKey ) {
+    e.preventDefault();
+    return false;
+  }
+
   // There are three possible drag events:
   // 1. Dragging an existing form element from inside a dropzone
   // 2. Dragging a new component from the sidebar
@@ -711,7 +716,11 @@ export const drop = async ( e ) => {
 
 
 
-
+/**
+ * @function sectionCollapse
+ * @param {*} e 
+ * @returns void
+ */
 export const sectionCollapse = ( e ) => {
   const collapseIcon = e.target.closest( '.collapse-icon' );
   if ( !collapseIcon ) return;

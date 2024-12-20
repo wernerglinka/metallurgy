@@ -32,7 +32,7 @@ export function renderSelect( field, implicitDef ) {
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <select class="element-value">${ optionsHTML }</select>
+          <select class="element-value ${ requiredSup ? 'is-required' : '' }">${ optionsHTML }</select>
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

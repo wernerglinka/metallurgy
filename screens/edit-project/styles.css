@@ -9,6 +9,7 @@
   --input-border: 1px solid rgba(255, 255, 255, 0.3);
   --input-box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   --element-padding: 0.5rem 2rem; 
+  --error-background-color: rgba(255, 0, 0, 0.1);F
 }
 
 h1 {
@@ -48,19 +49,19 @@ h2 {
 
 @keyframes slideSidebarOut {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
 }
 
 @keyframes slideSidebarIn {
   0% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
   }
   100% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -124,10 +125,15 @@ h2 {
   justify-content: flex-start;
   padding-right: 2rem;
   font-size: 1.6rem;
-  animation: slideSidebarIn 0.8s ease-in-out forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  /* Prevent any flickering edges */
+  -webkit-font-smoothing: antialiased;
+
+  animation: slideSidebarIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
   &.hidden {
-    animation: slideSidebarOut 0.8s ease-in-out forwards;
+    animation: slideSidebarOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
@@ -594,6 +600,10 @@ fieldset {
         width: 100%;
       }
     }
+
+    & input.is-error {
+    background-color: var(--error-background-color);
+  }
 
     & [type="text"], & textarea, & [type="number"], & [type="date"], & [type="url"], & select {
       font-family: "Open Sans", sans-serif;

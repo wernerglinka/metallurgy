@@ -27,7 +27,7 @@ export function renderCheckbox( field, implicitDef ) {
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <input type="checkbox" role="switch" class="element-value" value="${ value }" placeholder="${ placeholder }" ${ field.value ? 'checked' : '' }>
+          <input type="checkbox" role="switch" class="element-value ${ requiredSup ? 'is-required' : '' }" value="${ value }" placeholder="${ placeholder }" ${ field.value ? 'checked' : '' }>
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

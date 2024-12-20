@@ -41,6 +41,7 @@ export const addMainForm = () => {
   submitButton.setAttribute( 'type', "submit" );
   submitButton.id = 'submit-primary';
   submitButton.classList.add( 'btn', 'primary' );
+  submitButton.disabled = true;
   submitButton.innerHTML = "Submit";
   buttonWrapper.appendChild( submitButton );
 
@@ -50,11 +51,7 @@ export const addMainForm = () => {
   clearDropzoneButton.id = 'clear-dropzone';
   clearDropzoneButton.disabled = true;
   clearDropzoneButton.innerHTML = "Clear Dropzone";
-  clearDropzoneButton.addEventListener( 'click', ( e ) => {
-    e.preventDefault();
-    dropzone.innerHTML = "";
-    updateButtonsStatus();
-  } );
+
   buttonWrapper.appendChild( clearDropzoneButton );
 
   return mainForm;

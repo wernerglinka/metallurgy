@@ -27,7 +27,7 @@ export function renderTextarea( field, implicitDef ) {
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <textarea class="element-value is-editor" placeholder="Click to open editor">${ value }</textarea>
+          <textarea class="element-value is-editor ${ requiredSup ? 'is-required' : '' }" placeholder="Click to open editor">${ value }</textarea>
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

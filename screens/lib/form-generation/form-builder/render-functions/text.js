@@ -26,7 +26,7 @@ export function renderText( field, implicitDef ) {
       <label class="content-wrapper">
         <span class="hint">${ hint }</span>
         <div>
-          <input type="${ ( implicitDef && implicitDef.type ) || 'text' }" class="element-value" placeholder="${ placeholder }" value="${ value }">
+          <input type="${ ( implicitDef && implicitDef.type ) || 'text' }" class="element-value ${ requiredSup ? 'is-required' : '' }" placeholder="${ placeholder }" value="${ value }">
         </div>
       </label>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }
