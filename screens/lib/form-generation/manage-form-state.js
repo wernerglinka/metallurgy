@@ -110,6 +110,12 @@ const updateButtonStates = ( form ) => {
 // Clear dropzone handler
 const clearDropzone = ( dropzone ) => {
   dropzone.innerHTML = '';
+
+  // reset any active links in the sidebar
+  const activeSidebarLink = document.querySelector( '.sidebar .dom-tree a.active' );
+  if ( activeSidebarLink ) {
+    activeSidebarLink.classList.remove( 'active' );
+  }
 };
 
 // Initialize form manager

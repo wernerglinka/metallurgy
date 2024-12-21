@@ -47,27 +47,43 @@ h2 {
   }
 }
 
-@keyframes normalWidth {
+@keyframes slideSidebarOut {
   0% {
-    flex: 0 0 0;
-    padding: 0;
-    opacity: 0;
+    transform: translateX(0);
   }
   100% {
-    flex: 0 0 30rem;
-    opacity: 1;
+    transform: translateX(-100%);
   }
 }
 
-@keyframes noWidth {
+@keyframes slideSidebarIn {
   0% {
-    flex: 0 0 30rem;
-    opacity: 1;
+    transform: translateX(-100%);
   }
   100% {
-    flex: 0 0 0;
-    padding: 0;
-    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+@keyframes expandContainer {
+  0% {
+    width: calc(100% - 30rem);
+    margin-left: 30rem;
+  }
+  100% {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@keyframes collapseContainer {
+  0% {
+    width: 100%;
+    margin-left: 0;
+  }
+  100% {
+    width: calc(100% - 30rem);
+    margin-left: 30rem;
   }
 }
 
@@ -79,9 +95,13 @@ h2 {
 }
 
 .edit-container {
-  flex: 0 0 120rem;
-  will-change: transform;
-  transition: transform 0.8s ease-in-out;
+  width: calc(100% - 30rem);
+  margin-left: 30rem;
+  animation: collapseContainer 0.8s ease-in-out forwards;
+}
+
+.full-width .edit-container {
+  animation: expandContainer 0.8s ease-in-out forwards;
 }
 
 .sidebar-toggle {
@@ -98,21 +118,22 @@ h2 {
 
 
 .sidebar {
-  flex: 0 0 30rem;
-  padding: 0 2rem;
+  position: absolute;
+  width: 30rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  padding-right: 2rem;
   font-size: 1.6rem;
-  overflow: hidden;
-  animation: normalWidth 0.8s ease-in-out forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  /* Prevent any flickering edges */
+  -webkit-font-smoothing: antialiased;
+
+  animation: slideSidebarIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
   &.hidden {
-    animation: noWidth 0.8s ease-in-out forwards;
-  }
-
-  & > * {
-    width: 26rem;
+    animation: slideSidebarOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
@@ -132,7 +153,7 @@ h2 {
 .active .right-sidebar {
   padding-left: 1.5rem;
   flex: 0 0 20%;
-  min-width: 30rem;;
+   min-with: 30rem;
 }
 
 .container-background {
