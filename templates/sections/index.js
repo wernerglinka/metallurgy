@@ -3,6 +3,8 @@ export { ctasSection } from './ctasSection.js';
 export { flexSection } from './flexSection.js';
 export { iconSection } from './iconSection.js';
 export { imageSection } from './imageSection.js';
+export { leafletSection } from './leafletSection.js';
+export { listSection } from './listSection.js';
 export { lottieSection } from './lottieSection.js';
 export { videoSection } from './videoSection.js';
 export { textSection } from './textSection.js';

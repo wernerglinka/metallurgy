@@ -90,6 +90,11 @@ async function processTemplate( e, url ) {
     const templateName = url.split( '/' ).pop().replace( '.js', '' );
     const templateSchema = templates[ templateName ];
 
+    console.log( JSON.stringify( templates, null, 2 ) );
+
+    console.log( `templateName: ${ templateName }` );
+    console.log( `templateSchema: ${ JSON.stringify( templateSchema ) }` );
+
     if ( !templateSchema ) {
       throw new Error( 'Failed to load template' );
     }

@@ -60,10 +60,11 @@ const isFormValid = ( dropzone ) => {
     // Check if it's an object wrapper or regular field
     const isObject = field.classList.contains( 'is-object' );
     const isArray = field.classList.contains( 'is-array' );
+    const isList = field.classList.contains( 'is-list' );
     const isRequired = field.classList.contains( 'is-required' );
 
     // Skip validation for object/array wrappers - they are containers
-    if ( isObject || isArray ) {
+    if ( isObject || isArray || isList ) {
       return true;
     }
 
