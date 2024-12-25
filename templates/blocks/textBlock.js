@@ -3,6 +3,7 @@ export const textBlock = {
     prefix: '',
     title: '',
     header: '',
+    textLength: "60",
     subtitle: '',
     prose: ''
   }

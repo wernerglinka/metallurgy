@@ -104,7 +104,7 @@ h2 {
   flex-direction: column;
   justify-content: flex-start;
   font-size: 1.6rem;
-  overflow: hidden;
+  overflow-x: hidden;
   animation: normalWidth 0.8s ease-in-out forwards;
 
   &.hidden {
@@ -407,6 +407,10 @@ h2 {
 
   &.dropzone-highlight {
     background-color: var(--dropzone-background-highlight-color);
+
+    & .form-element {
+      margin: 2rem 0;
+    }
   }
 }
 

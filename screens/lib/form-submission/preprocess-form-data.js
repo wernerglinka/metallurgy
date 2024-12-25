@@ -26,8 +26,20 @@ import { transformFormElementsToObject } from './transform-form-to-object.js';
  * // Returns: { title: "Page Title" }
  */
 export const preprocessFormData = () => {
+  // Add logging to trace execution
+  console.log( 'Starting preprocessFormData' );
+
+  // Get the main form
+  const mainForm = document.getElementById( 'main-form' );
+  if ( !mainForm ) {
+    console.error( 'Main form not found' );
+    return null;
+  }
+
   // Add temporary markers for structure parsing
   const allDropzones = document.querySelectorAll( '.js-dropzone' );
+  console.log( 'Found dropzones:', allDropzones.length );
+
   allDropzones.forEach( dropzone => {
     // Add dummy is-last element at the end of dropzone
     const dummyElement = document.createElement( 'div' );
@@ -41,26 +53,37 @@ export const preprocessFormData = () => {
   } );
 
   // Get all form elements
-  const mainForm = document.getElementById( 'main-form' );
   const allFormElements = mainForm.querySelectorAll( '.form-element' );
+  console.log( 'Found form elements:', allFormElements.length );
 
-  // loop over allFormElements, find arrays and the add `is-last` to the last element of the array
+  // Find arrays and add is-last to the last element
   allFormElements.forEach( element => {
     if ( element.classList.contains( 'is-array' ) ) {
       const thisDropzone = element.querySelector( '.dropzone' );
-      const lastElement = thisDropzone.lastElementChild;
-      lastElement.classList.add( 'array-last' );
+      if ( thisDropzone ) {
+        const lastElement = thisDropzone.lastElementChild;
+        if ( lastElement ) {
+          lastElement.classList.add( 'array-last' );
+        }
+      }
     }
   } );
 
-  // Transform to object structure
-  const dropzoneValues = transformFormElementsToObject( allFormElements );
+  try {
+    // Transform to object structure
+    const dropzoneValues = transformFormElementsToObject( allFormElements );
+    console.log( 'Transformed values:', dropzoneValues );
 
-  // Cleanup temporary markers
-  const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
-  redundantDummyElements.forEach( element => {
-    element.remove();
-  } );
+    // Cleanup temporary markers
+    const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );
+    redundantDummyElements.forEach( element => {
+      element.remove();
+    } );
 
-  return dropzoneValues;
+    return dropzoneValues;
+
+  } catch ( error ) {
+    console.error( 'Error in preprocessFormData:', error );
+    return null;
+  }
 };

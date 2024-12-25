@@ -1,6 +1,6 @@
 export const iconBlock = {
   icon: {
-    name: "",
+    name: "icon",
     caption: ""
   }
 };

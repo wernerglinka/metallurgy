@@ -7,7 +7,7 @@ const validateLabelInput = ( value ) => {
   // convert from nice label to camelCase
   // e.g. `helpers.toCamelCase( value )` rather than `value`
   const camelCaseValue = helpers.toCamelCase( value );
-  const labelRegex = /^[A-Za-z0-9]{3,}$/;
+  const labelRegex = /^[A-Za-z0-9]{2,}$/;
   return labelRegex.test( camelCaseValue );
 };
 
@@ -78,7 +78,7 @@ const isFormValid = ( dropzone ) => {
     const labelValue = labelInput.value;
     const isLabelValid = !labelValue || validateLabelInput( labelValue );
     if ( !isLabelValid ) {
-      console.log( `Label validation failed for "${ fieldName }": Value "${ labelValue }" does not match pattern (min 4 chars, A-Z, a-z, 0-9, no spaces)` );
+      console.log( `Label validation failed for "${ fieldName }": Value "${ labelValue }" does not match pattern (min 2 chars, A-Z, a-z, 0-9, no spaces)` );
       labelInput.classList.add( 'is-error' );
     } else {
       labelInput.classList.remove( 'is-error' );

@@ -1,32 +1,55 @@
-// lib/transform-form-to-object.js
-import { processList } from './process-list.js';
-import helpers from '../form-generation/form-builder/helpers/index.js';
+// Value operations
+export const ValueOps = {
+  // Extracts name from either input or text element
+  getName: element => {
+    const input = element.querySelector( '.object-name input' );
+    const text = element.querySelector( '.label-text' );
+    if ( !input && !text ) return '';
 
-/**
- * Pure functions for path operations
- * These functions never modify their inputs, always return new arrays/objects
- */
+    // Clean up name - trim spaces and convert to camelCase if needed
+    const rawName = ( input ? input.value : text.textContent ).trim();
+    return rawName.toLowerCase();
+  },
+
+  // Extracts both key and value from a form element
+  getKeyValue: element => {
+    const labelInput = element.querySelector( '.element-label' );
+    const valueInput = element.querySelector( '.element-value' );
+
+    // Get key and ensure it's lowercase
+    const key = labelInput ? labelInput.value.trim().toLowerCase() : '';
+
+    // For value, handle different input types
+    let value = '';
+    if ( valueInput ) {
+      if ( valueInput.type === 'checkbox' ) {
+        value = valueInput.checked;
+      } else if ( valueInput.type === 'number' ) {
+        value = Number( valueInput.value );
+      } else {
+        value = valueInput.value.trim();
+      }
+    }
+
+    // Special case for layout to ensure it's exactly 'blocks.njk'
+    if ( key === 'layout' ) {
+      return { key, value: 'blocks.njk' };
+    }
+
+    return { key, value };
+  }
+};
+
+// Path operations
 export const PathOps = {
-  // Takes a path array and name, returns new array with name added
-  // e.g., push(['main', 'seo'], 'title') returns ['main', 'seo', 'title']
   push: ( path, name ) => [ ...path, name ],
-
-  // Takes a path array, returns new array without last element
-  // e.g., pop(['main', 'seo', 'title']) returns ['main', 'seo']
   pop: path => path.slice( 0, -1 ),
-
-  // Safely traverses nested object structure, creating objects as needed
-  // e.g., getIn({a: {b: {}}}, ['a', 'b', 'c']) returns {} and ensures path exists
-  getIn: ( obj, path ) =>
-    path.reduce( ( current, key ) => {
+  getIn: ( obj, path ) => {
+    return path.reduce( ( current, key ) => {
       current[ key ] = current[ key ] || {};
       return current[ key ];
-    }, obj ),
-
-  // Sets value at nested path, returning entirely new object structure
-  // Preserves immutability by creating new objects along the path
-  // e.g., setIn({a: {b: {}}}, ['a', 'b', 'c'], 'value') returns new object
-  // with value set at a.b.c
+    }, obj );
+  },
   setIn: ( obj, path, value ) => {
     if ( path.length === 0 ) return value;
 
@@ -38,94 +61,30 @@ export const PathOps = {
   }
 };
 
-/**
- * Pure functions for extracting and converting values from DOM elements
- * Each function handles one specific aspect of value extraction
- */
-export const ValueOps = {
-  // Extracts name from either input or text element
-  // Handles both editable (input) and static (span) cases
-  getName: element => {
-    const input = element.querySelector( '.object-name input' );
-    const text = element.querySelector( '.label-text' );
-    if ( !input && !text ) return '';
-
-    // convert the pretty label to camelCase as that is what the YAML frontmatter expects
-    // e.g. `helpers.toCamelCase( input.value )` rather than `input.value`
-    return input ? helpers.toCamelCase( input.value ) : text.textContent;
-  },
-
-  // Converts form values to appropriate types based on input type
-  // Handles numbers, checkboxes, dates, and default string values
-  getValue: element => {
-    const input = element.querySelector( '.element-value' );
-    if ( !input ) return '';
-
-    switch ( input.type ) {
-      case 'number': return Number( input.value );
-      case 'checkbox': return input.checked;
-      case 'date': return new Date( input.value );
-      default: return input.value;
-    }
-  },
-
-  // Extracts both key and value from a form element
-  // Returns an object with both properties
-  getKeyValue: element => {
-    const input = element.querySelector( '.element-label' );
-    const text = element.querySelector( '.label-text' );
-
-    if ( !input && !text ) return { key: '', value: ValueOps.getValue( element ) };
-
-    // convert the pretty label to camelCase as that is what the YAML frontmatter expects
-    // e.g. `helpers.toCamelCase( input.value )` rather than `input.value`
-    return {
-      key: input ? helpers.toCamelCase( input.value ) : text.textContent,
-      value: ValueOps.getValue( element )
-    };
-  },
-};
-
-/**
- * Functions for handling form state transitions
- * Each function takes current state and returns new state
- * State consists of:
- * - path: array of keys showing current position in object structure
- * - result: the accumulated result object
- */
+// Form state operations
 export const FormStateOps = {
-  // Creates initial state object with 'main' as root
   createState: () => ( {
     path: [ 'main' ],
     result: { main: {} }
   } ),
 
-  // Handles object/array type elements by adding their name to the path
-  // Returns new state with updated path
   handleStructural: ( state, element ) => {
+    console.log( 'Handling structural element' );
     const name = ValueOps.getName( element );
+    console.log( 'Got name:', name );
     return {
       ...state,
       path: PathOps.push( state.path, name )
     };
   },
 
-  // Handles simple value elements and list elements
-  // Updates result object with new key-value pair at current path
   handleValue: ( state, element ) => {
-    if ( element.classList.contains( 'is-list' ) ) {
-      const { key, value } = processList( element );
-      return {
-        ...state,
-        result: PathOps.setIn(
-          state.result,
-          state.path,
-          { ...PathOps.getIn( state.result, state.path ), [ key ]: value }
-        )
-      };
-    }
-
+    console.log( 'Handling value element' );
     const { key, value } = ValueOps.getKeyValue( element );
+    console.log( 'Got key-value:', { key, value } );
+
+    if ( !key ) return state; // Skip if no key found
+
     return {
       ...state,
       result: PathOps.setIn(
@@ -136,14 +95,21 @@ export const FormStateOps = {
     };
   },
 
-  // Converts object to array at current path and moves up one level
-  // Used when processing array-type structures
   handleArrayConversion: ( state ) => {
+    console.log( 'Converting to array' );
     const currentObj = PathOps.getIn( state.result, state.path );
-    // Convert object key-values to array items
-    const arrayVersion = Object.entries( currentObj ).map( ( [ key, value ] ) =>
-      typeof value === 'object' ? value : { [ key ]: value }
-    );
+
+    // Convert object to array, keeping blocks intact
+    const arrayVersion = Object.entries( currentObj ).map( ( [ key, value ] ) => {
+      // Check if this is a block (has a specific block structure)
+      const isBlock = key.endsWith( 'block' );
+      if ( isBlock ) {
+        // Return block directly
+        return { [ key ]: value };
+      }
+      // For other elements, use standard conversion
+      return typeof value === 'object' ? value : { [ key ]: value };
+    } );
 
     return {
       ...state,
@@ -152,50 +118,85 @@ export const FormStateOps = {
     };
   },
 
-  // Moves up one level in the path when finishing an object
-  handleObjectEnd: ( state ) => ( {
-    ...state,
-    path: PathOps.pop( state.path )
-  } )
+  handleObjectEnd: ( state ) => {
+    console.log( 'Ending object, current path:', state.path );
+    return {
+      ...state,
+      path: PathOps.pop( state.path )
+    };
+  }
 };
 
-/**
- * Processes a single form element, determining its type and applying
- * appropriate state transformation
- * Returns new state object after processing element
- */
+// Main transformation function
+export const transformFormElementsToObject = ( allFormElements ) => {
+  console.log( 'Starting transformation with elements:', allFormElements.length );
+
+  try {
+    const finalState = Array.from( allFormElements ).reduce( ( state, element ) => {
+      console.log( 'Processing element:', element.className );
+
+      const isObject = element.classList.contains( 'is-object' );
+      const isArray = element.classList.contains( 'is-array' );
+      const isLast = element.classList.contains( 'is-last' );
+      const isLastInArray = element.classList.contains( 'array-last' );
+
+      if ( isObject || isArray ) {
+        return FormStateOps.handleStructural( state, element );
+      } else if ( !isLast ) {
+        return FormStateOps.handleValue( state, element );
+      } else if ( isLastInArray ) {
+        return FormStateOps.handleArrayConversion( state );
+      } else {
+        return FormStateOps.handleObjectEnd( state );
+      }
+    }, FormStateOps.createState() );
+
+    console.log( 'Final state:', finalState );
+    return finalState.result.main;
+  } catch ( error ) {
+    console.error( 'Transformation error:', error );
+    return null;
+  }
+};
+
 export const processElement = ( state, element ) => {
-  // Classify element by its type using class markers
+  // Special handling for blocks
+  if ( element.classList.contains( 'is-block' ) ) {
+    const blockName = ValueOps.getName( element ).toLowerCase();
+    if ( !blockName ) return state;
+
+    // Process all fields in the block's container
+    const blockFields = {};
+    element.querySelectorAll( '.block-fields-container .form-element' ).forEach( field => {
+      const { key, value } = ValueOps.getKeyValue( field );
+      if ( key ) {
+        blockFields[ key ] = value;
+      }
+    } );
+
+    // Add block to current path level
+    return {
+      ...state,
+      result: PathOps.setIn(
+        state.result,
+        state.path,
+        { ...PathOps.getIn( state.result, state.path ), [ blockName ]: blockFields }
+      )
+    };
+  }
+
+  // Regular element processing
   const isObject = element.classList.contains( 'is-object' );
   const isArray = element.classList.contains( 'is-array' );
   const isLast = element.classList.contains( 'is-last' );
   const isLastInArray = element.classList.contains( 'array-last' );
 
-  // Apply appropriate state transformation based on element type
   if ( isObject || isArray ) {
     return FormStateOps.handleStructural( state, element );
-  }
-  if ( !isLast ) {
+  } else if ( !isLast ) {
     return FormStateOps.handleValue( state, element );
-  }
-  if ( isLastInArray ) {
+  } else if ( isLastInArray ) {
     return FormStateOps.handleArrayConversion( state );
   }
   return FormStateOps.handleObjectEnd( state );
-};
-
-/**
- * Main transformation function that processes form elements into object structure
- * Uses reduce to thread state through all elements, maintaining immutability
- * Returns final transformed object without the 'main' wrapper
- */
-export const transformFormElementsToObject = ( allFormElements ) => {
-  // Convert NodeList to Array and reduce over elements
-  const finalState = Array.from( allFormElements ).reduce(
-    ( state, element ) => processElement( state, element ),
-    FormStateOps.createState()
-  );
-
-  // Return just the 'main' object's contents
-  return finalState.result.main;
 };

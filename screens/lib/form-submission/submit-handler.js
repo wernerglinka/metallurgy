@@ -9,7 +9,7 @@ import { preprocessFormData } from './preprocess-form-data.js';
  * @param {string} filePath - Path to save the file
  * @param {Object} schema - Form schema
  */
-export const handleFormSubmission = async ( form, filePath, schema ) => {
+export const handleFormSubmission = async ( form, filePath, schema = null ) => {
   const submitButton = form.querySelector( 'button[type="submit"]' );
   submitButton.disabled = true;
 
@@ -17,7 +17,11 @@ export const handleFormSubmission = async ( form, filePath, schema ) => {
     // Process form data
     const formData = preprocessFormData();
 
-    // Validate processed data
+    if ( !formData ) {
+      throw new Error( 'No form data available' );
+    }
+
+    // Always validate, but with optional schema
     const validationErrors = validateSubmission( formData, schema );
     if ( validationErrors.length ) {
       throw new Error( `Validation failed:\n${ validationErrors.join( '\n' ) }` );
@@ -33,7 +37,7 @@ export const handleFormSubmission = async ( form, filePath, schema ) => {
     console.error( 'Form submission failed:', error );
     return {
       success: false,
-      error: error.message
+      error: error.message || 'Unknown error occurred'
     };
 
   } finally {

@@ -83,124 +83,144 @@ function processNewField( e, component ) {
  */
 // processTemplate function update
 async function processTemplate( e, url ) {
-  const dropzone = e.target.closest( '.dropzone' );
+  let dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
   try {
     const templateName = url.split( '/' ).pop().replace( '.js', '' );
     const templateSchema = templates[ templateName ];
 
-    console.log( JSON.stringify( templates, null, 2 ) );
-
-    console.log( `templateName: ${ templateName }` );
-    console.log( `templateSchema: ${ JSON.stringify( templateSchema ) }` );
-
     if ( !templateSchema ) {
       throw new Error( 'Failed to load template' );
     }
 
-    // check if section or block template
+    const isBlock = url.includes( '/blocks/' );
+
+    // For blocks, ensure we're targeting the column array dropzone
+    if ( isBlock ) {
+      const columnArrayDropzone = dropzone.closest( '.array-dropzone[data-wrapper="is-array"]' );
+      if ( !columnArrayDropzone ) {
+        console.warn( 'Blocks can only be dropped into columns' );
+        return;
+      }
+      dropzone = columnArrayDropzone;
+    }
+
+    // Prevent dropping sections into columns
+    if ( !isBlock && dropzone.matches( '.array-dropzone[data-wrapper="is-array"]' ) ) {
+      console.warn( 'Sections cannot be dropped into columns' );
+      return;
+    }
+
     if ( url.includes( 'section' ) || url.includes( 'blocks' ) ) {
-      // Create wrapper fragment
       const wrapperFragment = document.createDocumentFragment();
       const wrapper = document.createElement( 'div' );
-      wrapper.className = 'label-exists form-element is-object no-drop';
+
+      // Different class structure for blocks vs sections
+      if ( isBlock ) {
+        wrapper.className = 'form-element is-block is-object no-drop';
+      } else {
+        wrapper.className = 'label-exists form-element is-object no-drop';
+      }
       wrapper.draggable = true;
-      //wrapper.setAttribute( 'data-path', templateName );
 
-      const isSection = url.includes( 'section' );
-      const hintText = isSection ? 'Sections Object' : 'Block Object';
-      const description = isSection ? templateSchema.sectionDescription : templateSchema.blockDescription;
+      const hintText = isBlock ? 'Block Element' : 'Sections Object';
+      const description = isBlock ? templateSchema.blockDescription : templateSchema.sectionDescription;
 
-      // Add wrapper structure
-      wrapper.innerHTML = `
-        <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
-        <label class="object-name label-wrapper">
-          <span>${ isSection ? 'Object Label' : templateName + ' Block' }<sup>*</sup></span>
-          <span class="hint">${ hintText }</span>
-          <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
-          <span class="collapse-icon">
-            ${ ICONS.COLLAPSE }
-            ${ ICONS.COLLAPSED }
-          </span>
-        </label>
-        <div class="object-dropzone dropzone js-dropzone"></div>
-      `;
+      // Add wrapper structure with block-specific attributes
+      if ( isBlock ) {
+        wrapper.setAttribute( 'data-block-type', templateName );
+        wrapper.innerHTML = `
+          <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
+          <label class="object-name label-wrapper">
+            <span>${ templateName }<sup>*</sup></span>
+            <span class="hint">${ hintText }</span>
+            <input type="text" class="element-label" value="${ templateName }" readonly>
+          </label>
+          <div class="block-fields-container dropzone js-dropzone"></div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <span class="sort-handle">${ ICONS.DRAG_HANDLE }</span>
+          <label class="object-name label-wrapper">
+            <span>Object Label<sup>*</sup></span>
+            <span class="hint">${ hintText }</span>
+            <input type="text" class="element-label" placeholder="Label Placeholder" readonly="">
+            <span class="collapse-icon">
+              ${ ICONS.COLLAPSE }
+              ${ ICONS.COLLAPSED }
+            </span>
+          </label>
+          <div class="object-dropzone dropzone js-dropzone"></div>
+        `;
+      }
 
-      // Add appropriate buttons based on type
+      // Add buttons
       addActionButtons( wrapper, {
         addDeleteButton: true,
-        addDuplicateButton: isSection
+        addDuplicateButton: !isBlock
       } );
 
       // Add description if it exists
       if ( description && description !== '' ) {
         const descriptionSpan = document.createElement( 'span' );
-        descriptionSpan.classList.add( isSection ? 'section-description' : 'block-description' );
+        descriptionSpan.classList.add( isBlock ? 'block-description' : 'section-description' );
         descriptionSpan.textContent = description;
 
         const hintElement = wrapper.querySelector( '.hint' );
         hintElement.insertAdjacentElement( 'afterend', descriptionSpan );
       }
 
-      // convert the template schema to HTML form fields
+      // Convert template schema to HTML form fields
       const formFragment = await frontmatterToFragment( templateSchema, templateName );
 
-      // Process any arrays if it's a section
-      if ( isSection ) {
+      // Process arrays if needed for non-block elements
+      if ( !isBlock ) {
         processArraysInFragment( formFragment, templateSchema );
       }
 
-      // Add form elements to the inner dropzone
-      wrapper.querySelector( '.object-dropzone' ).appendChild( formFragment );
+      // Add form elements to appropriate container
+      const targetContainer = isBlock ?
+        wrapper.querySelector( '.block-fields-container' ) :
+        wrapper.querySelector( '.object-dropzone' );
+      targetContainer.appendChild( formFragment );
+
       wrapperFragment.appendChild( wrapper );
 
-      // Handle insertion based on position
+      // Handle insertion
       const { closest, position } = getInsertionPoint( dropzone, e.clientY );
 
       if ( !closest ) {
         dropzone.appendChild( wrapperFragment );
-        return;
-      }
-
-      if ( position === 'before' ) {
-        dropzone.insertBefore( wrapperFragment, closest );
       } else {
-        const nextSibling = closest.nextElementSibling;
-        if ( nextSibling ) {
-          dropzone.insertBefore( wrapperFragment, nextSibling );
+        if ( position === 'before' ) {
+          dropzone.insertBefore( wrapperFragment, closest );
         } else {
-          dropzone.appendChild( wrapperFragment );
+          const nextSibling = closest.nextElementSibling;
+          if ( nextSibling ) {
+            dropzone.insertBefore( wrapperFragment, nextSibling );
+          } else {
+            dropzone.appendChild( wrapperFragment );
+          }
         }
       }
     } else {
-      // Handle other templates
+      // Handle other templates as before...
       const fragment = await frontmatterToFragment( templateSchema );
-
-      // Validate fragment
-      if ( !( fragment instanceof DocumentFragment ) ) {
-        throw new Error( 'Invalid fragment returned from frontmatterToForm' );
-      }
-
-      // Handle insertion based on position
       const { closest, position } = getInsertionPoint( dropzone, e.clientY );
 
       if ( !closest ) {
         dropzone.appendChild( fragment );
-        return;
-      }
-
-      if ( position === 'before' ) {
-        dropzone.insertBefore( fragment, closest );
       } else {
-        const nextSibling = closest.nextElementSibling;
-        if ( nextSibling ) {
-          dropzone.insertBefore( fragment, nextSibling );
+        const referenceNode = position === 'before' ? closest : closest.nextSibling;
+        if ( referenceNode && referenceNode.parentNode === dropzone ) {
+          dropzone.insertBefore( fragment, referenceNode );
         } else {
           dropzone.appendChild( fragment );
         }
       }
     }
+
   } catch ( error ) {
     console.error( 'Template processing failed:', error );
     throw error;
@@ -279,31 +299,6 @@ let dragState = {
 };
 
 const THROTTLE_DELAY = 100; // Minimum delay between updates
-
-/**
- * @function getInsertionPoint
- * @param {*} dropzone 
- * @param {*} y 
- * @returns
- * @description This function enables precise placement of dragged elements by calculating whether to insert before or after existing elements based on the mouse position.
- */
-function getInsertionPoint( dropzone, y ) {
-  const elements = Array.from( dropzone.querySelectorAll( '.form-element' ) );
-  let closest = null;
-  let position = 'after';
-
-  for ( const element of elements ) {
-    const rect = element.getBoundingClientRect();
-    const midpoint = rect.top + rect.height / 2;
-    if ( y < midpoint ) {
-      closest = element;
-      position = 'before';
-      break;
-    }
-  }
-
-  return { closest, position };
-}
 
 /**
  * @function recordElementPositions
@@ -586,36 +581,97 @@ export const dragOver = ( e ) => {
 
   scheduleUpdate( () => {
     try {
-      if ( dragState.currentDropzone === dropzone ) {
-        const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-        const newPosition = closest ? `${ closest.id }-${ position }` : 'empty';
+      // Always create ghost element if it doesn't exist
+      if ( !dragState.ghostElement ) {
+        dragState.ghostElement = createGhostElement();
+      }
 
-        if ( dragState.lastPosition !== newPosition ) {
-          dragState.lastPosition = newPosition;
-          updateGhostPosition( dropzone, closest, position );
-          dragState.lastUpdate = now;
-        }
-      } else {
+      if ( dragState.currentDropzone !== dropzone ) {
+        // Switching to new dropzone
         if ( dragState.currentDropzone ) {
           dragState.currentDropzone.classList.remove( 'dropzone-highlight' );
         }
-
         dragState.currentDropzone = dropzone;
         dropzone.classList.add( 'dropzone-highlight' );
+      }
 
-        if ( !dragState.ghostElement ) {
-          dragState.ghostElement = createGhostElement();
+      // Get insertion point relative to the current dropzone
+      const rect = dropzone.getBoundingClientRect();
+      const { closest, position } = getInsertionPoint( dropzone, e.clientY );
+
+      // Calculate new position identifier
+      const newPosition = closest ? `${ closest.id }-${ position }` : 'empty';
+
+      // Only update ghost if position changed
+      if ( dragState.lastPosition !== newPosition ) {
+        dragState.lastPosition = newPosition;
+
+        // Ensure ghost is removed from its current location
+        if ( dragState.ghostElement.parentNode ) {
+          dragState.ghostElement.remove();
         }
 
-        const { closest, position } = getInsertionPoint( dropzone, e.clientY );
-        updateGhostPosition( dropzone, closest, position );
-        dragState.lastUpdate = now;
+        // Insert ghost at new position
+        if ( !closest ) {
+          // If no closest element, append to dropzone
+          dropzone.appendChild( dragState.ghostElement );
+        } else {
+          // Handle insertion before/after closest element
+          const referenceNode = position === 'before' ? closest : closest.nextSibling;
+          if ( referenceNode && referenceNode.parentNode === dropzone ) {
+            dropzone.insertBefore( dragState.ghostElement, referenceNode );
+          } else {
+            dropzone.appendChild( dragState.ghostElement );
+          }
+        }
+
+        // Record positions for animation
+        recordElementPositions( dropzone );
+        // Animate elements to new positions
+        animateElements( dropzone );
       }
+
+      dragState.lastUpdate = now;
     } finally {
       dragState.isUpdating = false;
     }
   } );
 };
+
+// Update getInsertionPoint to be more precise
+function getInsertionPoint( dropzone, y ) {
+  const elements = Array.from( dropzone.querySelectorAll( ':scope > .form-element' ) );
+  let closest = null;
+  let position = 'after';
+
+  // If no elements, return null for closest
+  if ( elements.length === 0 ) {
+    return { closest: null, position: 'after' };
+  }
+
+  // Get dropzone boundaries
+  const dropzoneRect = dropzone.getBoundingClientRect();
+
+  for ( const element of elements ) {
+    const rect = element.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+
+    // Check if cursor is above midpoint of current element
+    if ( y < midpoint ) {
+      closest = element;
+      position = 'before';
+      break;
+    }
+
+    // If this is the last element and cursor is below its midpoint
+    if ( element === elements[ elements.length - 1 ] ) {
+      closest = element;
+      position = 'after';
+    }
+  }
+
+  return { closest, position };
+}
 
 /**
  * @function dragLeave
@@ -666,9 +722,9 @@ export const drop = async ( e ) => {
       case 'templates': {
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
 
-        /*
+
         const isBlock = templateUrl.includes( '/blocks/' );
-        const isColumnDropzone = dropzone.matches( '.object-dropzone[data-wrapper="is-object"]' );
+        const isColumnDropzone = dropzone.matches( '.array-dropzone[data-wrapper="is-array"]' );
 
         // Validate allowed drop conditions
         if ( isBlock && !isColumnDropzone ) {
@@ -678,7 +734,7 @@ export const drop = async ( e ) => {
           console.warn( 'Sections cannot be dropped into columns' );
           return;
         }
-        */
+
 
         // generate the HTML from the template URL and place it at the ghost position
         await processTemplate( e, templateUrl );
