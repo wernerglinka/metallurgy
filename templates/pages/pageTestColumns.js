@@ -7,7 +7,7 @@ export const pageTestColumns = {
         {
           column: [
             {
-              name: "text",
+              blockName: "text",
               title: "",
               header: "h2",
               lextLength: 60,

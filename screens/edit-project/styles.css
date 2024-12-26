@@ -692,7 +692,10 @@ fieldset {
     }
   }
 
-  &.is-array, &.is-object, &.is-list {
+  &.is-array, 
+  &.is-object, 
+  &.is-list, 
+  &.is-block {
     display: block;
 
     & label {
@@ -775,7 +778,9 @@ fieldset {
     */
   }
 
-  & .object-dropzone, & .array-dropzone {
+  & .object-dropzone, 
+  & .array-dropzone,
+  & .block-fields-container {
     min-height: 5rem;
     border: 1px dotted var(--border-color);
     border-radius: var(--default-radius);

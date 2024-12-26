@@ -1,5 +1,5 @@
-export const textBlock = {
-  name: 'textBlock',
+export const text = {
+  blockName: 'text',
   prefix: '',
   title: '',
   header: '',

@@ -6,6 +6,7 @@ import { processFrontmatter } from './process-frontmatter.js';
 import { getExplicitSchema } from './schema/schema-handler.js';
 import { buildForm } from './form-builder/index.js';
 import { initializeEditor } from '../editor/setup.js';
+import { initFormManager } from './manage-form-state.js';
 
 import { logFragment } from '../utilities/fragment-debug-helper.js';
 
@@ -35,6 +36,11 @@ export const frontmatterToForm = async ( frontmatter, content ) => {
 
     // Clone and append template content
     dropzone.appendChild( template.content.cloneNode( true ) );
+    // get the form ID
+    const formId = document.querySelector( '#main-form' ).id;
+    // Initialize form manager after new file has been loaded
+    initFormManager( formId );
+
 
     if ( !document.getElementById( 'editorWrapper' ) ) {
       window.mdeditor = initializeEditor();

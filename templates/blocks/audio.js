@@ -1,5 +1,5 @@
-export const audioBlock = {
-  name: "Audio Block",
+export const audio = {
+  blockName: "audio",
   format: {
     ogg: "",
     mpeg: ""

@@ -18,12 +18,12 @@ export const templates = {
   'lottieSection': { ...commonSectionFields, ...sections.lottieSection },
   'textSection': { ...commonSectionFields, ...sections.textSection },
   'videoSection': { ...commonSectionFields, ...sections.videoSection },
-  'audioBlock': blocks.audioBlock,
-  'ctasBlock': blocks.ctasBlock,
-  'iconBlock': blocks.iconBlock,
-  'imageBlock': blocks.imageBlock,
-  'textBlock': blocks.textBlock,
-  'videoBlock': blocks.videoBlock
+  'audio': blocks.audio,
+  'ctas': blocks.ctas,
+  'icon': blocks.icon,
+  'image': blocks.image,
+  'text': blocks.text,
+  'video': blocks.video
 
   // ... other templates
 };

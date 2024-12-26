@@ -86,19 +86,27 @@ async function processTemplate( e, url ) {
   let dropzone = e.target.closest( '.dropzone' );
   if ( !dropzone ) return;
 
+  console.log( url );
+  console.log( templates );
+
   try {
     const templateName = url.split( '/' ).pop().replace( '.js', '' );
+
+    console.log( templateName );
+
     const templateSchema = templates[ templateName ];
 
     if ( !templateSchema ) {
       throw new Error( 'Failed to load template' );
     }
 
+    const isPage = url.includes( '/pages/' );
+    const isSection = url.includes( '/sections/' );
     const isBlock = url.includes( '/blocks/' );
 
     // For blocks, ensure we're targeting the column array dropzone
     if ( isBlock ) {
-      const columnArrayDropzone = dropzone.closest( '.array-dropzone[data-wrapper="is-array"]' );
+      const columnArrayDropzone = dropzone.closest( '.array-dropzone[data-wrapper="is-column"]' );
       if ( !columnArrayDropzone ) {
         console.warn( 'Blocks can only be dropped into columns' );
         return;
@@ -107,25 +115,25 @@ async function processTemplate( e, url ) {
     }
 
     // Prevent dropping sections into columns
-    if ( !isBlock && dropzone.matches( '.array-dropzone[data-wrapper="is-array"]' ) ) {
+    if ( isSection && dropzone.matches( '.array-dropzone[data-wrapper="is-column"]' ) ) {
       console.warn( 'Sections cannot be dropped into columns' );
       return;
     }
 
-    if ( url.includes( 'section' ) || url.includes( 'blocks' ) ) {
+    if ( isSection || isBlock ) {
       const wrapperFragment = document.createDocumentFragment();
       const wrapper = document.createElement( 'div' );
 
       // Different class structure for blocks vs sections
       if ( isBlock ) {
-        wrapper.className = 'form-element is-block is-object no-drop';
+        wrapper.className = 'label-exists form-element is-block is-object no-drop';
       } else {
         wrapper.className = 'label-exists form-element is-object no-drop';
       }
       wrapper.draggable = true;
 
       const hintText = isBlock ? 'Block Element' : 'Sections Object';
-      const description = isBlock ? templateSchema.blockDescription : templateSchema.sectionDescription;
+      const description = templateSchema.sectionDescription;
 
       // Add wrapper structure with block-specific attributes
       if ( isBlock ) {
@@ -136,6 +144,10 @@ async function processTemplate( e, url ) {
             <span>${ templateName }<sup>*</sup></span>
             <span class="hint">${ hintText }</span>
             <input type="text" class="element-label" value="${ templateName }" readonly>
+            <span class="collapse-icon">
+              ${ ICONS.COLLAPSE }
+              ${ ICONS.COLLAPSED }
+            </span>
           </label>
           <div class="block-fields-container dropzone js-dropzone"></div>
         `;
@@ -162,9 +174,9 @@ async function processTemplate( e, url ) {
       } );
 
       // Add description if it exists
-      if ( description && description !== '' ) {
+      if ( isSection && description && description !== '' ) {
         const descriptionSpan = document.createElement( 'span' );
-        descriptionSpan.classList.add( isBlock ? 'block-description' : 'section-description' );
+        descriptionSpan.classList.add( 'section-description' );
         descriptionSpan.textContent = description;
 
         const hintElement = wrapper.querySelector( '.hint' );
@@ -721,16 +733,26 @@ export const drop = async ( e ) => {
     switch ( origin ) {
       case 'templates': {
         const templateUrl = e.dataTransfer.getData( 'text/plain' );
-
-
         const isBlock = templateUrl.includes( '/blocks/' );
-        const isColumnDropzone = dropzone.matches( '.array-dropzone[data-wrapper="is-array"]' );
+        const isSection = templateUrl.includes( '/sections/' );
+        const isPage = templateUrl.includes( '/pages/' );
+
+        // for pages
+        const isPageDropzone = dropzone.matches( '#dropzone' );
+        // for sections
+        const isSectionsDropzone = dropzone.matches( '.array-dropzone[data-wrapper="is-array"]' );
+        // for blocks
+        const isBlockDropzone = dropzone.matches( '.array-dropzone[data-wrapper="is-column"]' );
+
 
         // Validate allowed drop conditions
-        if ( isBlock && !isColumnDropzone ) {
+        if ( isPage && !isPageDropzone ) {
+          console.warn( 'Pages can only be dropped into the main dropzone' );
+          return;
+        } else if ( isBlock && !isBlockDropzone ) {
           console.warn( 'Blocks can only be dropped into columns' );
           return;
-        } else if ( !isBlock && isColumnDropzone ) {
+        } else if ( isSection && !isSectionsDropzone ) {
           console.warn( 'Sections cannot be dropped into columns' );
           return;
         }

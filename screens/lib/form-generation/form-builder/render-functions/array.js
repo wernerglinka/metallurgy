@@ -16,6 +16,8 @@ export function renderArray( field, implicitDef, implicitSchema ) {
   const requiredSup = helpers.getRequiredSup( implicitDef );
   const hint = ( implicitDef && implicitDef.label ) ? `${ implicitDef.label } Array` : 'Sections Array';
 
+  const isColumn = field.label === 'column';
+
   const innerFields = field.value.map( subField => renderFunctions.renderField( subField, implicitSchema ) ).join( '' );
 
   return `<div class="form-element is-array label-exists no-drop" draggable="true">
@@ -25,7 +27,7 @@ export function renderArray( field, implicitDef, implicitSchema ) {
         <input type="text" class="element-label" placeholder="Array Name" value="${ label }" readonly>
         ${ renderFunctions.renderCollapseButtonsHTML() }
       </label>
-      <div class="array-dropzone dropzone js-dropzone" data-wrapper="is-array">
+      <div class="array-dropzone dropzone js-dropzone" data-wrapper="${ isColumn ? 'is-column' : 'is-array' }">
         ${ innerFields }
       </div>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }
