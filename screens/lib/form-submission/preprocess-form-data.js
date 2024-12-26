@@ -26,9 +26,6 @@ import { transformFormElementsToObject } from './transform-form-to-object.js';
  * // Returns: { title: "Page Title" }
  */
 export const preprocessFormData = () => {
-  // Add logging to trace execution
-  console.log( 'Starting preprocessFormData' );
-
   // Get the main form
   const mainForm = document.getElementById( 'main-form' );
   if ( !mainForm ) {
@@ -38,7 +35,6 @@ export const preprocessFormData = () => {
 
   // Add temporary markers for structure parsing
   const allDropzones = document.querySelectorAll( '.js-dropzone' );
-  console.log( 'Found dropzones:', allDropzones.length );
 
   allDropzones.forEach( dropzone => {
     // Add dummy is-last element at the end of dropzone
@@ -54,7 +50,6 @@ export const preprocessFormData = () => {
 
   // Get all form elements
   const allFormElements = mainForm.querySelectorAll( '.form-element' );
-  console.log( 'Found form elements:', allFormElements.length );
 
   // Find arrays and add is-last to the last element
   allFormElements.forEach( element => {
@@ -72,7 +67,6 @@ export const preprocessFormData = () => {
   try {
     // Transform to object structure
     const dropzoneValues = transformFormElementsToObject( allFormElements );
-    console.log( 'Transformed values:', dropzoneValues );
 
     // Cleanup temporary markers
     const redundantDummyElements = mainForm.querySelectorAll( '.is-last' );

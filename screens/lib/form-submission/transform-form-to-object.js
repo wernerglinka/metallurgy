@@ -1,3 +1,5 @@
+import { toCamelCase } from '../form-generation/form-builder/helpers/to-camel-case.js';
+
 // Value operations
 export const ValueOps = {
   // Extracts name from either input or text element
@@ -8,7 +10,7 @@ export const ValueOps = {
 
     // Clean up name - trim spaces and convert to camelCase if needed
     const rawName = ( input ? input.value : text.textContent ).trim();
-    return rawName.toLowerCase();
+    return toCamelCase( rawName );
   },
 
   // Extracts both key and value from a form element
@@ -17,7 +19,7 @@ export const ValueOps = {
     const valueInput = element.querySelector( '.element-value' );
 
     // Get key and ensure it's lowercase
-    const key = labelInput ? labelInput.value.trim().toLowerCase() : '';
+    const key = labelInput ? toCamelCase( labelInput.value ) : '';
 
     // For value, handle different input types
     let value = '';
@@ -69,9 +71,7 @@ export const FormStateOps = {
   } ),
 
   handleStructural: ( state, element ) => {
-    console.log( 'Handling structural element' );
     const name = ValueOps.getName( element );
-    console.log( 'Got name:', name );
     return {
       ...state,
       path: PathOps.push( state.path, name )
@@ -79,9 +79,7 @@ export const FormStateOps = {
   },
 
   handleValue: ( state, element ) => {
-    console.log( 'Handling value element' );
     const { key, value } = ValueOps.getKeyValue( element );
-    console.log( 'Got key-value:', { key, value } );
 
     if ( !key ) return state; // Skip if no key found
 
@@ -96,7 +94,6 @@ export const FormStateOps = {
   },
 
   handleArrayConversion: ( state ) => {
-    console.log( 'Converting to array' );
     const currentObj = PathOps.getIn( state.result, state.path );
 
     // Convert object to array, keeping blocks intact
@@ -119,7 +116,6 @@ export const FormStateOps = {
   },
 
   handleObjectEnd: ( state ) => {
-    console.log( 'Ending object, current path:', state.path );
     return {
       ...state,
       path: PathOps.pop( state.path )
@@ -129,11 +125,8 @@ export const FormStateOps = {
 
 // Main transformation function
 export const transformFormElementsToObject = ( allFormElements ) => {
-  console.log( 'Starting transformation with elements:', allFormElements.length );
-
   try {
     const finalState = Array.from( allFormElements ).reduce( ( state, element ) => {
-      console.log( 'Processing element:', element.className );
 
       const isObject = element.classList.contains( 'is-object' );
       const isArray = element.classList.contains( 'is-array' );
@@ -151,7 +144,6 @@ export const transformFormElementsToObject = ( allFormElements ) => {
       }
     }, FormStateOps.createState() );
 
-    console.log( 'Final state:', finalState );
     return finalState.result.main;
   } catch ( error ) {
     console.error( 'Transformation error:', error );
@@ -162,7 +154,8 @@ export const transformFormElementsToObject = ( allFormElements ) => {
 export const processElement = ( state, element ) => {
   // Special handling for blocks
   if ( element.classList.contains( 'is-block' ) ) {
-    const blockName = ValueOps.getName( element ).toLowerCase();
+    let blockName = ValueOps.getName( element );
+    blockName = toCamelCase( blockName );
     if ( !blockName ) return state;
 
     // Process all fields in the block's container
