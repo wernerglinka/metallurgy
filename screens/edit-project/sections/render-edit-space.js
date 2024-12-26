@@ -2,6 +2,7 @@
 
 import { getDirectoryFiles } from "../../lib/file-ops/get-directory-files.js";
 import { getMarkdownFile } from "../../lib/file-ops/get-markdown-file.js";
+import { getMetadataFile } from "../../lib/file-ops/get-metadata-file.js";
 import { frontmatterToForm } from "../../lib/form-generation/frontmatter-to-form.js";
 import { renderJSONFile } from "../../lib/file-ops/render-json-file.js";
 import { redoUndo } from "../../lib/undo-redo.js";
@@ -55,14 +56,15 @@ const updateActiveLinkState = ( activeLink ) => {
  * @throws {Error} If file type not supported
  */
 const handleFileContent = async ( filePath, fileType ) => {
-  const { frontmatter, content } = await getMarkdownFile( filePath );
-
   switch ( fileType ) {
     case 'md':
+      const { frontmatter, content } = await getMarkdownFile( filePath );
       await frontmatterToForm( frontmatter, content );
       break;
     case 'json':
-      renderJSONFile( content );
+      const metadata = await getMetadataFile( filePath );
+      //renderJSONFile( metadata );
+      await frontmatterToForm( metadata, '' );
       break;
     default:
       throw new Error( `Unsupported file type: ${ fileType }` );

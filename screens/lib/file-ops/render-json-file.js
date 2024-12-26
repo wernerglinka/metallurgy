@@ -1,5 +1,5 @@
-export const renderJSONFile = ( content ) => {
+export const renderJSONFile = ( data ) => {
 
-  console.log( JSON.stringify( content, null, 2 ) );
+  console.log( data );
 
 };
