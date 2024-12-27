@@ -165,6 +165,27 @@ export const FormStateOps = {
   },
 
   /**
+   * @function handleList
+   * Handles list elements by updating path
+   * @param {Object} state - Current state
+   * @param {HTMLElement} element - Form element
+   * @returns {Object} Updated state
+   */
+  handleList: ( state, element ) => {
+    const name = ValueOps.getName( element );
+    const items = Array.from( element.querySelectorAll( '.list-item' ) )
+      .map( input => input.value.trim() );
+
+    return {
+      ...state,
+      result: PathOps.setIn( state.result, [ 'main' ], {
+        ...PathOps.getIn( state.result, [ 'main' ] ),
+        [ name ]: items
+      } )
+    };
+  },
+
+  /**
    * @function handleArrayConversion
    * Converts objects to arrays
    * @param {Object} state - Current state
@@ -224,42 +245,34 @@ export const transformFormElementsToObject = ( allFormElements ) => {
         isLastInArray: element.classList.contains( 'array-last' )
       };
 
-      // Root level fields without special handling
-      if ( state.path.length === 1 && !elementClasses.isObject && !elementClasses.isArray &&
-        !elementClasses.isList && !elementClasses.isLastInArray ) {
-        const { key, value } = ValueOps.getKeyValue( element );
-        if ( !key ) return state;
-        return {
-          ...state,
-          result: PathOps.setIn( state.result, [ 'main' ], {
-            ...PathOps.getIn( state.result, [ 'main' ] ),
-            [ key ]: value
-          } )
-        };
-      }
+      switch ( true ) {
+        case state.path.length === 1 && !elementClasses.isObject &&
+          !elementClasses.isArray && !elementClasses.isList &&
+          !elementClasses.isLastInArray:
+          const { key, value } = ValueOps.getKeyValue( element );
+          if ( !key ) return state;
+          return {
+            ...state,
+            result: PathOps.setIn( state.result, [ 'main' ], {
+              ...PathOps.getIn( state.result, [ 'main' ] ),
+              [ key ]: value
+            } )
+          };
 
-      // Handle structural and nested elements
-      if ( elementClasses.isObject || elementClasses.isArray ) {
-        return FormStateOps.handleStructural( state, element );
-      } else if ( elementClasses.isList ) {
-        const name = ValueOps.getName( element );
-        const items = Array.from( element.querySelectorAll( '.list-item' ) )
-          .map( input => input.value.trim() );
+        case elementClasses.isObject || elementClasses.isArray:
+          return FormStateOps.handleStructural( state, element );
 
-        return {
-          ...state,
-          result: PathOps.setIn(
-            state.result,
-            state.path,
-            { ...PathOps.getIn( state.result, state.path ), [ name ]: items }
-          )
-        };
-      } else if ( !elementClasses.isLast ) {
-        return FormStateOps.handleValue( state, element );
-      } else if ( elementClasses.isLastInArray ) {
-        return FormStateOps.handleArrayConversion( state );
-      } else {
-        return FormStateOps.handleObjectEnd( state );
+        case elementClasses.isList:
+          return FormStateOps.handleList( state, element );
+
+        case !elementClasses.isLast:
+          return FormStateOps.handleValue( state, element );
+
+        case elementClasses.isLastInArray:
+          return FormStateOps.handleArrayConversion( state );
+
+        default:
+          return FormStateOps.handleObjectEnd( state );
       }
     }, FormStateOps.createState() );
 
@@ -268,25 +281,4 @@ export const transformFormElementsToObject = ( allFormElements ) => {
     console.error( 'Transformation error:', error );
     return null;
   }
-};
-
-/**
- * @function handleListElement
- * Processes list elements
- * @param {Object} state - Current state
- * @param {HTMLElement} element - List element
- * @returns {Object} Updated state with list
- */
-const handleListElement = ( state, element ) => {
-  const listName = element.querySelector( '.element-label' )?.value;
-  const items = Array.from( element.querySelectorAll( '.list-item' ) )
-    .map( input => input.value.trim() );
-
-  return {
-    ...state,
-    result: {
-      ...state.result,
-      main: { ...state.result.main, [ toCamelCase( listName ) ]: items }
-    }
-  };
 };
