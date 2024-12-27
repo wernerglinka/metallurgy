@@ -10,7 +10,7 @@ export const getMetadataFile = async ( filePath ) => {
     const cleanPath = filePath.replace( 'file://', '' );
 
     // Get metadata file contents
-    const { status, data } = await window.electronAPI.files.read( cleanPath );
+    const { status, data, error } = await window.electronAPI.files.read( cleanPath );
 
     if ( status === 'failure' ) {
       throw new Error( `Failed to read metadata file: ${ error }` );

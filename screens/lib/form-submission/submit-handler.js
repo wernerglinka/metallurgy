@@ -13,6 +13,8 @@ export const handleFormSubmission = async ( form, filePath, schema = null ) => {
   const submitButton = form.querySelector( 'button[type="submit"]' );
   submitButton.disabled = true;
 
+  console.log( filePath );
+
   try {
     // Process form data
     const formData = preprocessFormData();
