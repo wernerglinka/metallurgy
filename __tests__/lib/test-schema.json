@@ -43,7 +43,7 @@
       }
     ],
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   },
   {
@@ -113,7 +113,7 @@
       }
     ],
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   },
   {
@@ -132,7 +132,7 @@
     "default": "",
     "placeholder": "Add a name",
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   },
   {
@@ -227,7 +227,7 @@
       }
     ],
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   },
   {
@@ -255,14 +255,14 @@
     "name": "src",
     "type": "url",
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   },
   {
     "name": "alt",
     "type": "text",
     "noDeletion": true,
-    "isRequired": false,
+    "isRequired": true,
     "noDuplication": true
   }
 ]

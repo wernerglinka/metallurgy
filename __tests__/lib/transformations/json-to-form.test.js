@@ -43,26 +43,6 @@ describe( 'Schema Processing Tests', () => {
 
   // Update test to show detailed diff
   it( 'processes JSON into expected HTML', () => {
-
-    /*
-    console.log( 'Result length:', testData.result.length );
-    console.log( 'Expected length:', testData.expectedContent.length );
-
-    console.log( 'First 100 chars of result:', testData.result.substring( 0, 100 ) );
-    console.log( 'First 100 chars of expected:', testData.expectedContent.substring( 0, 100 ) );
-
-    // Find first difference
-    const len = Math.min( testData.result.length, testData.expectedContent.length );
-    for ( let i = 0; i < len; i++ ) {
-      if ( testData.result[ i ] !== testData.expectedContent[ i ] ) {
-        console.log( `First difference at position ${ i }:` );
-        console.log( 'Expected:', testData.expectedContent.slice( i - 20, i + 20 ) );
-        console.log( 'Result:  ', testData.result.slice( i - 20, i + 20 ) );
-        break;
-      }
-    }
-    */
-
     expect( testData.result ).toEqual( testData.expectedContent );
   } );
 } );
