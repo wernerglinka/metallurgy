@@ -7,74 +7,50 @@ import { updateButtonsContainer } from "../lib/update-buttons-container.js";
 
 const renderer = ( () => {
   const showProjectFolderName = async () => {
-
-    // Get the project folder path from local storage
     const projectFolder = StorageOperations.getProjectPath();
-    StorageOperations.clearProjectData();
-
-    //update project folder name in the UI
     const projectFolderName = document.querySelector( '.js-project-folder-name' );
     if ( projectFolderName ) {
       const folderName = `/${ projectFolder.split( "/" ).pop() }/`;
       projectFolderName.innerText = folderName;
     }
 
-    let projectAlreadyExists;
+    // Check if a config file already exists in this project folder
+    // <projectFolder>/.metallurgy/projectData.json
+    const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
 
-    try {
-      // Check if a config file already exists in this project folder
-      // <projectFolder>/.metallurgy/projectData.json
-      const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
-      const response = await window.electronAPI.files.exists( configFilePath );
+    const exists = await electronAPI.files.exists( configFilePath );
 
-      if ( response.status === 'failure' ) {
-        throw new Error( response.error );
+    if ( exists ) {
+      // Get the content and data folder from the config file
+      const fileContentsRaw = await window.electronAPI.files.read( configFilePath );
+      const fileContents = JSON.parse( fileContentsRaw.data );
+
+      const contentFolder = fileContents.contentPath;
+      const dataFolder = fileContents.dataPath;
+
+      // Save the content and data folders to local storage
+      saveToLocalStorage( "contentFolder", contentFolder );
+      saveToLocalStorage( "dataFolder", dataFolder );
+
+      // Update the UI with the content and data folder names and hide the
+      // 'select content folder' and 'select data folder' buttons
+      updateFolderUI( 'content', contentFolder );
+      updateFolderUI( 'data', dataFolder );
+
+      // Check if the project is ready to be created
+      if ( isProjectReady() ) {
+        updateButtonsContainer();
       }
 
-      // If the config file exists, show the content and data folders in the UI
-      if ( response.data ) {
-        // Get the content and data folder from the config file
-        const fileContents = await window.electronAPI.files.read( configFilePath );
+      // Add note to the UI that the project already exists and ask if the
+      // user wants to continue
+      const startNew = document.querySelector( '.js-start-new' );
+      const startWithConfig = document.querySelector( '.js-start-with-config' );
 
-        const { projectPath, contentPath, dataPath } = fileContents.data;
-
-        StorageOperations.saveProjectData( {
-          projectPath,
-          contentPath,
-          dataPath
-        } );
-
-        // Update the UI with the content and data folder names and hide the
-        // 'select content folder' and 'select data folder' buttons
-        updateFolderUI( 'content', contentPath );
-        updateFolderUI( 'data', dataPath );
-
-        // Check if the project is ready to be created
-        if ( isProjectReady() ) {
-          updateButtonsContainer();
-        }
-
-        // Add note to the UI that the project already exists and ask if the
-        // user wants to continue
-        const startNew = document.querySelector( '.js-start-new' );
-        const startWithConfig = document.querySelector( '.js-start-with-config' );
-
-        startNew.style.display = "none";
-        startWithConfig.style.display = "block";
-
-        projectAlreadyExists = true;
-      } else {
-        StorageOperations.saveProjectPath( projectFolder );
-        projectAlreadyExists = false;
-      }
-
-      return projectAlreadyExists;
-
-    } catch ( error ) {
-      console.error( 'Error checking project config:', error );
+      startNew.style.display = "none";
+      startWithConfig.style.display = "block";
     }
   };
-
 
   const getContentFolder = () => {
     const trigger = document.querySelector( '.js-get-content-folder' );
@@ -86,12 +62,11 @@ const renderer = ( () => {
         try {
           // Get the content folder from the user via a dialog box
           const userSelection = await selectFolder( "Content" );
-
-          if ( userSelection.length === 0 ) return false;
+          if ( userSelection.canceled || userSelection.filePaths.length === 0 ) return false;
 
           // Save the content folder to local storage
-          const contentFolder = userSelection[ 0 ];
-          StorageOperations.saveContentPath( contentFolder );
+          const contentFolder = userSelection.filePaths[ 0 ];
+          saveToLocalStorage( "contentFolder", contentFolder );
 
           // Update the UI with the content folder name and hide the 'select 
           // content folder' button
@@ -124,11 +99,11 @@ const renderer = ( () => {
         try {
           // Get the content folder from the user via a dialog box
           const userSelection = await selectFolder( "Data" );
-          if ( userSelection.length === 0 ) return false;
+          if ( userSelection.canceled || userSelection.filePaths.length === 0 ) return false;
 
           // Save the data folder to local storage
-          const dataFolder = userSelection[ 0 ];
-          StorageOperations.saveDataPath( dataFolder );
+          const dataFolder = userSelection.filePaths[ 0 ];
+          saveToLocalStorage( "dataFolder", dataFolder );
 
           // update the UI with the content folder name and hide the 'select 
           // content folder' button
@@ -165,20 +140,8 @@ const renderer = ( () => {
         // Create the project config file
         const projectData = StorageOperations.getProjectData();
 
-        const configFilePath = `${ projectData.projectPath }/.metallurgy/projectData.json`;
-
-        console.log( `projectData:` );
-        console.log( JSON.stringify( projectData, null, 2 ) );
-
-        console.log( `configFilePath: ${ configFilePath }` );
-
-        const data = {
-          obj: projectData,
-          path: configFilePath
-        };
-
         // Send the project data to the main process to create the project config file
-        const response = await electronAPI.files.write( data );
+        const response = await electronAPI.files.write( projectData );
 
         if ( response.status === "success" ) {
           // Redirect to open project screen
@@ -191,17 +154,16 @@ const renderer = ( () => {
     }
   };
 
-  const init = async () => {
-    const exists = await showProjectFolderName();
-    if ( !exists ) {
-      getContentFolder();
-      getDataFolder();
-      storeProjectConfig();
-    }
+  return {
+    showProjectFolderName,
+    getContentFolder,
+    getDataFolder,
+    storeProjectConfig,
   };
-
-  return { init };
 
 } )();
 
-renderer.init();
+renderer.showProjectFolderName();
+renderer.getContentFolder();
+renderer.getDataFolder();
+renderer.storeProjectConfig();

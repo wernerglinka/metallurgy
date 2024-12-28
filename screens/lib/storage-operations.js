@@ -18,6 +18,16 @@ export const StorageOperations = {
     localStorage.setItem( "projectFolder", path );
   },
 
+  saveContentPath: ( path ) => {
+    if ( !path ) throw new Error( 'Content path is required' );
+    localStorage.setItem( "contentFolder", path );
+  },
+
+  saveDataPath: ( path ) => {
+    if ( !path ) throw new Error( 'Data path is required' );
+    localStorage.setItem( "dataFolder", path );
+  },
+
   /**
    * Gets project root path
    * @returns {string|null} Project path or null if not found

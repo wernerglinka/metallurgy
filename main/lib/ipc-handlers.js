@@ -30,7 +30,7 @@ const createIPCHandlers = ( window ) => {
       try {
         return {
           status: 'success',
-          data: FileSystem.exists( filePath )
+          data: FileSystem.fileExists( filePath )
         };
       } catch ( error ) {
         return {

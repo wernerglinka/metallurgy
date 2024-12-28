@@ -1,5 +1,5 @@
 export const updateButtonsContainer = () => {
-  // Show the 'create project' button;
+  // Show the 'start project' button;
   const startProjectButton = document.querySelector( '.js-start' );
   if ( startProjectButton ) {
     const buttonWrapper = startProjectButton.closest( ".js-decision-buttons" );

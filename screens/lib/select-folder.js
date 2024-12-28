@@ -32,9 +32,7 @@ export const selectFolder = async ( folderType ) => {
 
     const result = await window.electronAPI.dialog.open( 'showOpenDialog', dialogOptions );
 
-    return result.canceled ?
-      { canceled: true, filePaths: [] } :
-      result;
+    return result.data.canceled ? [] : result.data.filePaths;
 
   } catch ( error ) {
     console.error( `Error selecting ${ folderType } folder:`, error );
