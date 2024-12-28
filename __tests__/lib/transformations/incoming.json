@@ -1,0 +1,89 @@
+{
+  "layout": "blocks.njk",
+  "draft": true,
+  "bodyClasses": "another-page and-yet-another",
+  "seo": {
+    "title": "Metalsmith First starter",
+    "description": "This was great...",
+    "socialImage": "",
+    "canonicalUrl": ""
+  },
+  "simpleList": ["tadaa bumba", "whoopieeeee trallalla", "lalala poiuyt"],
+  "sections": [
+    {
+      "container": "section",
+      "sectionDescription": "section with contact form and info",
+      "containerFields": {
+        "disabled": false,
+        "containerId": "contact",
+        "containerClass": "contact",
+        "inContainer": false,
+        "background": {
+          "color": "",
+          "image": "",
+          "isDark": false
+        }
+      },
+      "columns": [
+        {
+          "name": "contact-form",
+          "sectionDescription": "Contact Form",
+          "blockClass": ""
+        },
+        {
+          "name": "contact-info",
+          "sectionDescription": "Contact Information",
+          "blockClass": "",
+          "copyrightOwner": {
+            "name": "Werner Glinka",
+            "url": "https://glinka.co",
+            "tel": "650.867.0778",
+            "notice": "© 2023 Werner Glinka"
+          },
+          "socialLinks": [
+            {
+              "label": "LinkedIn",
+              "sectionDescription": "LinkedIn",
+              "icon": "linkedin",
+              "url": "https://www.linkedin.com/in/werner-glinka-2a427/"
+            },
+            {
+              "label": "Github",
+              "sectionDescription": "Github",
+              "icon": "github",
+              "url": "https://github.com/wernerglinka"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "container": "section",
+      "name": "audio",
+      "containerFields": {
+        "isAnimated": false,
+        "containerId": "",
+        "isDisabled": false,
+        "containerClass": "",
+        "inContainer": true,
+        "isNarrow": true,
+        "background": {
+          "image": "",
+          "color": "",
+          "isDark": false
+        }
+      },
+      "sectionDescription": "Audio section",
+      "audio": {
+        "ogg": "",
+        "mpeg": ""
+      },
+      "hasImage": true,
+      "image": {
+        "src": "https://glinka.co",
+        "alt": "no alt needed",
+        "caption": ""
+      }
+    }
+  ]
+}

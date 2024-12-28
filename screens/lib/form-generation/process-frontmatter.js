@@ -6,7 +6,7 @@
 import { convertToSchemaObject } from './schema/convert-js-to-schema.js';
 import { validateSchema } from './schema/validate-schema.js';
 
-// Helper function to process frontmatter
+
 export const processFrontmatter = async ( frontmatter ) => {
   // Convert frontmatter to schema
   const schema = await convertToSchemaObject( frontmatter );

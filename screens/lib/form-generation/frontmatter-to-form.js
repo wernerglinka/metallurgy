@@ -18,11 +18,16 @@ import { logFragment } from '../utilities/fragment-debug-helper.js';
  */
 export const frontmatterToForm = async ( frontmatter, content ) => {
   try {
+
+    console.log( JSON.stringify( frontmatter, null, 2 ) );
+
     const schema = await processFrontmatter( frontmatter );
     const explicitSchemaArray = await getExplicitSchema();
 
     // Create form elements from schema fields
     const formHTML = buildForm( schema, explicitSchemaArray );
+
+    console.log( formHTML );
 
     // Create and populate template
     const template = document.createElement( 'template' );

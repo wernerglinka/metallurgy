@@ -43,7 +43,7 @@
       }
     ],
     "noDeletion": true,
-    "isRequired": true,
+    "isRequired": false,
     "noDuplication": true
   },
   {
@@ -113,7 +113,7 @@
       }
     ],
     "noDeletion": true,
-    "isRequired": true,
+    "isRequired": false,
     "noDuplication": true
   },
   {
@@ -132,7 +132,7 @@
     "default": "",
     "placeholder": "Add a name",
     "noDeletion": true,
-    "isRequired": true,
+    "isRequired": false,
     "noDuplication": true
   },
   {
@@ -177,7 +177,7 @@
   },
   {
     "name": "socialImage",
-    "type": "image",
+    "type": "url",
     "label": "Social Image",
     "default": "",
     "placeholder": "Add path to social image",
@@ -192,7 +192,42 @@
     "default": "",
     "placeholder": "Add a title",
     "noDeletion": true,
-    "isRequired": true,
+    "isRequired": false,
+    "noDuplication": true
+  },
+  {
+    "name": "header",
+    "type": "select",
+    "label": "Header",
+    "default": "h2",
+    "options": [
+      {
+        "label": "H1",
+        "value": "h1"
+      },
+      {
+        "label": "H2",
+        "value": "h2"
+      },
+      {
+        "label": "H3",
+        "value": "h3"
+      },
+      {
+        "label": "H4",
+        "value": "h4"
+      },
+      {
+        "label": "H5",
+        "value": "h5"
+      },
+      {
+        "label": "H6",
+        "value": "h6"
+      }
+    ],
+    "noDeletion": true,
+    "isRequired": false,
     "noDuplication": true
   },
   {
@@ -204,7 +239,7 @@
   },
   {
     "name": "sections",
-    "type": "object",
+    "type": "array",
     "noDeletion": true,
     "isRequired": false,
     "noDuplication": true
@@ -213,6 +248,20 @@
     "name": "containerFields",
     "type": "object",
     "noDeletion": false,
+    "isRequired": false,
+    "noDuplication": true
+  },
+  {
+    "name": "src",
+    "type": "url",
+    "noDeletion": true,
+    "isRequired": false,
+    "noDuplication": true
+  },
+  {
+    "name": "alt",
+    "type": "text",
+    "noDeletion": true,
     "isRequired": false,
     "noDuplication": true
   }
