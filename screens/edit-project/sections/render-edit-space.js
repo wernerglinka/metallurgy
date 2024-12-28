@@ -4,7 +4,6 @@ import { getDirectoryFiles } from "../../lib/file-ops/get-directory-files.js";
 import { getMarkdownFile } from "../../lib/file-ops/get-markdown-file.js";
 import { getMetadataFile } from "../../lib/file-ops/get-metadata-file.js";
 import { frontmatterToForm } from "../../lib/form-generation/frontmatter-to-form.js";
-import { renderJSONFile } from "../../lib/file-ops/render-json-file.js";
 import { redoUndo } from "../../lib/undo-redo.js";
 import { initNewPageProcess } from "./init-new-page-process.js";
 import { setupEditForm, setupFormSubmission } from './setup-edit-form.js';

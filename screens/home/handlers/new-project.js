@@ -12,10 +12,11 @@ export const handleNewProject = async ( e ) => {
 
     if ( projectFolder === "abort" ) return;
 
+    // Save project path in local storage
     StorageOperations.saveProjectPath( projectFolder );
-    StorageOperations.clearProjectData();
-
+    // and navigate to the new project screen
     navigate( targetScreen );
+
   } catch ( error ) {
     console.error( "Error creating new project:", error );
     alert( `Failed to create project: ${ error.message }` );

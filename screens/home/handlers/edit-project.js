@@ -48,10 +48,13 @@ const setupProjectConfig = async ( projectFolder ) => {
  * Handles opening existing project
  * @param {Event} e - Click event
  */
-export const handleOpenProject = async ( e ) => {
+export const handleEditProject = async ( e ) => {
   e.preventDefault();
 
+  console.log( "Hellooooooo" );
+
   console.log( `target: ${ e.target }` );
+
 
   try {
     const targetScreen = e.target.href;
@@ -73,4 +76,5 @@ export const handleOpenProject = async ( e ) => {
     console.error( "Error opening project:", error );
     alert( `${ ERRORS.OPEN_FAILED }: ${ error.message }` );
   }
+
 };

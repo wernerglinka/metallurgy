@@ -9,7 +9,7 @@ const SELECTORS = {
   recentProject: '.js-recent-project',
   newProject: '.js-get-project-folder',
   deleteProject: '.js-delete-project-folder',
-  openProject: '.js-open-project'
+  editProject: '.js-edit-project'
 };
 
 /**

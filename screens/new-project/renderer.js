@@ -1,4 +1,5 @@
 import { getFromLocalStorage, saveToLocalStorage } from "../lib/local-storage.js";
+import { StorageOperations } from '../lib/storage-operations.js';
 import { isProjectReady } from "../lib/utilities/is-project-ready.js";
 import { selectFolder } from "../lib/select-folder.js";
 import { updateFolderUI } from "../lib/update-folder-ui.js";
@@ -6,7 +7,7 @@ import { updateButtonsContainer } from "../lib/update-buttons-container.js";
 
 const renderer = ( () => {
   const showProjectFolderName = async () => {
-    const projectFolder = getFromLocalStorage( "projectFolder" );
+    const projectFolder = StorageOperations.getProjectPath();
     const projectFolderName = document.querySelector( '.js-project-folder-name' );
     if ( projectFolderName ) {
       const folderName = `/${ projectFolder.split( "/" ).pop() }/`;
@@ -137,11 +138,7 @@ const renderer = ( () => {
         const homeScreen = document.location.href;
 
         // Create the project config file
-        const projectData = {
-          projectPath: getFromLocalStorage( "projectFolder" ),
-          contentPath: getFromLocalStorage( "contentFolder" ),
-          dataPath: getFromLocalStorage( "dataFolder" ),
-        };
+        const projectData = StorageOperations.getProjectData();
 
         // Send the project data to the main process to create the project config file
         const response = await electronAPI.files.write( projectData );
