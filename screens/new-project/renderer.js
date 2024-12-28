@@ -165,13 +165,10 @@ const renderer = ( () => {
         // Create the project config file
         const projectData = StorageOperations.getProjectData();
 
+        // Construct the path to the project config file
         const configFilePath = `${ projectData.projectPath }/.metallurgy/projectData.json`;
 
-        console.log( `projectData:` );
-        console.log( JSON.stringify( projectData, null, 2 ) );
-
-        console.log( `configFilePath: ${ configFilePath }` );
-
+        // Construct the data object to be sent to the main process
         const data = {
           obj: projectData,
           path: configFilePath
