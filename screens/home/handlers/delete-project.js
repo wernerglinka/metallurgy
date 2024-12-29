@@ -28,7 +28,7 @@ export const handleDeleteProject = async ( e ) => {
     await ProjectOperations.deleteProject( projectFolder );
     StorageOperations.clearProjectData();
 
-    console.log( `Project ${ projectName } deleted successfully` );
+    alert( `Project ${ projectName } deleted successfully` );
     reload();
   } catch ( error ) {
     console.error( "Error deleting project:", error );

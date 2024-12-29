@@ -15,8 +15,9 @@ export const ProjectOperations = {
   },
 
   deleteProject: async ( projectFolder ) => {
-    const configFilePath = `${ projectFolder }/.metallurgy/projectData.json`;
-    const result = await window.electronAPI.files.delete( configFilePath );
+    const configFilePath = `${ projectFolder }/.metallurgy`;
+    const result = await window.electronAPI.directories.delete( configFilePath );
+
     if ( result.status === 'failure' ) {
       throw new Error( `Failed to delete project: ${ result.error }` );
     }

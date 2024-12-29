@@ -39,6 +39,20 @@ export const FileSystem = {
     }
   },
 
+  deleteDirectory: ( dirPath ) => {
+    try {
+      if ( !fs.existsSync( dirPath ) ) {
+        return { status: 'success', data: `Directory ${ dirPath } does not exist` };
+      }
+
+      fs.rmdirSync( dirPath, { recursive: true } );
+      return { status: 'success', data: `Directory ${ dirPath } deleted` };
+
+    } catch ( error ) {
+      return { status: 'failure', error: error.message };
+    }
+  },
+
   /**
    * Read file with error handling
    * @param {string} filePath - Path to file

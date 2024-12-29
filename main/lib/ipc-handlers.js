@@ -6,14 +6,16 @@ import { createDialogOperations } from './dialog.js';
 import { fileURLToPath } from 'url';
 import { CONSTANTS } from './constants.js';
 import { FileSystem } from './file-system.js';
+import simpleGit from 'simple-git';
+import prompt from 'electron-prompt';
+import { readdirSync } from 'node:fs';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
 
 const createIPCHandlers = ( window ) => {
   const dialogOps = createDialogOperations( window );
-
-  return {
+  const handlers = {
     /**
      * Dialog operation handlers for user interactions
      */
@@ -223,6 +225,19 @@ const createIPCHandlers = ( window ) => {
       FileSystem.deleteFile( filePath ),
 
     /**
+     * Deletes a directory from the filesystem
+     * @param {Event} event - IPC event object
+     * @param {string} filePath - Path to directory to delete
+     * @returns {Object} Operation result
+     * @returns {string} result.status - 'success' or 'failure'
+     * @returns {string} [result.error] - Error message if failed
+     * @example
+     * await handleDeleteDirectory(event, '/path/to/dir')
+     */
+    handleDeleteDirectory: async ( event, dirPath ) =>
+      FileSystem.deleteDirectory( dirPath ),
+
+    /**
      * Gets template files from specified directory
      * @param {Event} event - IPC event object
      * @param {string} templatesDirName - Name of templates directory
@@ -260,8 +275,82 @@ const createIPCHandlers = ( window ) => {
       const yamlString = yaml.stringify( obj );
       const content = `---\n${ yamlString }---\n`;
       return FileSystem.writeFile( filePath, content );
+    },
+
+    /**
+     * Clones a Git repository to a local path
+     * @param {Event} event - IPC event object
+     * @param {Object} params - Clone parameters
+     * @param {string} params.repoUrl - Repository URL
+     * @returns {Object} Operation result
+     * @returns {string} result.status - 'success' or 'failure'
+     * @returns {string} [result.error] - Error message if failed
+     * @example
+     * await handleCloneRepository(event, {
+     *   repoUrl: 'https://github.com/user/repo.git'
+     * })
+     */
+    handleCloneRepository: async ( event, { repoUrl } ) => {
+      try {
+        // for now there will never be a repoUrl passed in
+        if ( !repoUrl ) {
+          const result = await prompt( {
+            title: 'Enter Git Repo URL',
+            label: 'Repository URL:',
+            inputAttrs: { type: 'url' },
+            type: 'input'
+          } );
+          if ( !result ) {
+            throw new Error( 'No repo URL provided' );
+          }
+          repoUrl = result;
+        }
+
+        // Show dialog to select directory to clone into
+        const dialogResult = await dialogOps.showDialog( 'showOpenDialog', {
+          properties: [ 'openDirectory', 'createDirectory' ]
+        } );
+        const localPath = dialogResult.data.filePaths?.[ 0 ];
+
+        if ( !localPath ) {
+          throw new Error( 'No directory selected' );
+        }
+
+        // check if the directory is empty
+        const dirContents = readdirSync( localPath );
+        if ( dirContents.length > 0 ) {
+          const shouldProceed = await dialogOps.showConfirmation(
+            'Selected directory is not empty. Would you like to select a different directory?'
+          );
+
+          if ( shouldProceed ) {
+            return handlers.handleCloneRepository( event, { repoUrl } );
+          }
+          return { status: 'failure', error: 'Operation cancelled - Directory not empty' };
+        }
+
+        // Clone repository to selected directory
+        await simpleGit().clone( repoUrl, localPath );
+
+        // Show success dialog and ask to proceed
+        const shouldProceed = await dialogOps.showConfirmation(
+          `Repository successfully cloned to:\n${ localPath }\n\nWould you like to work with this project?`
+        );
+
+        return {
+          status: 'success',
+          proceed: shouldProceed,
+          path: localPath
+        };
+
+      } catch ( error ) {
+        console.error( 'Clone Repository Error:', error );  // Add detailed logging
+        return { status: 'failure', error: error.message };
+      }
     }
   };
+
+  return handlers;
 };
 
 const setupIPC = ( window ) => {
@@ -279,10 +368,12 @@ const setupIPC = ( window ) => {
   ipcMain.handle( 'writeMarkdownFile', ( e, path, data ) =>
     handlers.handleMarkdownOperations( e, 'write', path, data ) );
   ipcMain.handle( 'deleteFile', handlers.handleDeleteFile );
+  ipcMain.handle( 'deleteDirectory', handlers.handleDeleteDirectory );
   ipcMain.handle( 'getTemplates', handlers.handleGetTemplates );
   ipcMain.handle( 'writeObjectToFile', handlers.handleWriteObjectToFile );
   ipcMain.handle( 'readDirectory', ( e, path ) =>
     ( { status: 'success', data: FileSystem.readDirectoryStructure( path ) } ) );
+  ipcMain.handle( 'cloneRepository', handlers.handleCloneRepository );
 };
 
 export { createIPCHandlers, setupIPC };

@@ -31,7 +31,8 @@ const electronAPI = {
   // Directory operations
   directories: {
     read: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
-    getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName )
+    getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName ),
+    delete: ( directoryPath ) => ipcRenderer.invoke( 'deleteDirectory', directoryPath ),
   },
 
   // Markdown specific operations
@@ -44,7 +45,10 @@ const electronAPI = {
   // Utility functions that don't require file system access
   utils: {
     toYAML: ( args ) => convertToYAML.stringify( args )
-  }
+  },
+
+  // Git operations
+  cloneRepository: async ( repoUrl ) => await ipcRenderer.invoke( 'cloneRepository', { repoUrl } )
 };
 
 // Expose the API to the renderer process
