@@ -43,6 +43,28 @@ const createIPCHandlers = ( window ) => {
     },
 
     /**
+     * Checks if a directory exists in the filesystem
+     * @param {Event} event - IPC event object
+     * @param {string} dirPath - Path to check
+     * @returns {Object} Operation result with exists boolean
+     * @example
+     * const result = await handleDirectoryExists(event, '/path/to/dir')
+     */
+    handleDirectoryExists: async ( event, dirPath ) => {
+      try {
+        return {
+          status: 'success',
+          data: FileSystem.directoryExists( dirPath )
+        };
+      } catch ( error ) {
+        return {
+          status: 'failure',
+          error: error.message
+        };
+      }
+    },
+
+    /**
      * Shows a dialog with specified method and parameters
      * @param {Event} event - IPC event object
      * @param {string} method - Dialog method to use (e.g., 'showOpenDialog')
@@ -357,7 +379,10 @@ const setupIPC = ( window ) => {
   const handlers = createIPCHandlers( window );
 
   // Register all handlers
+  ipcMain.handle( 'ready', () => true );
+
   ipcMain.handle( 'fileExists', handlers.handleFileExists );
+  ipcMain.handle( 'directoryExists', handlers.handleDirectoryExists );
   ipcMain.handle( 'dialog', handlers.handleDialog );
   ipcMain.handle( 'showConfirmationDialog', handlers.handleConfirmationDialog );
   ipcMain.handle( 'writeFile', handlers.handleWriteFile );
@@ -374,6 +399,9 @@ const setupIPC = ( window ) => {
   ipcMain.handle( 'readDirectory', ( e, path ) =>
     ( { status: 'success', data: FileSystem.readDirectoryStructure( path ) } ) );
   ipcMain.handle( 'cloneRepository', handlers.handleCloneRepository );
+
+  // Emit ready event after all handlers are registered
+  window.webContents.send( 'app-ready' );
 };
 
 export { createIPCHandlers, setupIPC };

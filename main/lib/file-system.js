@@ -39,6 +39,19 @@ export const FileSystem = {
     }
   },
 
+  /**
+   * Simple check for directory existence
+   * @param {*} dirPath 
+   * @returns 
+   */
+  directoryExists: ( dirPath ) => {
+    try {
+      return fs.existsSync( dirPath ) && fs.statSync( dirPath ).isDirectory();
+    } catch {
+      return false;
+    }
+  },
+
   deleteDirectory: ( dirPath ) => {
     try {
       if ( !fs.existsSync( dirPath ) ) {

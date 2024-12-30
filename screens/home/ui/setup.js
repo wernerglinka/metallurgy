@@ -1,6 +1,5 @@
 // screens/home/ui/setup.js
 import { StorageOperations } from '../../lib/storage-operations.js';
-import { handleRecentProject } from '../handlers/recent-project.js';
 
 /**
  * DOM selector constants
@@ -14,7 +13,7 @@ const SELECTORS = {
 };
 
 /**
- * Error messages
+ * Error messages//
  */
 const ERRORS = {
   NO_RECENT: 'No recent project found',
@@ -22,31 +21,57 @@ const ERRORS = {
 };
 
 /**
+ * Handles click on recent project link
+ * @param {Event} e - Click event
+ */
+const handleRecentProject = ( e ) => {
+  e.preventDefault();
+  navigate( e.target.href );
+};
+
+/**
  * Sets up recent project UI and handlers
  * @throws {Error} If required elements not found
  */
 export const setupRecentProject = () => {
-  try {
-    const recentProject = StorageOperations.getProjectPath();
-    if ( !recentProject ) {
-      console.info( ERRORS.NO_RECENT );
-      return;
-    }
+  return new Promise( ( resolve ) => {
+    window.electronAPI.onReady( async () => {
+      try {
+        // check if a recent project is found in local storage
+        const recentProject = StorageOperations.getProjectPath();
+        if ( !recentProject ) {
+          resolve();
+          return;
+        }
+        // check if the project still exists
+        const projectExists = await window.electronAPI.directories.exists( recentProject );
+        if ( !projectExists.data ) {
+          StorageOperations.clearProjectData();
+          resolve();
+          return;
+        }
 
-    const element = document.querySelector( SELECTORS.recentProject );
-    if ( !element ) {
-      console.warn( ERRORS.NO_ELEMENT );
-      return;
-    }
+        // check if the element for the project name exists
+        const element = document.querySelector( SELECTORS.recentProject );
+        if ( !element ) {
+          console.warn( ERRORS.NO_ELEMENT );
+          resolve();
+          return;
+        }
 
-    const projectName = StorageOperations.getProjectName( recentProject );
-    element.innerHTML = projectName;
-    element.setAttribute( 'title', `Open ${ projectName }` );
-    element.addEventListener( 'click', handleRecentProject );
+        // set up the project name and event listener
+        const projectName = StorageOperations.getProjectName( recentProject );
+        element.innerHTML = projectName;
+        element.setAttribute( 'title', `Open ${ projectName }` );
+        element.addEventListener( 'click', handleRecentProject );
 
-  } catch ( error ) {
-    console.error( 'Failed to setup recent project:', error );
-  }
+        resolve();
+      } catch ( error ) {
+        console.error( 'Failed to setup recent project:', error );
+        resolve();
+      }
+    } );
+  } );
 };
 
 /**

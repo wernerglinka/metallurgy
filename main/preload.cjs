@@ -13,6 +13,8 @@ const convertToYAML = require( 'yaml' );
  * Groups functionality into logical categories for better organization
  */
 const electronAPI = {
+  onReady: ( callback ) => ipcRenderer.on( 'app-ready', callback ),
+
   // Dialog operations
   dialog: {
     open: ( method, config ) => ipcRenderer.invoke( 'dialog', method, config ),
@@ -33,6 +35,7 @@ const electronAPI = {
     read: ( directoryPath ) => ipcRenderer.invoke( 'readDirectory', directoryPath ),
     getTemplates: ( templatesDirName ) => ipcRenderer.invoke( 'getTemplates', templatesDirName ),
     delete: ( directoryPath ) => ipcRenderer.invoke( 'deleteDirectory', directoryPath ),
+    exists: ( directoryPath ) => ipcRenderer.invoke( 'directoryExists', directoryPath )
   },
 
   // Markdown specific operations

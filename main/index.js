@@ -97,7 +97,9 @@ const initializeApp = async () => {
   } );
 
   mainWindow = await createWindow();
+  console.log( 'About to setup IPC handlers' );
   setupIPC( getWindow(), FileSystem );
+  console.log( 'IPC handlers setup complete' );
 };
 
 const handleAppReady = () => {

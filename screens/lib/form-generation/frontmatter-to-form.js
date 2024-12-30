@@ -24,8 +24,6 @@ export const frontmatterToForm = async ( frontmatter, content ) => {
     // Create form elements from schema fields
     const formHTML = buildForm( schema, explicitSchemaArray );
 
-    console.log( formHTML );
-
     // Create and populate template
     const template = document.createElement( 'template' );
     template.innerHTML = formHTML;

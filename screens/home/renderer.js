@@ -12,7 +12,7 @@ const SELECTORS = {
   cloneProject: '.js-clone-from-github'
 };
 
-const initialize = () => {
+const initialize = async () => {
 
   const handlers = {
     [ SELECTORS.newProject ]: handleNewProject,
@@ -22,7 +22,7 @@ const initialize = () => {
   };
 
   initializeEventListeners( handlers );
-  setupRecentProject();
+  await setupRecentProject();
 };
 
-initialize();
+await initialize();
