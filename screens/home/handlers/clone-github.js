@@ -4,7 +4,7 @@ import { StorageOperations } from '../../lib/storage-operations.js';
 
 const cloneGitHubRepo = async () => {
   try {
-    return await window.electronAPI.cloneRepository();
+    return await window.electronAPI.git.clone();
   } catch ( error ) {
     console.error( 'Clone: Failed -', error );
     throw error;
@@ -12,17 +12,19 @@ const cloneGitHubRepo = async () => {
 };
 
 export const handleCloneGithub = async ( e ) => {
-  e.preventDefault();
+  console.log( 'handleCloneGithub called', e ? 'from button' : 'from menu' );
+  if ( e?.preventDefault ) {
+    e.preventDefault();
+  }
 
   try {
     const result = await cloneGitHubRepo();
+    console.log( 'Clone result:', result ); // Add this log
 
-    if ( result?.status === 'success' && result?.proceed?.status === 'success' ) {
+    // Changed from checking result?.proceed?.status === 'success'
+    if ( result?.status === 'success' && result?.proceed.data === true ) {
       await StorageOperations.saveProjectPath( result.path );
-
       navigate( '../new-project/index.html' );
-    } else {
-      throw new Error( 'Failed to clone repository' );
     }
   } catch ( error ) {
     console.error( 'Clone handler error:', error );

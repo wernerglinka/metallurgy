@@ -18,7 +18,8 @@ const electronAPI = {
   // Dialog operations
   dialog: {
     open: ( method, config ) => ipcRenderer.invoke( 'dialog', method, config ),
-    showConfirmation: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message )
+    showConfirmation: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
+    prompt: ( message ) => ipcRenderer.invoke( 'dialog-prompt', message )
   },
 
   // File operations
@@ -51,7 +52,10 @@ const electronAPI = {
   },
 
   // Git operations
-  cloneRepository: async ( repoUrl ) => await ipcRenderer.invoke( 'cloneRepository', { repoUrl } ),
+  git: {
+    clone: async ( repoUrl ) => await ipcRenderer.invoke( 'git-clone', { repoUrl } ),
+    commit: ( params ) => ipcRenderer.invoke( 'git-commit', params )
+  },
 
   // npm operations
   npm: {
@@ -60,6 +64,13 @@ const electronAPI = {
     stop: () => ipcRenderer.invoke( 'npm-stop' ),
     onOutput: ( callback ) => ipcRenderer.on( 'npm-output', callback ),
     onError: ( callback ) => ipcRenderer.on( 'npm-error', callback ),
+    removeListener: ( channel, callback ) => ipcRenderer.removeListener( channel, callback )
+  },
+
+  // IPC Renderer operations, used for main menu updfates from the renderer
+  ipcRenderer: {
+    send: ( channel, data ) => ipcRenderer.send( channel, data ),
+    on: ( channel, callback ) => ipcRenderer.on( channel, callback ),
     removeListener: ( channel, callback ) => ipcRenderer.removeListener( channel, callback )
   }
 };

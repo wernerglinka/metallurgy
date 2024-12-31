@@ -9,19 +9,6 @@ const state = {
 };
 
 /**
- * Updates visibility of start/stop buttons based on running state
- */
-const updateButtonStates = () => {
-  const startBtn = document.getElementById( 'npm-start' );
-  const stopBtn = document.getElementById( 'npm-stop' );
-
-  if ( startBtn && stopBtn ) {
-    startBtn.style.display = state.isRunning ? 'none' : 'inline-block';
-    stopBtn.style.display = state.isRunning ? 'inline-block' : 'none';
-  }
-};
-
-/**
  * Handles output messages from npm commands
  * @param {string} message - Output message to display
  */
@@ -71,9 +58,7 @@ const startProject = async () => {
 
     if ( result.status === 'success' ) {
       state.isRunning = true;
-      updateButtonStates();
-    } else {
-      handleError( result.error );
+      updateNpmState();
     }
   } catch ( error ) {
     handleError( error.message );
@@ -89,38 +74,11 @@ const stopProject = async () => {
 
     if ( result.status === 'success' ) {
       state.isRunning = false;
-      updateButtonStates();
-    } else {
-      handleError( result.error );
+      updateNpmState();
     }
   } catch ( error ) {
     handleError( error.message );
   }
-};
-
-/**
- * Updates the tooltip for an SVG button
- * @param {HTMLElement} button - The button element
- * @param {string} tooltipText - The tooltip text to display
- */
-const updateTooltip = ( button ) => {
-  // Find or create the title element within the SVG
-  let titleElement = button.querySelector( 'title' );
-  if ( !titleElement ) {
-    titleElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'title' );
-    button.appendChild( titleElement );
-  }
-  return titleElement;
-};
-
-/**
- * Disables the install button and updates its state
- * @param {HTMLElement} button - The install button element
- */
-const disableInstallButton = ( button ) => {
-  button.classList.add( 'disabled' );
-  updateTooltip( button ).textContent = 'Dependencies already installed';
-  button.removeEventListener( 'click', installDeps );
 };
 
 /**
@@ -129,28 +87,18 @@ const disableInstallButton = ( button ) => {
 const installDeps = async () => {
   if ( !state.projectPath ) return;
 
-  const installBtn = document.getElementById( 'npm-install' );
-  if ( !installBtn ) return;
-
   try {
     clearMessages();
-    installBtn.classList.add( 'installing' );
-    updateTooltip( installBtn ).textContent = 'Installing dependencies...';
-
     const result = await window.electronAPI.npm.install( state.projectPath );
 
     if ( result.status === 'failure' ) {
       handleError( result.error );
-      installBtn.classList.remove( 'installing' );
-      updateTooltip( installBtn ).textContent = 'Install dependencies';
     } else {
       handleOutput( 'Dependencies installed successfully!\n' );
-      disableInstallButton( installBtn );
+      updateNpmState();
     }
   } catch ( error ) {
     handleError( error.message );
-    installBtn.classList.remove( 'installing' );
-    updateTooltip( installBtn ).textContent = 'Install dependencies';
   }
 };
 
@@ -171,33 +119,43 @@ const hasNodeModules = async ( projectPath ) => {
   }
 };
 
+const updateNpmState = async () => {
+  const hasModules = await hasNodeModules( state.projectPath );
+  console.log( "Updating state:", {
+    running: state.isRunning,
+    hasNodeModules: hasModules,
+    hasProject: !!state.projectPath
+  } );
+  window.electronAPI.ipcRenderer.send( 'npm-state-change', {
+    running: state.isRunning,
+    hasNodeModules: hasModules,
+    hasProject: !!state.projectPath
+  } );
+};
+
+
 /**
  * Sets up event listeners for npm operations
- */
+*/
 const setupListeners = async () => {
   // Remove any existing listeners
-  window.electronAPI.npm.removeListener( 'npm-output', handleOutput );
-  window.electronAPI.npm.removeListener( 'npm-error', handleError );
+  window.electronAPI.ipcRenderer.removeListener( 'npm-install-trigger', installDeps );
+  window.electronAPI.ipcRenderer.removeListener( 'npm-start-trigger', startProject );
+  window.electronAPI.ipcRenderer.removeListener( 'npm-stop-trigger', stopProject );
 
-  // Add output and error listeners
-  window.electronAPI.npm.onOutput( ( event, message ) => handleOutput( message ) );
-  window.electronAPI.npm.onError( ( event, message ) => handleError( message ) );
+  // Add menu triggers
+  window.electronAPI.ipcRenderer.on( 'npm-install-trigger', () => installDeps() );
+  window.electronAPI.ipcRenderer.on( 'npm-start-trigger', () => startProject() );
+  window.electronAPI.ipcRenderer.on( 'npm-stop-trigger', () => stopProject() );
 
-  // Add button click listeners
-  document.getElementById( 'npm-start' )?.addEventListener( 'click', startProject );
-  document.getElementById( 'npm-stop' )?.addEventListener( 'click', stopProject );
+  // Check node_modules for initial menu state
+  const hasModules = await hasNodeModules( state.projectPath );
+  window.electronAPI.ipcRenderer.send( 'npm-state-change', {
+    running: state.isRunning,
+    hasNodeModules: hasModules
+  } );
 
-  // Check for node_modules before setting up install button
-  const installBtn = document.getElementById( 'npm-install' );
-  if ( installBtn ) {
-    const hasModules = await hasNodeModules( state.projectPath );
-    if ( hasModules ) {
-      disableInstallButton( installBtn );
-    } else {
-      updateTooltip( installBtn ).textContent = 'Install dependencies';
-      installBtn.addEventListener( 'click', installDeps );
-    }
-  }
+  updateNpmState();
 };
 
 /**
@@ -207,12 +165,10 @@ const setupListeners = async () => {
 const initNpmControls = ( path ) => {
   state.projectPath = path;
   setupListeners();
-  updateButtonStates();
 };
 
 export {
   initNpmControls,
-  updateButtonStates,
   startProject,
   stopProject,
   installDeps

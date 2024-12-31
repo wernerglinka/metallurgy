@@ -21,6 +21,14 @@ const initialize = async () => {
     [ SELECTORS.cloneProject ]: handleCloneGithub
   };
 
+  // Add menu trigger listener
+  console.log( 'Setting up git clone menu listener' );
+  window.electronAPI.ipcRenderer.removeListener( 'git-clone-trigger', handleCloneGithub );
+  window.electronAPI.ipcRenderer.on( 'git-clone-trigger', () => {
+    console.log( 'Received git-clone-trigger' );
+    handleCloneGithub();
+  } );
+
   initializeEventListeners( handlers );
   await setupRecentProject();
 };

@@ -7,6 +7,7 @@ import { setupIPC } from './lib/ipc-handlers.js';
 import { FileSystem } from './lib/file-system.js';
 import { CONSTANTS } from './lib/constants.js';
 import { isDev, isMac } from './lib/env.js';
+import { createApplicationMenu } from './lib/menu-handler.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -76,6 +77,7 @@ const createWindow = async () => {
   };
 
   mainWindow = new BrowserWindow( WINDOW_CONFIG );
+  createApplicationMenu( mainWindow );
   await mainWindow.loadFile( 'screens/home/index.html' );
 
   if ( isDev ) {
