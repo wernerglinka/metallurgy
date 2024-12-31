@@ -7,6 +7,7 @@ import { frontmatterToForm } from "../../lib/form-generation/frontmatter-to-form
 import { redoUndo } from "../../lib/undo-redo.js";
 import { initNewPageProcess } from "./init-new-page-process.js";
 import { setupEditForm, setupFormSubmission } from './setup-edit-form.js';
+import { initNpmControls } from './npm-controls.js';
 
 /**
  * Get directory files and render a DOM tree representation
@@ -113,7 +114,7 @@ const setupTemplateLinks = () => {
  * Main function to render the edit space
  * @throws {Error} If rendering fails
  */
-const renderEditSpace = async () => {
+const renderEditSpace = async ( projectPath ) => {
   try {
     // Get directory files and render a DOM tree representation
     await loadDirectoryFiles();
@@ -128,6 +129,11 @@ const renderEditSpace = async () => {
     setupTemplateLinks();
 
     initNewPageProcess();
+
+    // Setup NPM controls for the edit space
+    // When project is loaded
+    initNpmControls( projectPath );
+
 
   } catch ( error ) {
     console.error( 'Failed to render edit space:', error );

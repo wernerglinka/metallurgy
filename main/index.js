@@ -71,7 +71,8 @@ const createWindow = async () => {
       webSecurity: true,
       allowRunningInsecureContent: false,
       enableRemoteModule: false
-    }
+    },
+    icon: path.join( __dirname, 'main/lib/favicons/apple-icon-180x180.png' ),
   };
 
   mainWindow = new BrowserWindow( WINDOW_CONFIG );

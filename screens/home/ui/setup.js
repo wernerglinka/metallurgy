@@ -1,5 +1,6 @@
 // screens/home/ui/setup.js
 import { StorageOperations } from '../../lib/storage-operations.js';
+import { navigate } from '../navigation/utils.js';
 
 /**
  * DOM selector constants

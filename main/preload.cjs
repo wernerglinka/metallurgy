@@ -51,7 +51,17 @@ const electronAPI = {
   },
 
   // Git operations
-  cloneRepository: async ( repoUrl ) => await ipcRenderer.invoke( 'cloneRepository', { repoUrl } )
+  cloneRepository: async ( repoUrl ) => await ipcRenderer.invoke( 'cloneRepository', { repoUrl } ),
+
+  // npm operations
+  npm: {
+    install: ( projectPath ) => ipcRenderer.invoke( 'npm-command', { command: 'install', projectPath } ),
+    start: ( projectPath ) => ipcRenderer.invoke( 'npm-command', { command: 'start', projectPath } ),
+    stop: () => ipcRenderer.invoke( 'npm-stop' ),
+    onOutput: ( callback ) => ipcRenderer.on( 'npm-output', callback ),
+    onError: ( callback ) => ipcRenderer.on( 'npm-error', callback ),
+    removeListener: ( channel, callback ) => ipcRenderer.removeListener( channel, callback )
+  }
 };
 
 // Expose the API to the renderer process

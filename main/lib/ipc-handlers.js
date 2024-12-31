@@ -9,6 +9,7 @@ import { FileSystem } from './file-system.js';
 import simpleGit from 'simple-git';
 import prompt from 'electron-prompt';
 import { readdirSync } from 'node:fs';
+import { createNPMHandlers } from './npm-handlers.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -377,9 +378,14 @@ const createIPCHandlers = ( window ) => {
 
 const setupIPC = ( window ) => {
   const handlers = createIPCHandlers( window );
+  const npmHandlers = createNPMHandlers( window );
 
   // Register all handlers
   ipcMain.handle( 'ready', () => true );
+
+  // npm handlers
+  ipcMain.handle( 'npm-command', npmHandlers.handleNpmCommand );
+  ipcMain.handle( 'npm-stop', npmHandlers.handleNpmStop );
 
   ipcMain.handle( 'fileExists', handlers.handleFileExists );
   ipcMain.handle( 'directoryExists', handlers.handleDirectoryExists );

@@ -30,6 +30,8 @@ const updateProjectName = () => {
 
   // Update DOM
   projectNameElement.prepend( projectName );
+
+  return projectFolder;
 };
 
 export default updateProjectName;

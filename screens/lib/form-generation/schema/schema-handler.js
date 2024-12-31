@@ -39,7 +39,9 @@ export const getExplicitSchema = async () => {
   const schemaFilePath = `${ projectPath }/.metallurgy/frontmatterTemplates/fields.json`;
   const schemaExists = await window.electronAPI.files.exists( schemaFilePath );
 
-  if ( !schemaExists ) return null;
+  console.log( schemaExists );
+
+  if ( !schemaExists.data ) return [];
 
   const { status, data, error } = await window.electronAPI.files.read( schemaFilePath );
   if ( status === 'failure' ) {

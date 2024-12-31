@@ -24,7 +24,7 @@ import managePreview from "./sections/manage-preview.js";
  */
 
 // 1. Update project name in top left corner
-updateProjectName();
+const projectPath = updateProjectName();
 
 // 2. Initialize sidebar visibility toggle
 manageSidebarVisibility();
@@ -39,7 +39,7 @@ buildTemplatesSelection();
 
 // 5. Initialize main edit space
 //    Sets up file tree and form rendering
-renderEditSpace();
+renderEditSpace( projectPath );
 
 // 6. Set up preview pane functionality
 //    Handles YAML preview toggle and updates
