@@ -40,7 +40,6 @@ export const ValueOps = {
           valueInput.value.trim();
     }
 
-    if ( key === 'layout' ) return { key, value: 'blocks.njk' };
     return { key, value };
   }
 };
@@ -235,6 +234,7 @@ export const FormStateOps = {
  * @returns {Object|null} Transformed object
  */
 export const transformFormElementsToObject = ( allFormElements ) => {
+
   try {
     const finalState = Array.from( allFormElements ).reduce( ( state, element ) => {
       const elementClasses = {
