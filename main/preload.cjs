@@ -54,7 +54,7 @@ const electronAPI = {
   // Git operations
   git: {
     clone: async ( repoUrl ) => await ipcRenderer.invoke( 'git-clone', { repoUrl } ),
-    commit: ( params ) => ipcRenderer.invoke( 'git-commit', params )
+    commit: async ( { projectPath, message } ) => await ipcRenderer.invoke( 'git-commit', { projectPath, message } )
   },
 
   // npm operations

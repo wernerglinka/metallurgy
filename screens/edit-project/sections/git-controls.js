@@ -1,83 +1,36 @@
+// git-controls.js
 const state = {
-  projectPath: null,
-  isCommitting: false
+  projectPath: null
 };
 
-/**
- * Updates button state during git operations
- * @param {HTMLElement} button 
- * @param {boolean} isProcessing 
- */
-const updateCommitButtonState = ( button, isProcessing ) => {
-  if ( isProcessing ) {
-    button.classList.add( 'processing' );
-    updateTooltip( button ).textContent = 'Committing changes...';
-  } else {
-    button.classList.remove( 'processing' );
-    updateTooltip( button ).textContent = 'Commit changes';
-  }
-};
-
-/**
- * Handles committing changes
- */
 const handleCommit = async () => {
-  const commitBtn = document.getElementById( 'git-commit' );
-  if ( !commitBtn || state.isCommitting ) return;
+  if ( !state.projectPath ) return;
 
   try {
-    state.isCommitting = true;
-    updateCommitButtonState( commitBtn, true );
+    const result = await window.electronAPI.dialog.prompt( 'Enter commit message:' );
+    if ( !result ) return;  // User cancelled
 
-    // Get commit message from user (you'll need to implement the UI for this)
-    const message = await window.electronAPI.dialog.prompt( 'Enter commit message:' );
-    if ( !message ) {
-      state.isCommitting = false;
-      updateCommitButtonState( commitBtn, false );
-      return;
-    }
-
-    const result = await window.electronAPI.git.commit( {
+    const commitResult = await window.electronAPI.git.commit( {
       projectPath: state.projectPath,
-      message
+      message: result
     } );
 
-    if ( result.status === 'failure' ) {
-      window.electronAPI.dialog.showError( result.error );
+    if ( commitResult.status === 'failure' ) {
+      console.error( 'Commit failed:', commitResult.error );
     }
   } catch ( error ) {
-    window.electronAPI.dialog.showError( error.message );
-  } finally {
-    state.isCommitting = false;
-    updateCommitButtonState( commitBtn, false );
+    console.error( 'Commit error:', error );
   }
 };
 
-/**
- * Updates tooltip for SVG button
- * @param {HTMLElement} button 
- * @returns {SVGTitleElement}
- */
-const updateTooltip = ( button ) => {
-  let titleElement = button.querySelector( 'title' );
-  if ( !titleElement ) {
-    titleElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'title' );
-    button.appendChild( titleElement );
-  }
-  return titleElement;
+const setupGitListeners = () => {
+  window.electronAPI.ipcRenderer.removeListener( 'git-commit-trigger', handleCommit );
+  window.electronAPI.ipcRenderer.on( 'git-commit-trigger', () => handleCommit() );
 };
 
-/**
- * Initializes git controls
- * @param {string} path - Project path
- */
 const initGitControls = ( path ) => {
   state.projectPath = path;
-  const commitBtn = document.getElementById( 'git-commit' );
-  if ( commitBtn ) {
-    updateTooltip( commitBtn ).textContent = 'Commit changes';
-    commitBtn.addEventListener( 'click', handleCommit );
-  }
+  setupGitListeners();
 };
 
 export { initGitControls };

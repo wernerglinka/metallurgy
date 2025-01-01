@@ -67,6 +67,21 @@ const createIPCHandlers = ( window ) => {
     },
 
     /**
+     * Shows a prompt dialog with a message
+     * @param {Event} event - IPC event object
+     * @param {string} message - Message to display in prompt
+     * @returns {Promise<string|null>} User's input or null if cancelled
+     */
+    handlePromptDialog: async ( event, message ) => {
+      const result = await prompt( {
+        title: 'Git Commit',
+        label: message,
+        type: 'input'
+      } );
+      return result;
+    },
+
+    /**
      * Shows a dialog with specified method and parameters
      * @param {Event} event - IPC event object
      * @param {string} method - Dialog method to use (e.g., 'showOpenDialog')
@@ -324,6 +339,7 @@ const setupIPC = ( window ) => {
 
   ipcMain.handle( 'fileExists', handlers.handleFileExists );
   ipcMain.handle( 'directoryExists', handlers.handleDirectoryExists );
+  ipcMain.handle( 'dialog-prompt', handlers.handlePromptDialog );
   ipcMain.handle( 'dialog', handlers.handleDialog );
   ipcMain.handle( 'showConfirmationDialog', handlers.handleConfirmationDialog );
   ipcMain.handle( 'writeFile', handlers.handleWriteFile );

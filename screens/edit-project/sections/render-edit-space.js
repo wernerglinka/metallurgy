@@ -8,6 +8,7 @@ import { redoUndo } from "../../lib/undo-redo.js";
 import { initNewPageProcess } from "./init-new-page-process.js";
 import { setupEditForm, setupFormSubmission } from './setup-edit-form.js';
 import { initNpmControls } from './npm-controls.js';
+import { initGitControls } from './git-controls.js';
 
 /**
  * Get directory files and render a DOM tree representation
@@ -133,6 +134,9 @@ const renderEditSpace = async ( projectPath ) => {
     // Setup NPM controls for the edit space
     // When project is loaded
     initNpmControls( projectPath );
+
+    // Setup Git controls for the edit space
+    initGitControls( projectPath );
 
 
   } catch ( error ) {

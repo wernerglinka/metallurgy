@@ -77,10 +77,16 @@ const createApplicationMenu = ( window ) => {
         {
           label: 'Clone Repository',
           click: () => {
-            console.log( 'Menu: Clone Repository clicked' );
             window.webContents.send( 'git-clone-trigger' );
           },
           id: 'git-clone'
+        },
+        {
+          label: 'Git Commit',
+          click: () => {
+            window.webContents.send( 'git-commit-trigger' );
+          },
+          id: 'git-commit'
         }
       ]
     }
