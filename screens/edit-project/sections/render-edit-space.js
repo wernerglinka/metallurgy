@@ -132,12 +132,10 @@ const renderEditSpace = async ( projectPath ) => {
     initNewPageProcess();
 
     // Setup NPM controls for the edit space
-    // When project is loaded
     initNpmControls( projectPath );
 
     // Setup Git controls for the edit space
-    initGitControls( projectPath );
-
+    initGitControls( projectPath );  // Removed dialogOps parameter
 
   } catch ( error ) {
     console.error( 'Failed to render edit space:', error );

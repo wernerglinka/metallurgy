@@ -19,7 +19,9 @@ const electronAPI = {
   dialog: {
     open: ( method, config ) => ipcRenderer.invoke( 'dialog', method, config ),
     showConfirmation: ( message ) => ipcRenderer.invoke( 'showConfirmationDialog', message ),
-    prompt: ( message ) => ipcRenderer.invoke( 'dialog-prompt', message )
+    prompt: ( message ) => ipcRenderer.invoke( 'dialog-prompt', message ),
+    showCustomMessage: ( options ) => ipcRenderer.invoke( 'custom-dialog-message', options ),
+    customResponse: ( response ) => ipcRenderer.invoke( 'custom-dialog-response', response )
   },
 
   // File operations
@@ -54,7 +56,8 @@ const electronAPI = {
   // Git operations
   git: {
     clone: async ( repoUrl ) => await ipcRenderer.invoke( 'git-clone', { repoUrl } ),
-    commit: async ( { projectPath, message } ) => await ipcRenderer.invoke( 'git-commit', { projectPath, message } )
+    commit: async ( { projectPath, message } ) => await ipcRenderer.invoke( 'git-commit', { projectPath, message } ),
+    status: async ( projectPath ) => await ipcRenderer.invoke( 'git-status', { projectPath } )
   },
 
   // npm operations

@@ -11,6 +11,7 @@ import prompt from 'electron-prompt';
 import { readdirSync } from 'node:fs';
 import { createNPMHandlers } from './npm-handlers.js';
 import { createGitHandlers } from './git-handlers.js';
+import { createCustomDialog } from './custom-dialog.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -105,6 +106,18 @@ const createIPCHandlers = ( window ) => {
      */
     handleConfirmationDialog: async ( event, message ) =>
       dialogOps.showConfirmation( message ),
+
+    /**
+     * Shows a message dialog box
+     * @param {Event} event - IPC event object
+     * @param {Object} options - Dialog options
+     * @param {string} options.type - Dialog type ('info', 'error', etc.)
+     * @param {string} options.message - Message to display
+     * @param {string[]} options.buttons - Array of button labels
+     * @returns {Promise<Object>} Dialog result
+     */
+    handleMessageDialog: async ( event, options ) =>
+      dialogOps.showDialog( 'showMessageBox', options ),
 
     /**
      * Handles writing file data to the filesystem
@@ -322,9 +335,16 @@ const createIPCHandlers = ( window ) => {
 
 const setupIPC = ( window ) => {
   const dialogOps = createDialogOperations( window );
+  const customDialog = createCustomDialog( window );
+
+  // Add showCustomMessage to dialogOps
+  dialogOps.showCustomMessage = customDialog.showMessage;
+  dialogOps.closeProgress = customDialog.closeProgress;
+
   const handlers = createIPCHandlers( window );
   const npmHandlers = createNPMHandlers( window );
   const gitHandlers = createGitHandlers( window, dialogOps );
+
 
   // Register all handlers
   ipcMain.handle( 'ready', () => true );
@@ -336,11 +356,18 @@ const setupIPC = ( window ) => {
   // git handlers
   ipcMain.handle( 'git-commit', gitHandlers.handleGitCommit );
   ipcMain.handle( 'git-clone', gitHandlers.handleGitClone );
+  ipcMain.handle( 'git-status', gitHandlers.handleGitStatus );
+
+  // custom dialog handlers
+  ipcMain.handle( 'custom-dialog-message', async ( event, options ) => {
+    return customDialog.showMessage( options );
+  } );
 
   ipcMain.handle( 'fileExists', handlers.handleFileExists );
   ipcMain.handle( 'directoryExists', handlers.handleDirectoryExists );
-  ipcMain.handle( 'dialog-prompt', handlers.handlePromptDialog );
   ipcMain.handle( 'dialog', handlers.handleDialog );
+  ipcMain.handle( 'dialog-prompt', handlers.handlePromptDialog );
+  ipcMain.handle( 'dialog-message', handlers.handleMessageDialog );
   ipcMain.handle( 'showConfirmationDialog', handlers.handleConfirmationDialog );
   ipcMain.handle( 'writeFile', handlers.handleWriteFile );
   ipcMain.handle( 'writeYAMLFile', handlers.handleWriteYAML );

@@ -76,17 +76,15 @@ const createApplicationMenu = ( window ) => {
       submenu: [
         {
           label: 'Clone Repository',
-          click: () => {
-            window.webContents.send( 'git-clone-trigger' );
-          },
-          id: 'git-clone'
+          click: () => window.webContents.send( 'git-clone-trigger' ),
+          id: 'git-clone',
+          enabled: true  // Clone can always be available as it's a way to open a project
         },
         {
-          label: 'Git Commit',
-          click: () => {
-            window.webContents.send( 'git-commit-trigger' );
-          },
-          id: 'git-commit'
+          label: 'Commit Changes',
+          click: () => window.webContents.send( 'git-commit-trigger' ),
+          id: 'git-commit',
+          enabled: false  // Initially disabled
         }
       ]
     }
@@ -97,10 +95,14 @@ const createApplicationMenu = ( window ) => {
 
   // Expose methods to enable/disable items
   ipcMain.on( 'npm-state-change', ( event, { running, hasNodeModules, hasProject } ) => {
-    console.log( "in the ipcMain.on function" );
     menu.getMenuItemById( 'npm-start' ).enabled = hasProject && !running;
     menu.getMenuItemById( 'npm-stop' ).enabled = hasProject && running;
     menu.getMenuItemById( 'npm-install' ).enabled = hasProject && !hasNodeModules;
+  } );
+
+  // Expose methods to enable/disable git commit menu option
+  ipcMain.on( 'git-state-change', ( event, { hasChanges, hasProject } ) => {
+    menu.getMenuItemById( 'git-commit' ).enabled = hasProject && hasChanges;
   } );
 
   return menu;

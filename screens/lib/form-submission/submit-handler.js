@@ -2,6 +2,7 @@
 import { validateSubmission } from './validate.js';
 import { handleFileOperations } from './file-operations.js';
 import { preprocessFormData } from './preprocess-form-data.js';
+import { updateGitStatus } from '../../edit-project/sections/git-controls.js';
 
 /**
  * Main form submission handler
@@ -12,8 +13,6 @@ import { preprocessFormData } from './preprocess-form-data.js';
 export const handleFormSubmission = async ( form, filePath, schema = null ) => {
   const submitButton = form.querySelector( 'button[type="submit"]' );
   submitButton.disabled = true;
-
-  console.log( filePath );
 
   try {
     // Process form data
@@ -32,6 +31,9 @@ export const handleFormSubmission = async ( form, filePath, schema = null ) => {
     // Handle file operations
     const cleanPath = filePath.replace( 'file://', '' );
     await handleFileOperations( formData, cleanPath );
+
+    // Update git status after successful file operation
+    updateGitStatus();
 
     return { success: true };
 
