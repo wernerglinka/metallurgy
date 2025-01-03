@@ -36,11 +36,13 @@ const createCustomDialogHTML = ( { type, message, logOutput = '', buttons, input
     <style>${ dialogStyles }</style>
   </head>
   <body>
-    <div class="message">${ message }</div>
-    ${ type === 'progress' ? `<div class="log-output">${ logOutput }</div>` : '' }
-    ${ input ? '<div class="input"><input type="text" id="inputValue" /></div>' : '' }
-    <div class="buttons">
-     ${ buttons ? buttons.map( btn => `<button>${ btn }</button>` ).join( '' ) : '' }
+    <div class="message-container">
+      <div class="message">${ message }</div>
+      ${ type === 'progress' ? `<div class="log-output">${ logOutput }</div>` : '' }
+      ${ input ? '<div class="input"><input type="text" id="inputValue" /></div>' : '' }
+      <div class="buttons">
+      ${ buttons ? buttons.map( btn => `<button>${ btn }</button>` ).join( '' ) : '' }
+      </div>
     </div>
     <script>${ dialogScript }</script>
   </body>
