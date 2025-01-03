@@ -11,7 +11,7 @@ import prompt from 'electron-prompt';
 import { readdirSync } from 'node:fs';
 import { createNPMHandlers } from './npm-handlers.js';
 import { createGitHandlers } from './git-handlers.js';
-import { createCustomDialog } from './custom-dialog.js';
+import { createCustomDialog } from '../custom-dialog/index.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );

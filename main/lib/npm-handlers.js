@@ -3,11 +3,12 @@ import { spawn } from 'child_process';
 
 export const createNPMHandlers = ( window, dialogOps ) => {
   let currentProcess = null;
-  let progressDialog = null;
+  let progressWindow = null;
 
   const updateProgress = ( message, log ) => {
-    if ( progressDialog && progressDialog.webContents ) {
-      progressDialog.webContents.send( 'update-dialog-content', {
+    // Use the actual BrowserWindow instance
+    if ( progressWindow && !progressWindow.isDestroyed() ) {
+      progressWindow.webContents.send( 'update-dialog-content', {
         message: message,
         logOutput: log
       } );
@@ -27,17 +28,19 @@ export const createNPMHandlers = ( window, dialogOps ) => {
         const message = `Running npm ${ command }...`;
         let logContent = '';  // Reset log content
 
-        progressDialog = await dialogOps.showCustomMessage( {
+        // Store the actual window reference
+        let result = await dialogOps.showCustomMessage( {
           type: 'progress',
           message: message,
           logOutput: logContent,
           buttons: []
         } );
+        progressWindow = result.window; // Store the window reference
 
         // Wait for dialog to be ready
         await new Promise( resolve => setTimeout( resolve, 100 ) );
 
-        const result = await new Promise( ( resolve, reject ) => {
+        result = await new Promise( ( resolve, reject ) => {
           const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
           currentProcess = spawn( npm, [ command ], {
@@ -67,7 +70,7 @@ export const createNPMHandlers = ( window, dialogOps ) => {
               // Wait a moment before showing final dialog
               setTimeout( async () => {
                 dialogOps.closeProgress();
-                progressDialog = null;
+                progressWindow = null;
                 currentProcess = null;
 
                 if ( code === 0 ) {
@@ -89,7 +92,7 @@ export const createNPMHandlers = ( window, dialogOps ) => {
 
           currentProcess.on( 'error', ( error ) => {
             dialogOps.closeProgress();
-            progressDialog = null;
+            progressWindow = null;
             currentProcess = null;
             reject( error );
           } );
@@ -99,9 +102,9 @@ export const createNPMHandlers = ( window, dialogOps ) => {
 
       } catch ( error ) {
         // Always clean up on error
-        if ( progressDialog ) {
+        if ( progressWindow ) {
           dialogOps.closeProgress();
-          progressDialog = null;
+          progressWindow = null;
         }
         if ( currentProcess ) {
           currentProcess.kill();
