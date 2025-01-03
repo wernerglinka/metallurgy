@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require( 'electron' );
 
 contextBridge.exposeInMainWorld( 'electronAPI', {
-  customResponse: ( response ) => ipcRenderer.send( 'custom-dialog-response', response )
+  customResponse: ( data ) => ipcRenderer.send( 'custom-dialog-response', data ),
+  onUpdateDialogContent: ( callback ) => ipcRenderer.on( 'update-dialog-content', callback )
 } );

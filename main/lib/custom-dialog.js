@@ -27,7 +27,7 @@ const createDialogWindow = ( parentWindow, options ) => {
   return win;
 };
 
-const createCustomDialogHTML = ( { type, message, buttons, input } ) => `
+const createCustomDialogHTML = ( { type, message, logOutput = '', buttons, input } ) => `
  <!DOCTYPE html>
  <html>
   <head>
@@ -39,11 +39,24 @@ const createCustomDialogHTML = ( { type, message, buttons, input } ) => `
       background: #f5f5f5;
       display: flex;
       flex-direction: column;
+      height: 100vh;
      }
      .message {
       flex-grow: 0;
       margin: 20px 0;
       white-space: pre-wrap;
+     }
+     .log-output {
+      flex-grow: 1;
+      margin: 10px 0;
+      padding: 10px;
+      background: #1e1e1e;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      border-radius: 4px;
      }
      .input {
       margin: 10px 0;
@@ -74,11 +87,34 @@ const createCustomDialogHTML = ( { type, message, buttons, input } ) => `
   </head>
   <body>
     <div class="message">${ message }</div>
+    <div class="log-output">${ logOutput }</div>
     ${ input ? '<div class="input"><input type="text" id="inputValue" /></div>' : '' }
     <div class="buttons">
-     ${ buttons.map( btn => `<button>${ btn }</button>` ).join( '' ) }
+     ${ buttons ? buttons.map( btn => `<button>${ btn }</button>` ).join( '' ) : '' }
     </div>
     <script>
+     // Handle content updates
+     window.electronAPI.onUpdateDialogContent((event, { message, logOutput }) => {
+       const messageEl = document.querySelector('.message');
+       const logEl = document.querySelector('.log-output');
+       
+       if (messageEl && message) {
+         messageEl.textContent = message;
+       }
+       if (logEl && logOutput) {
+         logEl.textContent = logOutput;
+         logEl.scrollTop = logEl.scrollHeight;
+       }
+     });
+
+     // Add auto-scroll to bottom when content updates
+     const logDiv = document.querySelector('.log-output');
+     if (logDiv) {
+       const observer = new MutationObserver(() => {
+         logDiv.scrollTop = logDiv.scrollHeight;
+       });
+       observer.observe(logDiv, { childList: true, characterData: true, subtree: true });
+     }
      document.querySelectorAll('button').forEach((btn, index) => {
       btn.addEventListener('click', () => {
         const value = document.getElementById('inputValue')?.value;

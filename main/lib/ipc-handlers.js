@@ -342,7 +342,7 @@ const setupIPC = ( window ) => {
   dialogOps.closeProgress = customDialog.closeProgress;
 
   const handlers = createIPCHandlers( window );
-  const npmHandlers = createNPMHandlers( window );
+  const npmHandlers = createNPMHandlers( window, dialogOps );  // Add dialogOps here
   const gitHandlers = createGitHandlers( window, dialogOps );
 
 
