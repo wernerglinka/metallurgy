@@ -138,15 +138,12 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
 
       // Wait for window to close before proceeding
       await new Promise( ( resolve ) => {
-        // Check if window is already closed
         if ( !urlResult.window.isDestroyed() ) {
           urlResult.window.on( 'closed', () => {
-            // Small delay after close event
             setTimeout( resolve, 500 );
           } );
         } else {
-          // Window already closed, resolve after small delay
-          setTimeout( resolve, 100 );
+          setTimeout( resolve, 500 );
         }
       } );
     }
@@ -164,13 +161,28 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
     // check if the directory is empty
     const dirContents = readdirSync( localPath );
     if ( dirContents.length > 0 ) {
-      const shouldProceed = await dialogOps.showConfirmation(
-        'Selected directory is not empty. Would you like to select a different directory?'
-      );
+      // Show custom dialog for non-empty directory
+      const emptyResult = await dialogOps.showCustomMessage( {
+        type: 'warning',
+        message: 'Selected directory is not empty. Would you like to select a different directory?',
+        buttons: [ 'Yes', 'No' ]
+      } );
 
-      if ( shouldProceed ) {
+      // Wait for dialog to close
+      await new Promise( ( resolve ) => {
+        if ( !emptyResult.window.isDestroyed() ) {
+          emptyResult.window.on( 'closed', () => {
+            setTimeout( resolve, 500 );
+          } );
+        } else {
+          setTimeout( resolve, 500 );
+        }
+      } );
+
+      // Check if user wants to try another directory
+      if ( emptyResult?.response?.index === 0 ) {
         const recursiveResult = await handleGitClone( event, { repoUrl }, dialogOps );
-        return recursiveResult; // Just return the result from recursive call
+        return recursiveResult;
       }
       return { status: 'failure', error: 'Operation cancelled - Directory not empty' };
     }
@@ -178,14 +190,30 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
     // Clone repository to selected directory
     await simpleGit().clone( repoUrl, localPath );
 
-    // Show success dialog and ask to proceed - only show this at the final successful clone
-    const shouldProceed = await dialogOps.showConfirmation(
-      `Repository successfully cloned to:\n${ localPath }\n\nWould you like to work with this project?`
-    );
+    // Show custom success dialog and ask to proceed
+    const successResult = await dialogOps.showCustomMessage( {
+      type: 'success',
+      message: `Repository successfully cloned to:\n${ localPath }\n\nWould you like to work with this project?`,
+      buttons: [ 'Yes', 'No' ]
+    } );
+
+    // Wait for success dialog to close
+    await new Promise( ( resolve ) => {
+      if ( !successResult.window.isDestroyed() ) {
+        successResult.window.on( 'closed', () => {
+          setTimeout( resolve, 500 );
+        } );
+      } else {
+        setTimeout( resolve, 500 );
+      }
+    } );
 
     return {
       status: 'success',
-      proceed: shouldProceed,
+      proceed: {
+        status: 'success',
+        data: successResult?.response?.index === 0
+      },
       path: localPath
     };
 
