@@ -136,11 +136,20 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
 
       repoUrl = urlResult.response.value;
 
-      // Small delay to ensure dialog is fully closed
-      await new Promise( resolve => setTimeout( resolve, 1000 ) );
+      // Wait for window to close before proceeding
+      await new Promise( ( resolve ) => {
+        // Check if window is already closed
+        if ( !urlResult.window.isDestroyed() ) {
+          urlResult.window.on( 'closed', () => {
+            // Small delay after close event
+            setTimeout( resolve, 500 );
+          } );
+        } else {
+          // Window already closed, resolve after small delay
+          setTimeout( resolve, 100 );
+        }
+      } );
     }
-
-
 
     // Show dialog to select directory to clone into
     const dialogResult = await dialogOps.showDialog( 'showOpenDialog', {

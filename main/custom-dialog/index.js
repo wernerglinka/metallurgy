@@ -10,6 +10,7 @@ const __dirname = path.dirname( __filename );
 const dialogStyles = readFileSync( path.join( __dirname, 'styles.css' ), 'utf8' );
 const dialogScript = readFileSync( path.join( __dirname, 'script.js' ), 'utf8' );
 
+// Function to create a new dialog window
 const createDialogWindow = ( parentWindow, options ) => {
   const win = new BrowserWindow( {
     parent: parentWindow,
@@ -29,6 +30,7 @@ const createDialogWindow = ( parentWindow, options ) => {
   return win;
 };
 
+// Function to create the HTML content for the custom dialog
 const createCustomDialogHTML = ( { type, message, logOutput = '', buttons, input } ) => `
  <!DOCTYPE html>
  <html>
@@ -49,29 +51,55 @@ const createCustomDialogHTML = ( { type, message, logOutput = '', buttons, input
  </html>
 `;
 
+/**
+ * Creates and manages custom dialogs
+ * @param {BrowserWindow} window - The main application window
+ * @returns {Object} Object containing dialog functions
+ */
 export const createCustomDialog = ( window ) => {
   let progressWindow = null;
 
   return {
+    /**
+     * Shows a custom message dialog
+     * @param {Object} options - Dialog options
+     * @param {string} options.type - Dialog type ('custom', 'progress', etc.)
+     * @param {string} options.message - Message to display
+     * @param {string} [options.logOutput] - Log output for progress dialogs
+     * @param {string[]} [options.buttons] - Array of button labels
+     * @param {boolean} [options.input] - Whether to show an input field
+     * @returns {Promise<Object>} Dialog result
+     */
     showMessage: async ( options ) => {
       return new Promise( ( resolve ) => {
+        // Create a new dialog window
         const win = createDialogWindow( window, options );
 
+        // Function to handle dialog response
         const responseHandler = ( event, response ) => {
+          console.log( 'Response handler called' );
+          win.on( 'closed', () => {
+            console.log( 'Window closed' );
+          } );
           win.close();
-          resolve( { response } );
+          resolve( { response, window: win } );
         };
 
+        // Listen for dialog response
         ipcMain.removeAllListeners( 'custom-dialog-response' );
         ipcMain.once( 'custom-dialog-response', responseHandler );
 
+        // Close the dialog when the window is closed
         win.on( 'closed', () => {
           ipcMain.removeListener( 'custom-dialog-response', responseHandler );
+          console.log( 'Custom dialog window closed' );
         } );
 
+        // Load the dialog content
         const html = createCustomDialogHTML( options );
         win.loadURL( `data:text/html;charset=utf-8,${ encodeURIComponent( html ) }` );
 
+        // Resolve immediately if no buttons are provided
         if ( !options.buttons || options.buttons.length === 0 ) {
           progressWindow = win;
           resolve( { type: 'progress', window: win } );
@@ -79,6 +107,9 @@ export const createCustomDialog = ( window ) => {
       } );
     },
 
+    /**
+     * Closes the progress dialog
+     */
     closeProgress: () => {
       if ( progressWindow ) {
         progressWindow.close();
