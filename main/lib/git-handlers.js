@@ -121,17 +121,26 @@ const handleGitCommit = async ( event, { projectPath, message }, dialogOps ) => 
 const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
   try {
     if ( !repoUrl ) {
-      const result = await prompt( {
-        title: 'Enter Git Repo URL',
-        label: 'Repository URL:',
-        inputAttrs: { type: 'url' },
-        type: 'input'
+      // Show custom input dialog for URL
+      const urlResult = await dialogOps.showCustomMessage( {
+        type: 'custom',
+        message: 'Enter Git Repository URL:',
+        input: true,
+        buttons: [ 'Clone', 'Cancel' ]
       } );
-      if ( !result ) {
-        throw new Error( 'No repo URL provided' );
+
+      // Make sure we got a valid result
+      if ( !urlResult?.response?.value || urlResult.response.index !== 0 ) {
+        return { status: 'cancelled' };
       }
-      repoUrl = result;
+
+      repoUrl = urlResult.response.value;
+
+      // Small delay to ensure dialog is fully closed
+      await new Promise( resolve => setTimeout( resolve, 1000 ) );
     }
+
+
 
     // Show dialog to select directory to clone into
     const dialogResult = await dialogOps.showDialog( 'showOpenDialog', {
