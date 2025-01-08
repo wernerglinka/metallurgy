@@ -2,11 +2,10 @@ import { config } from 'dotenv'; config();
 import { app, BrowserWindow, session } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
-import { createRequire } from 'module';
 import { setupIPC } from './lib/ipc-handlers.js';
 import { FileSystem } from './lib/file-system.js';
 import { CONSTANTS } from './lib/constants.js';
-import { isDev, isMac } from './lib/env.js';
+import { isDev } from './lib/env.js';
 import { createApplicationMenu } from './lib/menu-handler.js';
 
 const __filename = fileURLToPath( import.meta.url );

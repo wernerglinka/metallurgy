@@ -2,7 +2,6 @@
 
 import simpleGit from 'simple-git';
 import { readdirSync } from 'node:fs';
-import prompt from 'electron-prompt';
 
 /**
  * Executes a series of Git operations: check status, add changes, commit, and push
