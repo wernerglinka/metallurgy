@@ -95,7 +95,7 @@ const createApplicationMenu = ( window ) => {
 
   // Expose methods to enable/disable items
   ipcMain.on( 'npm-state-change', ( event, { running, hasNodeModules, hasProject } ) => {
-    menu.getMenuItemById( 'npm-start' ).enabled = hasProject && !running;
+    menu.getMenuItemById( 'npm-start' ).enabled = hasProject && !running && hasNodeModules;
     menu.getMenuItemById( 'npm-stop' ).enabled = hasProject && running;
     menu.getMenuItemById( 'npm-install' ).enabled = hasProject && !hasNodeModules;
   } );
