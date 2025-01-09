@@ -77,12 +77,9 @@ export const createCustomDialog = ( window ) => {
 
         // Function to handle dialog response
         const responseHandler = ( event, response ) => {
-          console.log( 'Response handler called' );
-          win.on( 'closed', () => {
-            console.log( 'Window closed' );
-          } );
           win.close();
-          resolve( { response, window: win } );
+          // Don't pass the window reference in the response
+          resolve( { response } );
         };
 
         // Listen for dialog response
@@ -92,7 +89,6 @@ export const createCustomDialog = ( window ) => {
         // Close the dialog when the window is closed
         win.on( 'closed', () => {
           ipcMain.removeListener( 'custom-dialog-response', responseHandler );
-          console.log( 'Custom dialog window closed' );
         } );
 
         // Load the dialog content
@@ -102,7 +98,8 @@ export const createCustomDialog = ( window ) => {
         // Resolve immediately if no buttons are provided
         if ( !options.buttons || options.buttons.length === 0 ) {
           progressWindow = win;
-          resolve( { type: 'progress', window: win } );
+          // Don't pass the window reference
+          resolve( { type: 'progress' } );
         }
       } );
     },

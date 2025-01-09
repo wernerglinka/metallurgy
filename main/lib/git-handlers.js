@@ -37,10 +37,6 @@ const executeGitOperations = async ( git, message ) => {
  * @returns {Promise<Object>} Operation result
  */
 const handleGitCommit = async ( event, { projectPath, message }, dialogOps ) => {
-  const timeoutPromise = new Promise( ( _, reject ) => {
-    setTimeout( () => reject( new Error( 'Commit operation timed out' ) ), 30000 ); // 30 seconds
-  } );
-
   try {
     const git = simpleGit( projectPath );
 
@@ -52,21 +48,9 @@ const handleGitCommit = async ( event, { projectPath, message }, dialogOps ) => 
     } );
 
     try {
-      // Race between commit operation and timeout
-      const { commitResult, status } = await Promise.race( [
-        executeGitOperations( git, message ),
-        timeoutPromise
-      ] );
+      const { commitResult, status } = await executeGitOperations( git, message );
 
-      // Close progress dialog
       dialogOps.closeProgress();
-
-      // Success dialog
-      await dialogOps.showCustomMessage( {
-        type: 'info',
-        message: 'Changes committed successfully',
-        buttons: [ 'OK' ]
-      } );
 
       return {
         status: 'success',
@@ -83,7 +67,6 @@ const handleGitCommit = async ( event, { projectPath, message }, dialogOps ) => 
         ? 'The commit operation took too long. Please try again.'
         : `Error during commit: ${ error.message }`;
 
-      // Error dialog
       await dialogOps.showCustomMessage( {
         type: 'error',
         message: errorMessage,
@@ -117,6 +100,10 @@ const handleGitCommit = async ( event, { projectPath, message }, dialogOps ) => 
  *   repoUrl: 'https://github.com/user/repo.git'
  * })
  */
+
+// Utility function to wait for dialog closure
+const waitForDialog = () => new Promise( resolve => setTimeout( resolve, 500 ) );
+
 const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
   try {
     if ( !repoUrl ) {
@@ -136,19 +123,13 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
       repoUrl = urlResult.response.value;
 
       // Wait for window to close before proceeding
-      await new Promise( ( resolve ) => {
-        if ( !urlResult.window.isDestroyed() ) {
-          urlResult.window.on( 'closed', () => {
-            setTimeout( resolve, 500 );
-          } );
-        } else {
-          setTimeout( resolve, 500 );
-        }
-      } );
+      await waitForDialog();
     }
 
     // Show dialog to select directory to clone into
     const dialogResult = await dialogOps.showDialog( 'showOpenDialog', {
+      title: 'Select the folder to clone into',
+      message: 'Select the folder to clone into',
       properties: [ 'openDirectory', 'createDirectory' ]
     } );
     const localPath = dialogResult.data.filePaths?.[ 0 ];
@@ -168,15 +149,7 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
       } );
 
       // Wait for dialog to close
-      await new Promise( ( resolve ) => {
-        if ( !emptyResult.window.isDestroyed() ) {
-          emptyResult.window.on( 'closed', () => {
-            setTimeout( resolve, 500 );
-          } );
-        } else {
-          setTimeout( resolve, 500 );
-        }
-      } );
+      await waitForDialog();
 
       // Check if user wants to try another directory
       if ( emptyResult?.response?.index === 0 ) {
@@ -197,15 +170,7 @@ const handleGitClone = async ( event, { repoUrl }, dialogOps ) => {
     } );
 
     // Wait for success dialog to close
-    await new Promise( ( resolve ) => {
-      if ( !successResult.window.isDestroyed() ) {
-        successResult.window.on( 'closed', () => {
-          setTimeout( resolve, 500 );
-        } );
-      } else {
-        setTimeout( resolve, 500 );
-      }
-    } );
+    await waitForDialog();
 
     return {
       status: 'success',

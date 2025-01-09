@@ -59,8 +59,7 @@ const handleCommit = async () => {
       input: true
     } );
 
-    // Check response structure and button clicked
-    if ( !result.response || result.response.index !== 0 ) return;
+    if ( !result?.response?.value || result.response.index !== 0 ) return;
 
     const commitMessage = result.response.value;
     if ( !commitMessage ) return;
