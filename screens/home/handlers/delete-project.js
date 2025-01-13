@@ -18,8 +18,6 @@ export const handleDeleteProject = async ( e ) => {
     );
     const metallurgyExists = response.status === 'success' && response.data === true;
 
-    console.log( metallurgyExists );
-
     if ( !metallurgyExists ) {
       await window.electronAPI.dialog.showCustomMessage( {
         type: 'error',
