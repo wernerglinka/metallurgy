@@ -5,7 +5,7 @@ import { ProjectOperations } from '../../lib/project-operations.js';
 import { selectProject } from '../../lib/select-project.js';
 
 const ERRORS = {
-  INVALID_PROJECT: 'This folder is not a valid project - projectData.json missing!',
+  INVALID_PROJECT: 'This folder is not a valid project - .metallurgy folder not found!',
   OPEN_FAILED: 'Failed to open project'
 };
 
@@ -22,7 +22,11 @@ const getProjectFromDialog = async () => {
 
   const isValid = await ProjectOperations.validateProject( projectFolder );
   if ( !isValid ) {
-    alert( ERRORS.INVALID_PROJECT );
+    await window.electronAPI.dialog.showCustomMessage( {
+      type: 'error',
+      message: ERRORS.INVALID_PROJECT,
+      buttons: [ 'OK' ]
+    } );
     return null;
   }
 
@@ -65,7 +69,11 @@ export const handleEditProject = async ( e ) => {
 
   } catch ( error ) {
     console.error( "Error opening project:", error );
-    alert( `${ ERRORS.OPEN_FAILED }: ${ error.message }` );
+    await window.electronAPI.dialog.showCustomMessage( {
+      type: 'error',
+      message: `${ ERRORS.OPEN_FAILED }: ${ error.message }`,
+      buttons: [ 'OK' ]
+    } );
   }
 
 };

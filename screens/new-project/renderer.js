@@ -104,7 +104,11 @@ const renderer = ( () => {
 
         } catch ( error ) {
           console.error( "Error in getContentFolder", error );
-          alert( "Error selecting content folder" );
+          await window.electronAPI.dialog.showCustomMessage( {
+            type: 'error',
+            message: `Error selecting content folder`,
+            buttons: [ 'OK' ]
+          } );
           return false;
         }
       } );
@@ -140,7 +144,11 @@ const renderer = ( () => {
           }
         } catch ( error ) {
           console.error( "Error in getDataFolder", error );
-          alert( "Error selecting data folder" );
+          await window.electronAPI.dialog.showCustomMessage( {
+            type: 'error',
+            message: `Error selecting data folder`,
+            buttons: [ 'OK' ]
+          } );
           return false;
         }
       } );

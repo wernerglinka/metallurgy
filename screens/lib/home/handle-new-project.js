@@ -16,7 +16,11 @@ const handleNewProject = async ( e ) => {
     navigate( targetScreen );  // This will go to new-project/index.html
   } catch ( error ) {
     console.error( "Error creating new project:", error );
-    alert( `Failed to create project: ${ error.message }` );
+    await window.electronAPI.dialog.showCustomMessage( {
+      type: 'error',
+      message: `Failed to create project: ${ error.message }`,
+      buttons: [ 'OK' ]
+    } );
   }
 };
 

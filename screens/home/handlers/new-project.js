@@ -19,6 +19,10 @@ export const handleNewProject = async ( e ) => {
 
   } catch ( error ) {
     console.error( "Error creating new project:", error );
-    alert( `Failed to create project: ${ error.message }` );
+    await window.electronAPI.dialog.showCustomMessage( {
+      type: 'error',
+      message: `Failed to create project: ${ error.message }`,
+      buttons: [ 'OK' ]
+    } );
   }
 };
