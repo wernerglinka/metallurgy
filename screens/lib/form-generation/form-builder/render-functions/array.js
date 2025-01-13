@@ -27,7 +27,7 @@ export function renderArray( field, implicitDef, implicitSchema ) {
         <input type="text" class="element-label" placeholder="Array Name" value="${ label }" readonly>
         ${ renderFunctions.renderCollapseButtonsHTML() }
       </label>
-      <div class="array-dropzone dropzone js-dropzone" data-wrapper="${ isColumn ? 'is-column' : 'is-array' }">
+      <div class="array-dropzone dropzone js-dropzone is-collapsed" data-wrapper="${ isColumn ? 'is-column' : 'is-array' }">
         ${ innerFields }
       </div>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

@@ -40,7 +40,7 @@ export function renderObject( field, implicitDef, implicitSchema ) {
         <input type="text" class="element-label" placeholder="Label Placeholder" value="${ label }" readonly>
         ${ renderFunctions.renderCollapseButtonsHTML() }
       </label>
-      <div class="object-dropzone dropzone js-dropzone" data-wrapper="is-object">
+      <div class="object-dropzone dropzone js-dropzone is-collapsed" data-wrapper="is-object">
         ${ innerFields }
       </div>
       ${ renderFunctions.renderButtonWrapperHTML( implicitDef ) }

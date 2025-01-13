@@ -18,9 +18,7 @@ export const createNPMHandlers = ( window, dialogOps ) => {
 
   const handlers = {
     handleNpmCommand: async ( event, { command, projectPath } ) => {
-      console.log( 'handleNpmCommand called with command:', command, 'and projectPath:', projectPath );
       if ( !projectPath ) {
-        console.log( 'Project path is missing' );
         return {
           status: 'failure',
           error: 'Project path is required'
@@ -51,8 +49,6 @@ export const createNPMHandlers = ( window, dialogOps ) => {
             shell: true
           } );
 
-          console.log( 'Spawned npm process with PID:', currentProcess.pid );
-
           currentProcess.stdout.on( 'data', ( data ) => {
             const text = data.toString();
             // Convert to lowercase for case-insensitive match
@@ -65,7 +61,6 @@ export const createNPMHandlers = ( window, dialogOps ) => {
               ( lowerText.includes( 'browsersync' ) || lowerText.includes( 'build success' ) )
             ) {
               hasResolved = true;
-              console.log( 'Start successful, leaving process running' );
               dialogOps.closeProgress();
               progressWindow = null;
               // Inform your UI to toggle menu items
@@ -77,13 +72,10 @@ export const createNPMHandlers = ( window, dialogOps ) => {
           currentProcess.stderr.on( 'data', ( data ) => {
             logContent += data.toString();
             updateProgress( message, logContent );
-            console.log( 'stderr data:', data.toString() );
           } );
 
           currentProcess.on( 'close', async ( code ) => {
-            console.log( 'npm process closed with code:', code );
             if ( hasResolved ) {
-              console.log( 'Process closed after start, ignoring final dialog.' );
               currentProcess = null;
               window.webContents.send( 'update-menu-state', { canStart: true, canStop: false } );
               return;
@@ -109,20 +101,17 @@ export const createNPMHandlers = ( window, dialogOps ) => {
                     message: `npm ${ command } completed successfully`,
                     buttons: [ 'OK' ]
                   } );
-                  console.log( 'Success dialog shown' );
                   resolve( { status: 'success', data: logContent } );
                 } else {
                   throw new Error( `npm ${ command } failed with code ${ code }` );
                 }
               }, 1000 );
             } catch ( error ) {
-              console.log( 'Error in close handler:', error );
               reject( error );
             }
           } );
 
           currentProcess.on( 'error', ( error ) => {
-            console.log( 'Error spawning npm process:', error );
             dialogOps.closeProgress();
             progressWindow = null;
             currentProcess = null;
@@ -133,7 +122,6 @@ export const createNPMHandlers = ( window, dialogOps ) => {
         return result;
 
       } catch ( error ) {
-        console.log( 'Error in handleNpmCommand:', error );
         // Always clean up on error
         if ( progressWindow ) {
           dialogOps.closeProgress();
@@ -159,11 +147,9 @@ export const createNPMHandlers = ( window, dialogOps ) => {
     },
 
     handleNpmStop: async () => {
-      console.log( 'handleNpmStop called' );
       try {
         if ( currentProcess ) {
           currentProcess.kill();
-          console.log( 'npm process killed' );
           currentProcess = null;
         }
 
@@ -177,7 +163,6 @@ export const createNPMHandlers = ( window, dialogOps ) => {
 
         return { status: 'success' };
       } catch ( error ) {
-        console.log( 'Error in handleNpmStop:', error );
         return { status: 'failure', error: error.message };
       }
     }

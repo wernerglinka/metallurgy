@@ -121,11 +121,7 @@ const hasNodeModules = async ( projectPath ) => {
 
 const updateNpmState = async () => {
   const hasModules = await hasNodeModules( state.projectPath );
-  console.log( "Updating state:", {
-    running: state.isRunning,
-    hasNodeModules: hasModules,
-    hasProject: !!state.projectPath
-  } );
+
   window.electronAPI.ipcRenderer.send( 'npm-state-change', {
     running: state.isRunning,
     hasNodeModules: hasModules,
